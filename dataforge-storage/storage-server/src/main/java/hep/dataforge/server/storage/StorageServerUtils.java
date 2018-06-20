@@ -16,7 +16,7 @@ public class StorageServerUtils {
     public static void addFileStorage(ServerManager manager, String uri, String path) {
         addStorage(
                 manager,
-                FileStorageFactory.buildLocal(manager.getContext(), new File(uri), false, true),
+                FileStorageFactory.Companion.buildLocal(manager.getContext(), new File(uri), false, true),
                 path
         );
     }

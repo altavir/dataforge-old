@@ -2,11 +2,11 @@ package hep.dataforge.server.storage;
 
 import freemarker.template.Template;
 import hep.dataforge.exceptions.NameNotFoundException;
+import hep.dataforge.io.JSONMetaWriter;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.server.ServerManager;
 import hep.dataforge.server.ServletUtils;
 import hep.dataforge.storage.api.*;
-import hep.dataforge.storage.commons.JSONMetaWriter;
 import org.slf4j.LoggerFactory;
 import ratpack.handling.Context;
 import ratpack.handling.Handler;
@@ -110,9 +110,9 @@ public class StorageRatpackHandler implements Handler {
             Template template = ServletUtils.freemarkerConfig().getTemplate("StateLoader.ftl");
 
             Map<String, String> stateMap = new HashMap<>();
-            for (String stateName : loader.getStateNames()) {
-                stateMap.put(stateName, loader.getString(stateName));
-            }
+
+            loader.getValueStream().forEach(pair->  stateMap.put(pair.getFirst(), pair.getSecond().getString()));
+            // TODO add metastates
 
             Map<String, Object> data = buildLoaderData(ctx, loader);
             data.put("states", stateMap);
@@ -152,7 +152,7 @@ public class StorageRatpackHandler implements Handler {
             Template template = ServletUtils.freemarkerConfig().getTemplate("PointLoader.ftl");
 
             Map<String, Object> data = buildLoaderData(ctx, loader);
-            String plotParams = new JSONMetaWriter().writeString(pointLoaderPlotOptions(loader)).trim();
+            String plotParams = JSONMetaWriter.INSTANCE.writeString(pointLoaderPlotOptions(loader)).trim();
             data.put("plotParams", plotParams);
             //            data.put("data", loader.getIndex(valueName).pull(Value.of(from), Value.of(to), Integer.valueOf(maxItems)));
 

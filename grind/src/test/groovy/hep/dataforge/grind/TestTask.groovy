@@ -1,5 +1,6 @@
 package hep.dataforge.grind
 
+import hep.dataforge.data.DataNodeEditor
 import hep.dataforge.data.DataSet
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaUtils
@@ -21,12 +22,12 @@ class TestTask extends MultiStageTask {
 
     @Override
     protected MultiStageTask.MultiStageTaskState transform(TaskModel model, MultiStageTask.MultiStageTaskState state) {
-        DataSet.Builder b = DataSet.builder()
+        DataNodeEditor b = DataSet.edit()
         model.context.getProperties().forEach { key, value ->
             b.putStatic(key, value);
         }
         MetaUtils.valueStream(model.getMeta()).forEach { pair ->
-            b.putStatic("meta." + pair.getKey(), pair.getValue())
+            b.putStatic("meta." + pair.first, pair.second)
         }
 
         state.finish(b.build())

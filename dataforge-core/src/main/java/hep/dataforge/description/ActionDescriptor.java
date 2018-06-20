@@ -18,8 +18,13 @@ package hep.dataforge.description;
 import hep.dataforge.actions.Action;
 import hep.dataforge.actions.GenericAction;
 import hep.dataforge.actions.ManyToOneAction;
+import hep.dataforge.io.output.Output;
+import hep.dataforge.io.output.SelfRendered;
+import hep.dataforge.io.output.TextOutput;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
+import javafx.scene.paint.Color;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * <p>
@@ -28,11 +33,7 @@ import hep.dataforge.meta.MetaBuilder;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class ActionDescriptor extends NodeDescriptor {
-
-    public ActionDescriptor(String name) {
-        super(name);
-    }
+public class ActionDescriptor extends NodeDescriptor implements SelfRendered {
 
     public ActionDescriptor(Meta meta) {
         super(meta);
@@ -82,23 +83,39 @@ public class ActionDescriptor extends NodeDescriptor {
         return new ActionDescriptor(builder);
     }
 
+    @NotNull
     @Override
-    public String info() {
+    public String getInfo() {
         return getMeta().getString("actionDef.description", "");
     }
 
-    public String inputType() {
+    public String getInputType() {
         return getMeta().getString("actionDef.inputType", "");
     }
 
-    public String outputType() {
+    public String getOutputType() {
         return getMeta().getString("actionDef.outputType", "");
     }
 
+    @NotNull
     @Override
     public String getName() {
         return getMeta().getString("actionDef.name", super.getName());
     }
 
+    @Override
+    public void render(@NotNull Output output, @NotNull Meta meta) {
+        if(output instanceof TextOutput){
+            TextOutput textOutput = ((TextOutput) output);
+            textOutput.renderText(getName(), Color.GREEN);
+            textOutput.renderText(" {input : ");
+            textOutput.renderText(getInputType(), Color.CYAN);
+            textOutput.renderText(", output : ");
+            textOutput.renderText(getOutputType(), Color.CYAN);
+            textOutput.renderText(String.format("}: %s", getInfo()));
 
+        } else {
+            output.render(String.format("Action %s (input: %s, output: %s): %s%n",getName(), getInputType(), getOutputType(), getInfo()),meta);
+        }
+    }
 }

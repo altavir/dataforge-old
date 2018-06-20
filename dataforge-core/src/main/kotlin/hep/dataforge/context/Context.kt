@@ -15,30 +15,36 @@
  */
 package hep.dataforge.context
 
-import hep.dataforge.io.history.Chronicle
-import hep.dataforge.io.history.History
-import hep.dataforge.kodex.buildMeta
-import hep.dataforge.kodex.nullable
-import hep.dataforge.kodex.optional
-import hep.dataforge.kodex.useMeta
+import hep.dataforge.Named
+import hep.dataforge.data.binary.Binary
+import hep.dataforge.data.binary.StreamBinary
+import hep.dataforge.io.DefaultOutputManager
+import hep.dataforge.io.IOUtils
+import hep.dataforge.io.OutputManager
+import hep.dataforge.io.SplitOutputManager
+import hep.dataforge.kodex.*
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaID
-import hep.dataforge.names.Named
 import hep.dataforge.providers.Provider
 import hep.dataforge.providers.Provides
 import hep.dataforge.providers.ProvidesNames
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueProvider
+import hep.dataforge.workspace.FileReference
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.io.File
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-import java.util.function.Predicate
 import java.util.stream.Stream
-import java.util.stream.StreamSupport
-import kotlin.reflect.KClass
+import kotlin.collections.HashMap
+import kotlin.streams.asSequence
+import kotlin.streams.asStream
 
 /**
  *
@@ -47,20 +53,21 @@ import kotlin.reflect.KClass
  * Each context has a set of named [Value] properties which are taken from parent context in case they are not found in local context.
  * Context implements [ValueProvider] interface and therefore could be uses as a value source for substitutions etc.
  * Context contains [PluginManager] which could be used any number of configurable named plugins.
- * Also Context has its own logger and [IOManager] to govern all the input and output being made inside the context.
+ * Also Context has its own logger and [OutputManager] to govern all the input and output being made inside the context.
  * @author Alexander Nozik
  */
 open class Context(
-        private val name: String,
+        final override val name: String,
         val parent: Context? = Global,
-        classLoader: ClassLoader? = null) : Provider, ValueProvider, History, Named, AutoCloseable, MetaID {
+        classLoader: ClassLoader? = null,
+        private val properties: MutableMap<String, Value> = ConcurrentHashMap()
+) : Provider, ValueProvider, Named, AutoCloseable, MetaID {
 
     /**
      * A class loader for this context. Parent class loader is used by default
      */
     open val classLoader: ClassLoader = classLoader ?: parent?.classLoader ?: Global.classLoader
 
-    private val properties: MutableMap<String, Value> = ConcurrentHashMap()
     /**
      * Plugin manager for this Context
      *
@@ -74,10 +81,26 @@ open class Context(
      * Return IO manager of this context. By default parent IOManager is
      * returned.
      *
+     * Setter sets the output or adds new output to the [SplitOutputManager] output
+     *
      * @return the io
      */
-    open val io: IOManager
-        get() = pluginManager.get(IOManager::class) ?: parent?.io ?: Global.io
+    open var output: OutputManager
+        get() = pluginManager[OutputManager::class, false]
+                ?: parent?.output
+                ?: pluginManager.load(DefaultOutputManager())
+        set(newOutput) {
+            val currentOutput = pluginManager.get<OutputManager>(false)
+            when (currentOutput) {
+                is SplitOutputManager -> currentOutput.managers.add(newOutput) // add to current output managers
+                null -> pluginManager.load(newOutput) // if no output, then load new one
+                else -> {
+                    val split = SplitOutputManager.build(currentOutput, newOutput)
+                    pluginManager.remove(currentOutput)
+                    pluginManager.load(split)
+                }
+            }
+        }
 
 
     /**
@@ -91,7 +114,7 @@ open class Context(
      * @return
      */
     val dispatcher: ExecutorService by lazy {
-        logger.info("Initializing dispatch thread executor in {}", getName())
+        logger.info("Initializing dispatch thread executor in {}", name)
         Executors.newSingleThreadExecutor { r ->
             Thread(r).apply {
                 priority = 8 // slightly higher priority
@@ -101,8 +124,8 @@ open class Context(
         }
     }
 
-    open val executor: ExecutorPlugin
-        get() = pluginManager.get(ExecutorPlugin::class) ?: parent?.executor ?: Global.executor
+    open val executors: ExecutorPlugin
+        get() = pluginManager.get(ExecutorPlugin::class) ?: parent?.executors ?: Global.executors
 
     /**
      * Find out if context is locked
@@ -115,24 +138,11 @@ open class Context(
     open val history: Chronicler
         get() = pluginManager.get(Chronicler::class) ?: parent?.history ?: Global.history
 
-    override fun getChronicle(): Chronicle {
-        return history.chronicle
-    }
-
     /**
      * {@inheritDoc} namespace does not work
      */
     override fun optValue(path: String): Optional<Value> {
         return (properties[path] ?: parent?.optValue(path).nullable).optional
-    }
-
-    /**
-     * The name of the context
-     *
-     * @return
-     */
-    override fun getName(): String {
-        return name
     }
 
     /**
@@ -145,7 +155,7 @@ open class Context(
         lock.modify { properties[name] = Value.of(value) }
     }
 
-    override fun defaultTarget(): String {
+    override fun getDefaultTarget(): String {
         return Plugin.PLUGIN_TARGET
     }
 
@@ -156,7 +166,7 @@ open class Context(
 
     @ProvidesNames(Plugin.PLUGIN_TARGET)
     fun listPlugins(): Collection<String> {
-        return pluginManager.list().map { it.name }
+        return pluginManager.map { it.name }
     }
 
     @ProvidesNames(ValueProvider.VALUE_TARGET)
@@ -178,16 +188,20 @@ open class Context(
      * @return
      */
     operator fun <T> get(type: Class<T>): T {
-        return optFeature(type)
-                .orElseThrow { RuntimeException("Feature could not be loaded by type: " + type.name) }
+        return opt(type) ?: throw RuntimeException("Feature could not be loaded by type: " + type.name)
     }
 
+    inline fun <reified T> get(): T {
+        return get(T::class.java)
+    }
+
+    @JvmOverloads
     fun <T : Plugin> load(type: Class<T>, meta: Meta = Meta.empty()): T {
         return pluginManager.load(type, meta)
     }
 
-    fun <T : Plugin> load(type: KClass<T>, meta: Meta = Meta.empty()): T {
-        return pluginManager.load(type, meta)
+    inline fun <reified T : Plugin> load(noinline metaBuilder: KMetaBuilder.() -> Unit = {}): T {
+        return pluginManager.load<T>(metaBuilder)
     }
 
 
@@ -198,13 +212,14 @@ open class Context(
      * @param <T>
      * @return
      */
-    fun <T> optFeature(type: Class<T>): Optional<T> {
+    fun <T> opt(type: Class<T>): T? {
         return pluginManager
                 .stream(true)
-                .filter { type.isInstance(it) }
-                .findFirst()
-                .map { type.cast(it) }
+                .asSequence().filterIsInstance(type)
+                .firstOrNull()
     }
+
+    private val serviceCache: MutableMap<Class<*>, ServiceLoader<*>> = HashMap()
 
     /**
      * Get stream of services of given class provided by Java SPI or any other service loading API.
@@ -213,21 +228,18 @@ open class Context(
      * @param <T>
      * @return
      */
-    @Synchronized
     fun <T> serviceStream(serviceClass: Class<T>): Stream<T> {
-        return StreamSupport.stream(ServiceLoader.load(serviceClass, classLoader).spliterator(), false)
+        synchronized(serviceCache) {
+            val loader: ServiceLoader<*> = serviceCache.getOrPut(serviceClass) { ServiceLoader.load(serviceClass, classLoader) }
+            return loader.asSequence().filterIsInstance(serviceClass).asStream()
+        }
     }
 
     /**
      * Find specific service provided by java SPI
-     *
-     * @param serviceClass
-     * @param predicate
-     * @param <T>
-     * @return
      */
-    fun <T> findService(serviceClass: Class<T>, predicate: Predicate<T>): Optional<T> {
-        return serviceStream(serviceClass).filter(predicate).findFirst()
+    fun <T> findService(serviceClass: Class<T>, condition: (T) -> Boolean): T? {
+        return serviceStream(serviceClass).filter(condition).findFirst().nullable
     }
 
     /**
@@ -285,7 +297,82 @@ open class Context(
         }
     }
 
+
+    /**
+     * Return the root directory for this IOManager. By convention, Context
+     * should not have access outside root directory to prevent System damage.
+     *
+     * @return a [java.io.File] object.
+     */
+    val rootDir: Path by lazy {
+        properties[ROOT_DIRECTORY_CONTEXT_KEY]
+                ?.let { Paths.get(it.string).also { Files.createDirectories(it) } }
+                ?: parent?.rootDir
+                ?: File(System.getProperty("user.home")).toPath()
+    }
+
+    /**
+     * The working directory for output and temporary files. Is always inside root directory
+     *
+     * @return
+     */
+    val workDir: Path by lazy {
+        properties[WORK_DIRECTORY_CONTEXT_KEY]
+                ?.let { rootDir.resolve(it.string).also { Files.createDirectories(it) } }
+                ?: parent?.workDir
+                ?: rootDir.resolve(".dataforge").also { Files.createDirectories(it) }
+    }
+
+    /**
+     * Get the default directory for file data. By default uses context root directory
+     * @return
+     */
+    val dataDir: Path by lazy {
+        properties[DATA_DIRECTORY_CONTEXT_KEY]?.let { IOUtils.resolvePath(it.string) } ?: rootDir
+    }
+
+    /**
+     * The directory for temporary files. This directory could be cleaned up any
+     * moment. Is always inside root directory.
+     *
+     * @return
+     */
+    val tmpDir: Path by lazy {
+        properties[TEMP_DIRECTORY_CONTEXT_KEY]
+                ?.let { rootDir.resolve(it.string).also { Files.createDirectories(it) } }
+                ?: parent?.workDir
+                ?: rootDir.resolve(".dataforge/.temp").also { Files.createDirectories(it) }
+    }
+
+
+    fun getDataFile(path: String): FileReference {
+        return FileReference.openDataFile(this, path)
+    }
+
+    /**
+     * Get a file where `path` is relative to root directory or absolute.
+     * @param path a [java.lang.String] object.
+     * @return a [java.io.File] object.
+     */
+    fun getFile(path: String): FileReference {
+        return FileReference.openFile(this, path)
+    }
+
+    /**
+     * Get the context based classpath resource
+     */
+    fun getResource(name: String): Binary? {
+        val resource = classLoader.getResource(name)
+        return resource?.let { StreamBinary { it.openStream() } }
+    }
+
+
     companion object {
+
+        const val ROOT_DIRECTORY_CONTEXT_KEY = "rootDir"
+        const val WORK_DIRECTORY_CONTEXT_KEY = "workDir"
+        const val DATA_DIRECTORY_CONTEXT_KEY = "dataDir"
+        const val TEMP_DIRECTORY_CONTEXT_KEY = "tempDir"
 
         /**
          * Build a new context based on given meta
@@ -303,7 +390,7 @@ open class Context(
 
             meta.optString("rootDir").ifPresent { builder.setRootDir(it) }
 
-            meta.optValue("classpath").ifPresent { value -> value.listValue().stream().map<String> { it.stringValue() }.forEach { builder.classPath(it) } }
+            meta.optValue("classpath").ifPresent { value -> value.list.stream().map<String> { it.string }.forEach { builder.classPath(it) } }
 
             meta.getMetaList("plugin").forEach { builder.plugin(it) }
 

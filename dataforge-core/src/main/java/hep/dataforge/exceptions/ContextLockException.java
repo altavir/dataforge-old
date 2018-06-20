@@ -1,6 +1,6 @@
 package hep.dataforge.exceptions;
 
-import hep.dataforge.names.Named;
+import hep.dataforge.Named;
 
 public class ContextLockException extends RuntimeException {
     private final Object locker;

@@ -15,13 +15,12 @@
  */
 package hep.dataforge.stat.models;
 
+import hep.dataforge.Named;
 import hep.dataforge.context.*;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.names.Named;
 import hep.dataforge.providers.Provides;
 import hep.dataforge.providers.ProvidesNames;
 import hep.dataforge.utils.ContextMetaFactory;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -46,8 +45,8 @@ public class ModelManager extends BasicPlugin {
      * @param meta
      * @return
      */
-    public static Optional<Model> restoreModel(@Nullable Context context, Meta meta) {
-        return context.optFeature(ModelManager.class).flatMap(manager -> manager.getModel(meta));
+    public static Optional<Model> restoreModel(Context context, Meta meta) {
+        return Optional.ofNullable(context.opt(ModelManager.class)).flatMap(manager -> manager.getModel(meta));
     }
 
     private final Set<ModelFactory> factories = new HashSet<>();
@@ -85,7 +84,7 @@ public class ModelManager extends BasicPlugin {
     }
 
     @Override
-    public String defaultTarget() {
+    public String getDefaultTarget() {
         return MODEL_TARGET;
     }
 

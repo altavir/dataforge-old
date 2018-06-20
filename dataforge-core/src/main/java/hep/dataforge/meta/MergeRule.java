@@ -17,6 +17,7 @@ package hep.dataforge.meta;
 
 import hep.dataforge.names.Name;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueFactory;
 
 import java.util.Collections;
 import java.util.List;
@@ -115,8 +116,8 @@ public abstract class MergeRule implements Collector<Meta, MetaBuilder, Meta> {
                             valueName,
                             mergeValues(
                                     Name.join(builder.getFullName(), Name.of(valueName)),
-                                    main.optValue(valueName).orElse(Value.NULL),
-                                    builder.optValue(valueName).orElse(Value.NULL)
+                                    main.optValue(valueName).orElse(ValueFactory.NULL),
+                                    builder.optValue(valueName).orElse(ValueFactory.NULL)
                             )
                     );
                 });

@@ -42,7 +42,7 @@ public class FileObjectLoaderTest {
 
     @Before
     public void setUp() throws IOException {
-        new StorageManager().startGlobal();
+        Global.INSTANCE.load(StorageManager.class);
         dir = Files.createTempDirectory("df_storage").toFile();
     }
 
@@ -54,7 +54,7 @@ public class FileObjectLoaderTest {
     @Test
     public void test() throws FileNotFoundException, StorageException {
 
-        FileStorage storage = FileStorageFactory.buildLocal(Global.Companion.instance(),dir,false,true);
+        FileStorage storage = FileStorageFactory.Companion.buildLocal(Global.INSTANCE,dir,false,true);
 
         ObjectLoader loader = LoaderFactory.buildObjectLoder(storage, "test", "");
 

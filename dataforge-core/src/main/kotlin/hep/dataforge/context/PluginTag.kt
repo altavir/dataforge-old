@@ -17,6 +17,7 @@ package hep.dataforge.context
 
 import hep.dataforge.description.ValueDef
 import hep.dataforge.description.ValueDefs
+import hep.dataforge.kodex.buildMeta
 import hep.dataforge.kodex.stringValue
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
@@ -31,8 +32,8 @@ import hep.dataforge.meta.SimpleMetaMorph
 //@ValueDef(name = "role", multiple = true,info = "The list of roles this plugin implements")
 //@ValueDef(name = "priority", type = "NUMBER", info = "Plugin load priority. Used for plugins with the same role")
 @ValueDefs(
-        ValueDef(name = "group", def = ""),
-        ValueDef(name = "name", required = true)
+        ValueDef(key = "group", def = ""),
+        ValueDef(key = "name", required = true)
 )
 class PluginTag(meta: Meta) : SimpleMetaMorph(meta) {
 
@@ -40,10 +41,16 @@ class PluginTag(meta: Meta) : SimpleMetaMorph(meta) {
 
     val group by meta.stringValue(def = "")
 
-    constructor(group: String, name: String) : this(
-            MetaBuilder("tag")
-                    .setValue("group", group)
-                    .setValue("name", name)
+    constructor(name: String, group: String = "hep.dataforge", description: String? = null, version: String? = null, vararg dependsOn: String) : this(
+            buildMeta("plugin") {
+                "name" to name
+                "group" to group
+                description?.let { "description" to it }
+                version?.let { "version" to it }
+                if (dependsOn.isNotEmpty()) {
+                    dependsOn.let { "dependsOn" to it }
+                }
+            }
     )
 
     /**
@@ -91,9 +98,9 @@ class PluginTag(meta: Meta) : SimpleMetaMorph(meta) {
         fun fromString(tag: String): PluginTag {
             val sepIndex = tag.indexOf(":")
             return if (sepIndex >= 0) {
-                PluginTag(tag.substring(0, sepIndex), tag.substring(sepIndex + 1))
+                PluginTag(group = tag.substring(0, sepIndex), name = tag.substring(sepIndex + 1))
             } else {
-                PluginTag("", tag)
+                PluginTag(tag)
             }
         }
 

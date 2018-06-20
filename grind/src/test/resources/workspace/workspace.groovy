@@ -2,8 +2,8 @@
 // define context
 context{
     name = "TEST"
-    plugin "immutable"
-    plugin "plots"
+    plugin "cache"
+    plugin "plots-fx"
     properties{
         a = 4
         b = false

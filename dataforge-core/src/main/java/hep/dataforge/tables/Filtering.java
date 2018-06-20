@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +19,8 @@ import hep.dataforge.description.NodeDef;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
-import hep.dataforge.values.ValueUtils;
+import hep.dataforge.values.ValueFactory;
+import hep.dataforge.values.ValueRange;
 import hep.dataforge.values.Values;
 
 import java.util.List;
@@ -60,7 +61,7 @@ public class Filtering {
      * @return a {@link java.util.function.Predicate} object.
      */
     public static Predicate<Values> getValueCondition(final String valueName, final Value a, final Value b) {
-        if (ValueUtils.compare(a, b) >= 0) {
+        if (a.compareTo(b) >= 0) {
             throw new IllegalArgumentException();
         }
         return (Values dp) -> {
@@ -68,7 +69,7 @@ public class Filtering {
                 return false;
             } else {
                 try {
-                    return (ValueUtils.isBetween(dp.getValue(valueName),a,b));
+                    return new ValueRange(a, b).contains((dp.getValue(valueName)));
                 } catch (NameNotFoundException ex) {
                     //Считаем, что если такого имени нет, то тест автоматически провален
                     return false;
@@ -99,8 +100,8 @@ public class Filtering {
      * @param an a {@link hep.dataforge.meta.Meta} object.
      * @return a {@link java.util.function.Predicate} object.
      */
-    @NodeDef(name = "is", multiple = true, info = "The filtering condition that must be satisfied", from = "method::hep.dataforge.tables.Filtering.buildCondition")
-    @NodeDef(name = "not", multiple = true, info = "The filtering condition that must NOT be satisfied", from = "method::hep.dataforge.tables.Filtering.buildCondition")
+    @NodeDef(key = "is", multiple = true, info = "The filtering condition that must be satisfied", from = "method::hep.dataforge.tables.Filtering.buildCondition")
+    @NodeDef(key = "not", multiple = true, info = "The filtering condition that must NOT be satisfied", from = "method::hep.dataforge.tables.Filtering.buildCondition")
     public static Predicate<Values> buildConditionSet(Meta an) {
         Predicate<Values> res = null;
         if (an.hasMeta("is")) {
@@ -137,22 +138,22 @@ public class Filtering {
     public static Predicate<Values> buildCondition(Meta an) {
         Predicate<Values> res = null;
         if (an.hasValue("tag")) {
-            List<Value> tagList = an.getValue("tag").listValue();
+            List<Value> tagList = an.getValue("tag").getList();
             String[] tags = new String[tagList.size()];
             for (int i = 0; i < tagList.size(); i++) {
-                tags[i] = tagList.get(i).stringValue();
+                tags[i] = tagList.get(i).getString();
             }
             res = getTagCondition(tags);
         }
         if (an.hasValue("value")) {
-            String valueName = an.getValue("value").stringValue();
+            String valueName = an.getValue("value").getString();
             Predicate<Values> valueCondition;
             if (an.hasValue("equals")) {
                 Value equals = an.getValue("equals");
                 valueCondition = getValueEqualityCondition(valueName, equals);
             } else {
-                Value from = an.getValue("from", Value.of(Double.NEGATIVE_INFINITY));
-                Value to = an.getValue("to", Value.of(Double.POSITIVE_INFINITY));
+                Value from = an.getValue("from", ValueFactory.of(Double.NEGATIVE_INFINITY));
+                Value to = an.getValue("to", ValueFactory.of(Double.POSITIVE_INFINITY));
                 valueCondition = getValueCondition(valueName, from, to);
             }
 

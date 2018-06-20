@@ -16,10 +16,15 @@
 
 package hep.dataforge.context
 
+import hep.dataforge.context.Context.Companion.DATA_DIRECTORY_CONTEXT_KEY
+import hep.dataforge.context.Context.Companion.ROOT_DIRECTORY_CONTEXT_KEY
+import hep.dataforge.io.DefaultOutputManager
+import hep.dataforge.io.OutputManager
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.meta.MetaUtils
 import hep.dataforge.values.Value
+import hep.dataforge.values.asValue
 import java.io.IOException
 import java.net.MalformedURLException
 import java.net.URI
@@ -43,26 +48,25 @@ class ContextBuilder(val name: String, val parent: Context = Global) {
 
     private val plugins = ArrayList<Plugin>()
 
+    var output: OutputManager? = null
 
     var rootDir: String
-        get() = properties[IOManager.ROOT_DIRECTORY_CONTEXT_KEY]?.toString() ?: parent.io.rootDir.toString()
+        get() = properties[ROOT_DIRECTORY_CONTEXT_KEY]?.toString() ?: parent.rootDir.toString()
         set(value) {
-            setDefaultIO()
-            val path = parent.io.rootDir.resolve(value)
+            val path = parent.rootDir.resolve(value)
             //Add libraries to classpath
             val libPath = path.resolve("lib")
             if (Files.isDirectory(libPath)) {
                 classPath(libPath.toUri())
             }
-            properties[IOManager.ROOT_DIRECTORY_CONTEXT_KEY] = Value.of(path.toString())
+            properties[ROOT_DIRECTORY_CONTEXT_KEY] = path.toString().asValue()
         }
 
     var dataDir: String
-        get() = properties[IOManager.DATA_DIRECTORY_CONTEXT_KEY]?.toString()
-                ?: parent.getString(IOManager.DATA_DIRECTORY_CONTEXT_KEY, parent.io.rootDir.toString())
+        get() = properties[DATA_DIRECTORY_CONTEXT_KEY]?.toString()
+                ?: parent.getString(DATA_DIRECTORY_CONTEXT_KEY, parent.rootDir.toString())
         set(value) {
-            setDefaultIO()
-            properties[IOManager.DATA_DIRECTORY_CONTEXT_KEY] = Value.of(value)
+            properties[DATA_DIRECTORY_CONTEXT_KEY] = value.asValue()
         }
 
     fun properties(config: Meta): ContextBuilder {
@@ -71,7 +75,7 @@ class ContextBuilder(val name: String, val parent: Context = Global) {
                 properties[propertyNode.getString("key")] = propertyNode.getValue("value")
             }
         } else if (config.name == "properties") {
-            MetaUtils.valueStream(config).forEach { pair -> properties[pair.key] = pair.value }
+            MetaUtils.valueStream(config).forEach { pair -> properties[pair.first] = pair.second }
         }
         return this
     }
@@ -79,17 +83,6 @@ class ContextBuilder(val name: String, val parent: Context = Global) {
     fun plugin(plugin: Plugin): ContextBuilder {
         this.plugins.add(plugin)
         return this
-    }
-
-    /**
-     * Set default IO if another IO not already defined
-     */
-    fun setDefaultIO(): ContextBuilder {
-        return if (plugins.none { it is IOManager }) {
-            plugin(DefaultIOManager())
-        } else {
-            this
-        }
     }
 
     /**
@@ -189,10 +182,22 @@ class ContextBuilder(val name: String, val parent: Context = Global) {
         } else {
             URLClassLoader(classPath.toTypedArray(), parent.classLoader)
         }
-        return Context(name, parent, classLoader).apply {
+
+        return Context(name, parent, classLoader, properties).apply {
+            this@ContextBuilder.output?.let {
+                pluginManager.load(it)
+            }
             plugins.forEach {
                 pluginManager.load(it)
             }
+
+            //If custom paths are defined, use new plugin to direct to them
+            if (properties.containsKey(ROOT_DIRECTORY_CONTEXT_KEY) || properties.containsKey(DATA_DIRECTORY_CONTEXT_KEY)) {
+                if (pluginManager.find { it is OutputManager } == null) {
+                    pluginManager.load(DefaultOutputManager())
+                }
+            }
+
         }
 
     }

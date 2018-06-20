@@ -3,6 +3,7 @@ package hep.dataforge.actions;
 import hep.dataforge.context.Context;
 import hep.dataforge.data.Data;
 import hep.dataforge.data.DataNode;
+import hep.dataforge.data.DataNodeEditor;
 import hep.dataforge.data.DataTree;
 import hep.dataforge.goals.Goal;
 import hep.dataforge.goals.PipeGoal;
@@ -20,15 +21,15 @@ public abstract class OneToManyAction<T, R> extends GenericAction<T, R> {
     @Override
     public DataNode<R> run(Context context, DataNode<? extends T> data, Meta actionMeta) {
         checkInput(data);
-        DataTree.Builder<R> builder = DataTree.builder(getOutputType());
+        DataNodeEditor<R> builder = DataTree.Companion.edit(getOutputType());
         data.forEach(datum -> {
             String inputName = datum.getName();
             Laminate inputMeta = new Laminate(datum.getMeta(), actionMeta);
             Map<String, Meta> metaMap = prepareMeta(context, inputName, inputMeta);
             metaMap.forEach((outputName, outputMeta) -> {
                 Goal<R> goal = new PipeGoal<>(datum.getGoal(), input -> execute(context, inputName, outputName, input, inputMeta));
-                Data<R> res = new Data<R>(goal, getOutputType(), outputMeta);
-                builder.putData(placement(inputName, outputName), res);
+                Data<R> res = new Data<R>(getOutputType(), goal, outputMeta);
+                builder.putData(placement(inputName, outputName), res, false);
             });
         });
         return builder.build();

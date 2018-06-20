@@ -6,6 +6,7 @@
 package hep.dataforge.io;
 
 import hep.dataforge.meta.Meta;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -18,21 +19,13 @@ import java.nio.charset.Charset;
 public interface MetaStreamWriter {
 
     /**
-     * Set charset for this writer
-     *
-     * @param charset
-     * @return
-     */
-    MetaStreamWriter withCharset(Charset charset);
-
-    /**
      * write Meta object to the giver OuputStream using given charset (if it is
      * possible)
      *
      * @param stream
      * @param meta   charset is used
      */
-    void write(OutputStream stream, Meta meta) throws IOException;
+    void write(@NotNull OutputStream stream, @NotNull Meta meta) throws IOException;
 
 
     default String writeString(Meta meta) {

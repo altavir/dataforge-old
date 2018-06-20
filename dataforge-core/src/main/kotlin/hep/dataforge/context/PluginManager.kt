@@ -16,7 +16,8 @@
 package hep.dataforge.context
 
 import hep.dataforge.exceptions.ContextLockException
-import hep.dataforge.kodex.toList
+import hep.dataforge.kodex.KMetaBuilder
+import hep.dataforge.kodex.buildMeta
 import hep.dataforge.meta.Meta
 import java.util.*
 import java.util.stream.Stream
@@ -28,7 +29,7 @@ import kotlin.reflect.KClass
  * @property context A context for this plugin manager
  * @author Alexander Nozik
  */
-class PluginManager(private val context: Context) : ContextAware, AutoCloseable {
+class PluginManager(override val context: Context) : ContextAware, AutoCloseable, Iterable<Plugin> {
 
     /**
      * A set of loaded plugins
@@ -42,9 +43,6 @@ class PluginManager(private val context: Context) : ContextAware, AutoCloseable 
 
     private val parent: PluginManager? = context.parent?.pluginManager
 
-    override fun getContext(): Context {
-        return this.context
-    }
 
     fun stream(recursive: Boolean): Stream<Plugin> {
         return if (recursive && parent != null) {
@@ -58,11 +56,10 @@ class PluginManager(private val context: Context) : ContextAware, AutoCloseable 
      * Get for existing plugin
      */
     fun get(recursive: Boolean = true, predicate: (Plugin) -> Boolean): Plugin? {
-        val plugins = stream(recursive).filter(predicate).toList()
-        return when (plugins.size) {
-            0 -> null
-            1 -> plugins[0]
-            else -> throw RuntimeException("Multiple candidates for plugin resolution")
+        return plugins.find(predicate) ?: if (recursive && parent != null) {
+            parent.get(true, predicate)
+        } else {
+            null
         }
     }
 
@@ -72,8 +69,8 @@ class PluginManager(private val context: Context) : ContextAware, AutoCloseable 
      * @param tag
      * @return
      */
-    fun get(tag: PluginTag): Plugin? {
-        return get(true) { tag.matches(it.tag) }
+    operator fun get(tag: PluginTag, recursive: Boolean = true): Plugin? {
+        return get(recursive) { tag.matches(it.tag) }
     }
 
     /**
@@ -85,8 +82,12 @@ class PluginManager(private val context: Context) : ContextAware, AutoCloseable 
      * @return
      */
     @Suppress("UNCHECKED_CAST")
-    fun <T : Plugin> get(type: KClass<T>): T? {
-        return get(true) { type.isInstance(it) } as T?
+    operator fun <T : Plugin> get(type: KClass<T>, recursive: Boolean = true): T? {
+        return get(recursive) { type.isInstance(it) } as T?
+    }
+
+    inline fun <reified T : Plugin> get(recursive: Boolean = true): T? {
+        return get(T::class, recursive)
     }
 
     /**
@@ -100,18 +101,32 @@ class PluginManager(private val context: Context) : ContextAware, AutoCloseable 
         if (context.isLocked) {
             throw ContextLockException()
         }
-
-        if (get(plugin::class) != null) {
+        if (get(plugin::class, false) != null) {
             throw  RuntimeException("Plugin of type ${plugin::class} already exists in ${context.name}")
         } else {
-            for (tag in plugin.dependsOn()) {
-                load(tag)
-            }
+            loadDependencies(plugin)
 
             logger.info("Loading plugin {} into {}", plugin.name, context.name)
-            plugin.attach(getContext())
+            plugin.attach(context)
             plugins.add(plugin)
             return plugin
+        }
+    }
+
+    fun loadDependencies(plugin: Plugin){
+        for (tag in plugin.dependsOn()) {
+            load(tag)
+        }
+    }
+
+    fun remove(plugin: Plugin){
+        if (context.isLocked) {
+            throw ContextLockException()
+        }
+        if (plugins.contains(plugin)){
+            logger.info("Removing plugin {} from {}", plugin.name, context.name)
+            plugin.detach()
+            plugins.remove(plugin)
         }
     }
 
@@ -123,7 +138,7 @@ class PluginManager(private val context: Context) : ContextAware, AutoCloseable 
      */
     @JvmOverloads
     fun load(tag: PluginTag, meta: Meta = Meta.empty()): Plugin {
-        val loaded = get(tag)
+        val loaded = get(tag, false)
         return when {
             loaded == null -> load(pluginLoader[tag, meta])
             loaded.meta == meta -> loaded // if meta is the same, return existing plugin
@@ -134,14 +149,17 @@ class PluginManager(private val context: Context) : ContextAware, AutoCloseable 
     /**
      * Load plugin by its class and meta. Ignore if plugin with this meta is already loaded.
      */
-    @JvmOverloads
     fun <T : Plugin> load(type: KClass<T>, meta: Meta = Meta.empty()): T {
-        val loaded = get(type)
+        val loaded = get(type, false)
         return when {
             loaded == null -> load(pluginLoader[type, meta])
             loaded.meta == meta -> loaded // if meta is the same, return existing plugin
             else -> throw RuntimeException("Can't load plugin with type $type. Plugin with this type and different configuration already exists in context.")
         }
+    }
+
+    inline fun <reified T : Plugin> load(noinline metaBuilder: KMetaBuilder.() -> Unit = {}): T {
+        return load(T::class, buildMeta("plugin", metaBuilder))
     }
 
     @JvmOverloads
@@ -159,12 +177,6 @@ class PluginManager(private val context: Context) : ContextAware, AutoCloseable 
         this.plugins.forEach { it.detach() }
     }
 
-    /**
-     * List loaded plugins
-     *
-     * @return
-     */
-    fun list(): Collection<Plugin> {
-        return this.plugins
-    }
+    override fun iterator(): Iterator<Plugin> = plugins.iterator()
+
 }

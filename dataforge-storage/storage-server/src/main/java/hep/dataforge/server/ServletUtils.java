@@ -83,10 +83,10 @@ public class ServletUtils {
 //                return val.booleanValue() ? BooleanValue.TRUE : BooleanValue.FALSE;
 //            case TIME:
 //                GregorianCalendar gr = new GregorianCalendar();
-//                gr.setTime(Date.from(val.timeValue()));
+//                gr.setTime(Date.from(val.getTime()));
 //                return new DateTimeValue(gr);
 //            default:
-//                return new TextValue(val.stringValue());
+//                return new TextValue(val.getString());
 //        }
 //    }
 }

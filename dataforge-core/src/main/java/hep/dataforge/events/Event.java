@@ -83,7 +83,7 @@ public class Event extends SimpleMetaMorph {
     }
 
     public Instant time() {
-        return getMeta().getValue(EVENT_TIME_KEY).timeValue();
+        return getMeta().getValue(EVENT_TIME_KEY).getTime();
     }
 
 //    /**

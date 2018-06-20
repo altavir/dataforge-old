@@ -18,7 +18,6 @@ package hep.dataforge.tables;
 import hep.dataforge.actions.OneToOneAction;
 import hep.dataforge.context.Context;
 import hep.dataforge.description.TypedActionDef;
-import hep.dataforge.io.DataPointStringIterator;
 import hep.dataforge.io.LineIterator;
 import hep.dataforge.meta.Laminate;
 
@@ -46,13 +45,13 @@ public class ReadPointSetAction extends OneToOneAction<InputStream, Table> {
 
             String dataSetName = meta.getString("dataSetName", name);
 
-            DataPointStringIterator dpReader;
+            ValuesReader dpReader;
             if (meta.hasValue("columnNames")) {
                 String[] names = meta.getStringArray("columnNames");
-                dpReader = new DataPointStringIterator(iterator, names);
+                dpReader = new ValuesReader(iterator, names);
                 fileData = new ListTable.Builder(names);
             } else {
-                dpReader = new DataPointStringIterator(iterator, iterator.next());
+                dpReader = new ValuesReader(iterator, iterator.next());
                 fileData = new ListTable.Builder(dataSetName);
             }
 

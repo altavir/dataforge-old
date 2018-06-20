@@ -167,7 +167,7 @@ public class NamesUtils {
         Number[] res = new Number[set.getNames().size()];
         List<String> names = set.getNames().asList();
         for (int i = 0; i < set.getNames().size(); i++) {
-            res[i] = set.getValue(names.get(i)).doubleValue();
+            res[i] = set.getValue(names.get(i)).getDouble();
         }
         return res;
     }
@@ -184,7 +184,7 @@ public class NamesUtils {
     public static double[] getNamedSubSetValues(Values set, String... names) throws NameNotFoundException {
         double[] res = new double[names.length];
         for (int i = 0; i < names.length; i++) {
-            res[i] = set.getValue(names[i]).doubleValue();
+            res[i] = set.getValue(names[i]).getDouble();
 
         }
         return res;

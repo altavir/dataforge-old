@@ -19,7 +19,6 @@ package hep.dataforge.grind.extensions
 import groovy.transform.CompileStatic
 import hep.dataforge.data.Data
 import hep.dataforge.data.DataNode
-import hep.dataforge.exceptions.NameNotFoundException
 import hep.dataforge.grind.Grind
 import hep.dataforge.grind.GrindMetaBuilder
 import hep.dataforge.meta.*
@@ -38,15 +37,15 @@ class CoreExtension {
     //value extensions
 
     static Value plus(final Value self, Object obj) {
-        return plus(self, Value.of(obj))
+        return plus(self, ValueFactory.of(obj))
     }
 
     static Value plus(final Value self, Value other) {
         switch (self.getType()) {
             case ValueType.NUMBER:
-                return Value.of(self.numberValue() + other.numberValue());
+                return ValueFactory.of(self.getNumber() + other.getNumber());
             case ValueType.STRING:
-                return Value.of(self.stringValue() + other.stringValue());
+                return ValueFactory.of(self.getString() + other.getString());
             case ValueType.TIME:
                 //TODO implement
                 throw new RuntimeException("Time plus operator is not yet supported")
@@ -59,15 +58,15 @@ class CoreExtension {
     }
 
     static Value minus(final Value self, Object obj) {
-        return minus(self, Value.of(obj))
+        return minus(self, ValueFactory.of(obj))
     }
 
     static Value minus(final Value self, Value other) {
         switch (self.getType()) {
             case ValueType.NUMBER:
-                return Value.of(self.numberValue() - other.numberValue());
+                return ValueFactory.of(self.getNumber() - other.getNumber());
             case ValueType.STRING:
-                return Value.of(self.stringValue() - other.stringValue());
+                return ValueFactory.of(self.getString() - other.getString());
             case ValueType.TIME:
                 //TODO implement
                 throw new RuntimeException("Time plus operator is not yet supported")
@@ -84,28 +83,28 @@ class CoreExtension {
         switch (self.getType()) {
             case ValueType.NUMBER:
                 //TODO fix non-dobule values
-                return Value.of(-self.doubleValue());
+                return ValueFactory.of(-self.getDouble());
             case ValueType.STRING:
                 throw new RuntimeException("Can't negate String value")
             case ValueType.TIME:
                 throw new RuntimeException("Can't negate time value")
             case ValueType.BOOLEAN:
-                return Value.of(!self.booleanValue());
+                return ValueFactory.of(!self.getBoolean());
             case ValueType.NULL:
                 return self;
         }
     }
 
     static Value multiply(final Value self, Object obj) {
-        return multiply(self, Value.of(obj))
+        return multiply(self, ValueFactory.of(obj))
     }
 
     static Value multiply(final Value self, Value other) {
         switch (self.getType()) {
             case ValueType.NUMBER:
-                return Value.of(self.numberValue() * other.numberValue());
+                return ValueFactory.of(self.getNumber() * other.getNumber());
             case ValueType.STRING:
-                return Value.of(self.stringValue() * other.intValue());
+                return ValueFactory.of(self.getString() * other.getInt());
             case ValueType.TIME:
                 //TODO implement
                 throw new RuntimeException("Time multiply operator is not yet supported")
@@ -113,30 +112,30 @@ class CoreExtension {
                 //TODO implement
                 throw new RuntimeException("Boolean multiply operator is not yet supported")
             case ValueType.NULL:
-                return Value.NULL;
+                return ValueFactory.NULL;
         }
     }
 
     static Object asType(final Value self, Class type) {
         switch (type) {
             case double:
-                return self.doubleValue();
+                return self.getDouble();
             case int:
-                return self.intValue();
+                return self.getInt();
             case short:
-                return self.numberValue().shortValue();
+                return self.getNumber().shortValue();
             case long:
-                return self.numberValue().longValue();
+                return self.getNumber().longValue();
             case Number:
-                return self.numberValue();
+                return self.getNumber();
             case String:
-                return self.stringValue();
+                return self.getString();
             case boolean:
-                return self.booleanValue();
+                return self.getBoolean();
             case Instant:
-                return self.timeValue();
+                return self.getTime();
             case Date:
-                return Date.from(self.timeValue());
+                return Date.from(self.getTime());
             default:
                 throw new RuntimeException("Unknown value cast type: ${type}");
         }
@@ -152,9 +151,9 @@ class CoreExtension {
 //            case ValueType.NUMBER:
 //                return self.doubleValue();
 //            case ValueType.STRING:
-//                return self.stringValue();
+//                return self.getString();
 //            case ValueType.TIME:
-//                return self.timeValue();
+//                return self.getTime();
 //            case ValueType.BOOLEAN:
 //                return self.booleanValue();
 //            case ValueType.NULL:
@@ -169,7 +168,7 @@ class CoreExtension {
      */
     static Map<String, Object> unbox(final Values self) {
         self.getNames().collectEntries {
-            [it: self.getValue(it).value()]
+            [it: self.getValue(it).getValue()]
         }
     }
 
@@ -180,7 +179,7 @@ class CoreExtension {
      * @return
      */
     static Object getAt(final Values self, String field) {
-        return self.getValue(field).value();
+        return self.getValue(field).getValue();
     }
 
     static Value getProperty(final Values self, String name) {
@@ -285,7 +284,7 @@ class CoreExtension {
     }
 
     static Object getAt(final Meta self, String name) {
-        return self.getValue(name).value();
+        return self.getValue(name).getValue();
     }
 
     static void setAt(final MetaBuilder self, String name, Object value) {
@@ -340,7 +339,7 @@ class CoreExtension {
     }
 
     static Object getAt(final Table self, String name, int index) {
-        return self.get(name, index).value();
+        return self.get(name, index).getValue();
     }
 
     //workspace extension
@@ -349,11 +348,11 @@ class CoreExtension {
             Meta meta = Grind.parseMeta(command);
             return wsp.runTask(meta);
         } else {
-            return wsp.runTask(command)
+            return wsp.runTask(command,command)
         }
     }
 
     static <T> Data<? extends T> getAt(final DataNode<T> self, String key){
-        return self.optData(key).orElseThrow{new NameNotFoundException(key)}
+        return self.optData(key)
     }
 }

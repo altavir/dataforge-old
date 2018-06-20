@@ -5,9 +5,9 @@
  */
 package hep.dataforge.stat.models;
 
+import hep.dataforge.Named;
 import hep.dataforge.context.Context;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.names.Named;
 import hep.dataforge.utils.ContextMetaFactory;
 
 /**

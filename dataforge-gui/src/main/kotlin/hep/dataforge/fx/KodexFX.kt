@@ -1,17 +1,20 @@
 package hep.dataforge.fx
 
 import hep.dataforge.context.Global
+import hep.dataforge.goals.Coal
 import hep.dataforge.goals.Goal
-import hep.dataforge.kodex.Coal
 import javafx.application.Platform
 import javafx.beans.property.BooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleStringProperty
+import javafx.scene.Node
+import javafx.scene.control.ToggleButton
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.scene.layout.Region
 import javafx.scene.paint.Color
-import kotlinx.coroutines.experimental.CommonPool
+import javafx.stage.Stage
+import kotlinx.coroutines.experimental.DefaultDispatcher
 import tornadofx.*
 import java.util.*
 import java.util.concurrent.Executor
@@ -70,26 +73,38 @@ private fun removeMonitor(component: UIComponent, id: String) {
     }
 }
 
-fun <R> UIComponent.runGoal(id: String, dispatcher: CoroutineContext = CommonPool, block: suspend GoalMonitor.() -> R): Coal<R> {
+fun <R> UIComponent.runGoal(id: String, dispatcher: CoroutineContext = DefaultDispatcher, block: suspend GoalMonitor.() -> R): Coal<R> {
     val monitor = getMonitor(id);
-    return Coal(Collections.emptyList(), dispatcher, id) { block.invoke(monitor) }
-            .apply {
-                onComplete { _, _ ->
-                    removeMonitor(this@runGoal, id)
-                }
-                run()
-            }
-}
-
-infix fun <R> Goal<R>.ui(func: (R) -> Unit): Goal<R> {
-    this.onComplete(uiExecutor, BiConsumer { res, _ ->
-        if (res != null) {
-            func.invoke(res);
+    return Coal(Collections.emptyList(), dispatcher, id) {
+        monitor.progress = -1.0
+        block(monitor).also {
+            monitor.progress = 1.0
         }
-    });
-    return this;
+    }.apply {
+        onComplete { _, _ -> removeMonitor(this@runGoal, id) }
+        run()
+    }
 }
 
+infix fun <R> Goal<R>.ui(action: (R) -> Unit): Goal<R> {
+    return this.apply {
+        onComplete(uiExecutor, BiConsumer { res, _ ->
+            if (res != null) {
+                action(res);
+            }
+        })
+    }
+}
+
+infix fun <R> Goal<R>.except(action: (Throwable) -> Unit): Goal<R> {
+    return this.apply {
+        onComplete(uiExecutor, BiConsumer { _, ex ->
+            if (ex != null) {
+                action(ex);
+            }
+        })
+    }
+}
 
 /**
  * Add a listener that performs some update action on any window size change
@@ -123,18 +138,40 @@ fun runNow(r: Runnable) {
     }
 }
 
-fun UIComponent.bindWindow(toggle: BooleanProperty) {
-    toggle.onChange {
-        val stage = openWindow()
-        if (it) {
-            stage?.show()
-        } else {
-            stage?.hide()
+/**
+ * A display window that could be toggled
+ */
+class ToggleUIComponent(
+        val component: UIComponent,
+        val owner: Node,
+        val toggle: BooleanProperty) {
+    val stage: Stage by lazy {
+        val res = component.modalStage ?: component.openWindow(owner = owner.scene.window)
+        ?: throw RuntimeException("Can'topen window for $component")
+        res.showingProperty().onChange {
+            toggle.set(it)
         }
-        stage?.showingProperty()?.onChange {
-            toggle.set(false)
-        }
+        res
     }
+
+    init {
+        toggle.onChange {
+            if (it) {
+                stage.show()
+            } else {
+                stage.hide()
+            }
+        }
+
+    }
+}
+
+fun UIComponent.bindWindow(owner: Node, toggle: BooleanProperty): ToggleUIComponent {
+    return ToggleUIComponent(this, owner, toggle)
+}
+
+fun UIComponent.bindWindow(button: ToggleButton): ToggleUIComponent {
+    return bindWindow(button, button.selectedProperty())
 }
 
 //fun TableView<Values>.table(table: Table){

@@ -3,7 +3,9 @@ package hep.dataforge.grind.helpers
 import groovy.transform.CompileStatic
 import hep.dataforge.context.Context
 import hep.dataforge.grind.workspace.WorkspaceSpec
-import hep.dataforge.io.markup.MarkupBuilder
+import hep.dataforge.io.output.TextOutput
+import hep.dataforge.meta.Meta
+import org.jetbrains.annotations.NotNull
 
 import java.lang.reflect.Method
 
@@ -23,7 +25,9 @@ class WorkspaceHelper extends AbstractHelper {
     }
 
     @Override
-    protected MarkupBuilder getHelperDescription() {
-        return new MarkupBuilder().text("The helper for workspace operations");
+    protected void renderDescription(@NotNull TextOutput output, @NotNull Meta meta) {
+        output.renderText("The helper for workspace operations")
     }
+
+
 }

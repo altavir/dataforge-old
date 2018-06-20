@@ -33,11 +33,11 @@ import javax.cache.spi.CachingProvider
 /**
  * Created by darksnake on 08-Feb-17.
  */
-class DefaultCacheManager(private val context: Context, cfg: Meta) : MetaHolder(cfg), CacheManager, ContextAware {
+class DefaultCacheManager(override val context: Context, cfg: Meta) : MetaHolder(cfg), CacheManager, ContextAware {
     private var map: MutableMap<String, DefaultCache<*, *>> = ConcurrentHashMap();
 
     val rootCacheDir: Path
-        get() = context.io.tmpDir.resolve("immutable")
+        get() = context.tmpDir.resolve("cache")
 
     override fun getCachingProvider(): CachingProvider {
         return DefaultCachingProvider(context)
@@ -61,10 +61,12 @@ class DefaultCacheManager(private val context: Context, cfg: Meta) : MetaHolder(
         return DefaultCache(cacheName, this, configuration.keyType, configuration.valueType)
     }
 
+    @Suppress("UNCHECKED_CAST")
     override fun <K, V> getCache(cacheName: String, keyType: Class<K>, valueType: Class<V>): DefaultCache<K, V> {
         return map.getOrPut(cacheName) { DefaultCache(cacheName, this, keyType, valueType) } as DefaultCache<K, V>
     }
 
+    @Suppress("UNCHECKED_CAST")
     override fun <K, V> getCache(cacheName: String): DefaultCache<K, V> {
         return map.getOrPut(cacheName) { DefaultCache(cacheName, this, Any::class.java, Any::class.java) } as DefaultCache<K, V>
     }
@@ -107,8 +109,5 @@ class DefaultCacheManager(private val context: Context, cfg: Meta) : MetaHolder(
         }
     }
 
-    override fun getContext(): Context {
-        return context
-    }
 
 }

@@ -5,10 +5,6 @@
  */
 package hep.dataforge.description;
 
-import hep.dataforge.io.markup.MarkupBuilder;
-import hep.dataforge.names.Named;
-import org.jetbrains.annotations.Nullable;
-
 /**
  * A general interface for something with meta description
  *
@@ -22,20 +18,5 @@ public interface Described {
      */
     default NodeDescriptor getDescriptor() {
         return Descriptors.buildDescriptor(getClass());
-    }
-
-    /**
-     * Header markup. Null corresponds to no header
-     *
-     * @return
-     */
-    @Nullable
-    default MarkupBuilder getHeader() {
-        if (this instanceof Named) {
-            return new MarkupBuilder().text(((Named) this).getName(), "blue");
-        } else {
-            //TODO add customizable markup for different renderers
-            return new MarkupBuilder();
-        }
     }
 }

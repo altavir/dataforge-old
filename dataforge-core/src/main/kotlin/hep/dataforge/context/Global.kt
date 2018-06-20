@@ -18,6 +18,7 @@ package hep.dataforge.context
 import hep.dataforge.exceptions.ContextLockException
 import hep.dataforge.io.output.Output
 import hep.dataforge.io.output.StreamOutput
+import hep.dataforge.kodex.buildMeta
 import hep.dataforge.kodex.orElse
 import hep.dataforge.utils.ReferenceRegistry
 import hep.dataforge.values.Value
@@ -40,7 +41,7 @@ object Global : Context("GLOBAL", null, Thread.currentThread().contextClassLoade
     /**
      * System console output
      */
-    var console: Output = StreamOutput(System.out)
+    var console: Output = StreamOutput(this, System.out)
         set(value) {
             if (isLocked) {
                 throw ContextLockException("Can't change console output because Global is locked")
@@ -65,16 +66,12 @@ object Global : Context("GLOBAL", null, Thread.currentThread().contextClassLoade
             return dfUserDir
         }
 
-    override val history: Chronicler by lazy { Chronicler().apply { startGlobal() } }
+    override val history: Chronicler by lazy {
+        Chronicler(buildMeta("chronicler", "printHistory" to true)).apply { startGlobal() }
+    }
 
-    override val io: IOManager
-        get() = pluginManager.get(IOManager::class).orElse {
-            logger.debug("No IO plugin found. Using default IO.")
-            pluginManager.load(DefaultIOManager())
-        }
-
-    override val executor: ExecutorPlugin
-        get() = pluginManager.get(ExecutorPlugin::class).orElse {
+    override val executors: ExecutorPlugin
+        get() = pluginManager[ExecutorPlugin::class].orElse {
             logger.debug("No executor plugin found. Using default executor.")
             pluginManager.load(DefaultExecutorPlugin())
         }
@@ -121,20 +118,6 @@ object Global : Context("GLOBAL", null, Thread.currentThread().contextClassLoade
         res.priority = Thread.MAX_PRIORITY
         res
     }
-
-    /**
-     * Use that context when the context for some reason is not provided. By default throws a runtime exception.
-     *
-     * @return
-     */
-    @JvmStatic
-    var defaultContext: Context? = null
-        get() {
-            if (field == null) {
-                throw RuntimeException("Context not specified")
-            }
-            return field
-        }
 
     /**
      * A single thread executor for DataForge messages dispatch. No heavy calculations should be done on this thread

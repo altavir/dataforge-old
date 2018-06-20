@@ -5,9 +5,10 @@
  */
 package hep.dataforge.control.collectors;
 
-import hep.dataforge.tables.ValueMap;
 import hep.dataforge.utils.DateTimeUtils;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueFactory;
+import hep.dataforge.values.ValueMap;
 import hep.dataforge.values.Values;
 
 import java.time.Duration;
@@ -51,26 +52,28 @@ public class RegularPointCollector implements ValueCollector {
     }
 
     public synchronized void collect(Instant time) {
-        ValueMap.Builder point = new ValueMap.Builder();
+        if(!values.isEmpty()) {
+            ValueMap.Builder point = new ValueMap.Builder();
 
-        Instant average = Instant.ofEpochMilli((time.toEpochMilli() + startTime.toEpochMilli()) / 2);
+            Instant average = Instant.ofEpochMilli((time.toEpochMilli() + startTime.toEpochMilli()) / 2);
 
-        point.putValue("timestamp", average);
+            point.putValue("timestamp", average);
 
-        for (Map.Entry<String, List<Value>> entry : values.entrySet()) {
-            point.putValue(entry.getKey(), entry.getValue().stream().mapToDouble(Value::doubleValue).sum() / entry.getValue().size());
-        }
-
-        // filling all missing values with nulls
-        for (String name : names) {
-            if (!point.build().hasValue(name)) {
-                point.putValue(name, Value.getNull());
+            for (Map.Entry<String, List<Value>> entry : values.entrySet()) {
+                point.putValue(entry.getKey(), entry.getValue().stream().mapToDouble(Value::getDouble).sum() / entry.getValue().size());
             }
-        }
 
-        startTime = null;
-        values.clear();
-        consumer.accept(point.build());
+            // filling all missing values with nulls
+            for (String name : names) {
+                if (!point.build().hasValue(name)) {
+                    point.putValue(name, ValueFactory.NULL);
+                }
+            }
+
+            startTime = null;
+            values.clear();
+            consumer.accept(point.build());
+        }
     }
 
     @Override

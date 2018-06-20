@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,6 +20,7 @@ import hep.dataforge.context.Context;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.TypedActionDef;
 import hep.dataforge.io.history.Chronicle;
+import hep.dataforge.io.output.OutputKt;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.tables.Table;
 
@@ -34,14 +35,14 @@ import java.io.PrintWriter;
  * @version $Id: $Id
  */
 @TypedActionDef(name = "fit", inputType = Table.class, outputType = FitResult.class, info = "Fit dataset with previously stored model.")
-@NodeDef(name = "model",
+@NodeDef(key = "model",
         required = true, info = "The model against which fit should be made",
         from = "method::hep.dataforge.stat.models.ModelManager.getModel")
-@NodeDef(name = "params", required = true,
+@NodeDef(key = "params", required = true,
         info = "Initial fit parameter set. Both parameters from action annotation and parameters from data annotation are used. "
                 + "The merging of parameters is made supposing the annotation of data is main and annotation of action is secondary.",
         from = "method::hep.dataforge.stat.fit.ParamSet.fromMeta")
-@NodeDef(name = "stage", multiple = true, info = "Fit stages")
+@NodeDef(key = "stage", multiple = true, info = "Fit stages")
 public class FitAction extends OneToOneAction<Table, FitResult> {
 
     public static final String FIT_ACTION_NAME = "fit";
@@ -53,7 +54,7 @@ public class FitAction extends OneToOneAction<Table, FitResult> {
      */
     @Override
     protected FitResult execute(Context context, String name, Table input, Laminate meta) {
-        OutputStream output = context.getIo().stream(getName(), name);
+        OutputStream output = OutputKt.getStream(context.getOutput().get(getName(), name));
         PrintWriter writer = new PrintWriter(output);
         writer.printf("%n*** META ***%n");
         writer.println(meta.toString());
@@ -66,7 +67,9 @@ public class FitAction extends OneToOneAction<Table, FitResult> {
                 .run();
 
         if (meta.getBoolean("printLog", true)) {
-            log.print(writer);
+            writer.println();
+            log.getEntries().forEach(entry -> writer.println(entry.toString()));
+            writer.println();
         }
 
         return res;

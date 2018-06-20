@@ -34,18 +34,16 @@ import java.nio.file.StandardOpenOption
 /**
  * A context aware reference to file with content not managed by DataForge
  */
-class FileReference private constructor(private val _context: Context, val path: Path, val scope: FileReferenceScope = WORK) : ContextAware {
-
-    override fun getContext(): Context = _context
+class FileReference private constructor(override val context: Context, val path: Path, val scope: FileReferenceScope = WORK) : ContextAware {
 
     /**
      * Absolute path for this reference
      */
     val absolutePath: Path = when (scope) {
         SYS -> path
-        DATA -> context.io.dataDir.resolve(path)
-        WORK -> context.io.workDir.resolve(path)
-        TMP -> context.io.tmpDir.resolve(path)
+        DATA -> context.dataDir.resolve(path)
+        WORK -> context.workDir.resolve(path)
+        TMP -> context.tmpDir.resolve(path)
     }.toAbsolutePath()
 
     /**
@@ -56,12 +54,12 @@ class FileReference private constructor(private val _context: Context, val path:
     /**
      * Get binary references by this file reference
      */
-    val binary: Binary?
+    val binary: Binary
         get() {
             return if (exists) {
                 FileBinary(absolutePath)
             } else {
-                null
+                Binary.EMPTY
             }
         }
 
@@ -106,13 +104,13 @@ class FileReference private constructor(private val _context: Context, val path:
     val outputStream: OutputStream
         get() {
             prepareWrite()
-            return Files.newOutputStream(absolutePath, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.APPEND)
+            return Files.newOutputStream(absolutePath, StandardOpenOption.WRITE, StandardOpenOption.CREATE)
         }
 
     val channel: SeekableByteChannel
         get() {
             prepareWrite()
-            return Files.newByteChannel(absolutePath, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.APPEND)
+            return Files.newByteChannel(absolutePath, StandardOpenOption.WRITE, StandardOpenOption.CREATE)
         }
 
     /**
@@ -140,23 +138,23 @@ class FileReference private constructor(private val _context: Context, val path:
         /**
          * Provide a reference to a new file in tmp directory with unique ID.
          */
-        fun newTmpFile(context: Context, prefix: String, suffix: String): FileReference {
-            val path = Files.createTempFile(context.io.tmpDir, prefix, suffix)
+        fun newTmpFile(context: Context, prefix: String, suffix: String = "tmp"): FileReference {
+            val path = Files.createTempFile(context.tmpDir, prefix, suffix)
             return FileReference(context, path, TMP)
         }
 
         /**
-         * Create a reference for a file in a work directory. Filr itself is not created
+         * Create a reference for a file in a work directory. File itself is not created
          */
-        fun newWorkFile(context: Context, fileName: String, extension: String, path: Name = Name.EMPTY): FileReference {
+        fun newWorkFile(context: Context, prefix: String, suffix: String, path: Name = Name.EMPTY): FileReference {
             val dir = if (path.isEmpty) {
-                context.io.workDir
+                context.workDir
             } else {
                 val relativeDir = path.tokens.joinToString(File.separator) { it.toString() }
-                context.io.workDir.resolve(relativeDir)
+                context.workDir.resolve(relativeDir)
             }
 
-            val file = dir.resolve("$fileName.$extension")
+            val file = dir.resolve("$prefix.$suffix")
             return FileReference(context, file, WORK)
         }
 
@@ -168,7 +166,7 @@ class FileReference private constructor(private val _context: Context, val path:
         }
 
         fun openDataFile(context: Context, name: String): FileReference {
-            val path = context.io.dataDir.resolve(name)
+            val path = context.dataDir.resolve(name)
             return FileReference(context, path, DATA)
         }
 

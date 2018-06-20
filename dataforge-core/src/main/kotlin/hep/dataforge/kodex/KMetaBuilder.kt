@@ -6,9 +6,13 @@ import hep.dataforge.meta.MetaID
 import hep.dataforge.meta.MetaNode.DEFAULT_META_NAME
 import hep.dataforge.values.NamedValue
 
+@DslMarker
+annotation class MetaDSL
+
 /**
  * Kotlin meta builder extension
  */
+@MetaDSL
 class KMetaBuilder(name: String = MetaBuilder.DEFAULT_META_NAME) : MetaBuilder(name) {
     operator fun Meta.unaryPlus() {
         putNode(this);
@@ -20,7 +24,7 @@ class KMetaBuilder(name: String = MetaBuilder.DEFAULT_META_NAME) : MetaBuilder(n
     }
 
     operator fun NamedValue.unaryPlus() {
-        putValue(this.name, this.anonymousValue)
+        putValue(this.name, this.anonymous)
     }
 
     /**
@@ -30,26 +34,34 @@ class KMetaBuilder(name: String = MetaBuilder.DEFAULT_META_NAME) : MetaBuilder(n
         putValue(this, value);
     }
 
-    /**
-     * Short infix notation to put value
-     */
-    infix fun String.v(value: Any) {
-        putValue(this, value);
+    infix fun String.to(metaBuilder: KMetaBuilder.() -> Unit) {
+        putNode(this, KMetaBuilder(this).apply(metaBuilder))
     }
 
-    /**
-     * Short infix notation to put node
-     */
-    infix fun String.n(node: Meta) {
-        putNode(this, node)
+    infix fun String.to(meta: Meta) {
+        putNode(this, meta)
     }
 
-    /**
-     * Short infix notation  to put any object that could be converted to meta
-     */
-    infix fun String.n(node: MetaID) {
-        putNode(this, node.toMeta())
-    }
+//    /**
+//     * Short infix notation to put value
+//     */
+//    infix fun String.v(value: Any) {
+//        putValue(this, value);
+//    }
+//
+//    /**
+//     * Short infix notation to put node
+//     */
+//    infix fun String.n(node: Meta) {
+//        putNode(this, node)
+//    }
+//
+//    /**
+//     * Short infix notation  to put any object that could be converted to meta
+//     */
+//    infix fun String.n(node: MetaID) {
+//        putNode(this, node.toMeta())
+//    }
 
     fun putNode(node: MetaID) {
         putNode(node.toMeta())
@@ -62,6 +74,7 @@ class KMetaBuilder(name: String = MetaBuilder.DEFAULT_META_NAME) : MetaBuilder(n
     /**
      * Attach new node
      */
+    @MetaDSL
     fun node(name: String, vararg values: Pair<String, Any>, transform: (KMetaBuilder.() -> Unit)? = null) {
         val node = KMetaBuilder(name);
         values.forEach {

@@ -1,25 +1,43 @@
-buildscript{
-    ext.kotlin_version = "1.2.21"
+buildscript {
+    ext.kotlin_version = "1.2.50"
+    repositories {
+        jcenter()
+        maven {
+            url = "https://dl.bintray.com/kotlin/kotlin-eap"
+        }
+    }
+
+    dependencies {
+        classpath "org.jetbrains.dokka:dokka-gradle-plugin:0.9.16"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+
+
 }
 
 plugins {
-    id "org.jetbrains.kotlin.jvm" version "1.2.21" apply false
+    //id "org.jetbrains.kotlin.jvm" version "1.2.31" apply false
+    id "me.champeau.gradle.jmh" version "0.4.5" apply false
 }
+
 
 apply plugin: 'idea'
 //apply plugin: "com.jfrog.artifactory"
 apply plugin: 'maven-publish'
 
 allprojects {
+    apply plugin: 'org.jetbrains.dokka'
+    apply plugin: 'me.champeau.gradle.jmh'
+
     group = 'hep.dataforge'
     version = '0.4.0 - SNAPSHOT'
 
     repositories {
-        jcenter()
         mavenCentral()
-        //maven { url "https://jitpack.io" }
-        maven { url "http://dl.bintray.com/kotlin/ktor" }
-        maven { url "https://dl.bintray.com/kotlin/kotlinx" }
+        jcenter()
+        //maven { url = "https://jitpack.io" }
+        maven { url = "http://dl.bintray.com/kotlin/ktor" }
+        maven { url = "https://dl.bintray.com/kotlin/kotlinx" }
     }
 
 }
@@ -45,29 +63,34 @@ subprojects {
         }
 
 
-        if (project.hasProperty('npm_user')) {
-            publishing {
-                repositories {
-                    maven {
+
+        publishing {
+            repositories {
+                maven {
+                    if (project.hasProperty('npm_user')) {
                         // change to point to your repo, e.g. http://my.org/repo
-                        url "http://npm.mipt.ru/var/www/maven"
+                        url = "sftp://npm.mipt.ru:22/var/www/maven"
                         credentials {
                             username npm_user
                             password npm_pass
                         }
+                    } else {
+                        url "file:" + projectDir.path + "/build/maven"
                     }
                 }
-                publications {
-                    miptNPM(MavenPublication) {
-                        from components.java
-                    }
+            }
+            publications {
+                miptNPM(MavenPublication) {
+                    from components.java
                 }
             }
         }
 
 
+
         compileKotlin {
             kotlinOptions {
+                freeCompilerArgs = ['-Xjvm-default=enable']
                 jvmTarget = "1.8"
                 javaParameters = true
             }
@@ -75,6 +98,7 @@ subprojects {
 
         compileTestKotlin {
             kotlinOptions {
+                freeCompilerArgs = ['-Xjvm-default=enable']
                 jvmTarget = "1.8"
                 javaParameters = true
             }
@@ -89,7 +113,7 @@ subprojects {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '4.5'
+    gradleVersion = '4.8'
 }
 
 /*

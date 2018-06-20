@@ -15,11 +15,13 @@
  */
 package hep.dataforge.meta;
 
+import hep.dataforge.Named;
 import hep.dataforge.description.Described;
 import hep.dataforge.description.Descriptors;
 import hep.dataforge.description.NodeDescriptor;
-import hep.dataforge.names.Named;
+import hep.dataforge.io.XMLMetaWriter;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueFactory;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
@@ -225,11 +227,11 @@ public final class Laminate extends Meta implements Described {
 
 
     public Stream<String> getNodeNames(boolean includeHidden, boolean includeDefaults) {
-        Stream<String> names = layers.stream().flatMap(layer -> layer.getNodeNames(includeHidden)).distinct();
+        Stream<String> names = layers.stream().flatMap(layer -> layer.getNodeNames(includeHidden));
         if (includeDefaults && descriptorLayer != null) {
-            return Stream.concat(names, descriptorLayer.getNodeNames(includeHidden));
+            return Stream.concat(names, descriptorLayer.getNodeNames(includeHidden)).distinct();
         } else {
-            return names;
+            return names.distinct();
         }
     }
 
@@ -244,14 +246,15 @@ public final class Laminate extends Meta implements Described {
     }
 
     public Stream<String> getValueNames(boolean includeHidden, boolean includeDefaults) {
-        Stream<String> names = layers.stream().flatMap(layer -> layer.getValueNames(includeHidden)).distinct();
+        Stream<String> names = layers.stream().flatMap(layer -> layer.getValueNames(includeHidden));
         if (includeDefaults && descriptorLayer != null) {
-            return Stream.concat(names, descriptorLayer.getValueNames(includeHidden));
+            return Stream.concat(names, descriptorLayer.getValueNames(includeHidden)).distinct();
         } else {
-            return names;
+            return names.distinct();
         }
     }
 
+    @NotNull
     @Override
     public Optional<Value> optValue(@NotNull String path) {
         //searching layers for value
@@ -356,7 +359,7 @@ public final class Laminate extends Meta implements Described {
      * @return
      */
     public Collection<Meta> collectNodes(String nodeName, String key) {
-        return collectNodes(nodeName, meta -> getValue(key, Value.NULL));
+        return collectNodes(nodeName, meta -> getValue(key, ValueFactory.NULL));
     }
 
     /**
@@ -407,5 +410,10 @@ public final class Laminate extends Meta implements Described {
         res.setDescriptor(getDescriptor());
 
         return res;
+    }
+
+    @Override
+    public String toString() {
+        return new XMLMetaWriter().writeString(this.merge());
     }
 }

@@ -4,23 +4,15 @@ import hep.dataforge.context.Context
 import hep.dataforge.context.Global
 import hep.dataforge.data.Data
 import hep.dataforge.data.DataNode
-import hep.dataforge.description.Described
-import hep.dataforge.description.Descriptors
-import hep.dataforge.description.NodeDescriptor
-import hep.dataforge.grind.Grind
 import hep.dataforge.grind.GrindShell
 import hep.dataforge.io.IOUtils
-import hep.dataforge.io.markup.Markedup
-import hep.dataforge.io.markup.MarkupBuilder
-import hep.dataforge.io.markup.MarkupUtils
+import hep.dataforge.io.output.ANSIStreamOutput
+import hep.dataforge.io.output.Output
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.SimpleConfigurable
-import hep.dataforge.names.Named
 import hep.dataforge.workspace.FileBasedWorkspace
-import org.jline.reader.EndOfFileException
-import org.jline.reader.LineReader
-import org.jline.reader.LineReaderBuilder
-import org.jline.reader.UserInterruptException
+import org.jline.builtins.Completers
+import org.jline.reader.*
 import org.jline.terminal.Terminal
 import org.jline.terminal.TerminalBuilder
 import org.jline.terminal.impl.DumbTerminal
@@ -46,9 +38,7 @@ class GrindTerminal extends SimpleConfigurable {
     private final GrindShell shell;
     private final Terminal terminal;
 
-
-    final Meta markupConfig = Grind.buildMeta(target: "terminal")
-    final TerminalMarkupRenderer renderer;
+    final Output renderer;
 
     /**
      * Build default jline console based on operating system. Do not use for preview inside IDE
@@ -80,10 +70,6 @@ class GrindTerminal extends SimpleConfigurable {
             terminal = new DumbTerminal(System.in, System.out);
             terminal.echo(false);
 
-//            def console = System.console()
-//            if (console) {
-//                console.readLine('> Please enter your username: ')
-//            }
 
         }
 
@@ -105,7 +91,7 @@ class GrindTerminal extends SimpleConfigurable {
         //create the shell
         shell = new GrindShell(context)
 
-        renderer = new TerminalMarkupRenderer(terminal);
+        renderer = new ANSIStreamOutput(context, terminal.output())
 
         //bind helper commands
 
@@ -131,6 +117,32 @@ class GrindTerminal extends SimpleConfigurable {
         }
     }
 
+    private Completers.TreeCompleter.Node completerNode(Object obj) {
+        List<Object> objs = new ArrayList()
+        if (obj != null) {
+            obj.class.declaredFields.findAll { !it.synthetic }
+                    .collect { obj.properties.get(it.name) }.findAll { it != null }
+                    .each {
+                def node = completerNode(it)
+                if (node != null) {
+                    objs.add(node)
+                }
+            }
+            obj.class.declaredMethods.findAll { !it.synthetic }.each { objs.add(it.name) }
+        }
+        if (objs.size() > 0) {
+            return Completers.TreeCompleter.node(objs as Object[])
+        } else {
+            return null
+        }
+    }
+
+    private Completer setupCompleter() {
+        new Completers.TreeCompleter(shell.getBinding().list().values().collect {
+            completerNode(it)
+        }.findAll { it != null })
+    }
+
     /**
      * Apply some closure to each of sub-results using shell configuration
      * @param res
@@ -143,7 +155,7 @@ class GrindTerminal extends SimpleConfigurable {
             res = (res as Data).get();
         } else if (res instanceof DataNode) {
             def node = res as DataNode
-            node.computeAll()// start computation of the whole node
+            node.nodeGoal().run()// start computation of the whole node
             node.dataStream().forEach { unwrap(it, cl) };
         }
 
@@ -158,37 +170,7 @@ class GrindTerminal extends SimpleConfigurable {
     }
 
     def show(Object obj) {
-        if (obj instanceof Markedup) {
-            renderer.render{ it.ln()}
-            if (obj instanceof Named) {
-                renderer.render(new MarkupBuilder().text((obj as Named).name + "\n", "red").build())
-                renderer.render{it.ln()}
-            }
-            renderer.render((obj as Markedup).markup(markupConfig))
-        }
-        return null;
-    }
-
-    def describe(Object obj) {
-        if (obj instanceof Described) {
-            renderer.render(MarkupUtils.markupDescriptor(obj as Described))
-        } else if (obj instanceof NodeDescriptor) {
-            renderer.render(MarkupUtils.markupDescriptor(obj as NodeDescriptor))
-        } else if (obj instanceof String) {
-            NodeDescriptor descriptor = Descriptors.buildDescriptor(obj);
-            if (descriptor.getMeta().isEmpty()) {
-                renderer.render(new MarkupBuilder().text("The description for ")
-                        .text("${obj}", "blue")
-                        .text(" is empty")
-                        .build()
-                )
-            } else {
-                renderer.render(MarkupUtils.markupDescriptor(descriptor))
-            }
-        } else {
-            renderer.render{it.text("No description found for ").text("${obj}", "blue")}
-        }
-        renderer.render { it.ln() }
+        renderer.render(obj, Meta.empty())
         return null;
     }
 
@@ -199,7 +181,7 @@ class GrindTerminal extends SimpleConfigurable {
         } else if (obj instanceof Path) {
             scriptPath = obj as Path
         } else {
-            scriptPath = shell.context.getIo().getFile(obj as String);
+            scriptPath = shell.context.getOutput().getFile(obj as String).absolutePath;
         }
 
         Files.newBufferedReader(scriptPath).withCloseable {
@@ -277,6 +259,7 @@ class GrindTerminal extends SimpleConfigurable {
     def launch() {
         LineReader reader = LineReaderBuilder.builder()
                 .terminal(getTerminal())
+                //.completer(setupCompleter())
                 .appName("DataForge Grind terminal")
                 .build();
         PrintWriter writer = getTerminal().writer();

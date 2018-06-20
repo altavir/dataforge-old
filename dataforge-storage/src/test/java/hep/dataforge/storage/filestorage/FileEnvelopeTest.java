@@ -19,7 +19,7 @@ public class FileEnvelopeTest {
     @Before
     public void setUp() throws Exception {
         Path path = Files.createTempFile("df_envelope_test", ".df");
-        envelope = FileEnvelope.createEmpty(path, Meta.empty());
+        envelope = FileEnvelope.Companion.createEmpty(path, Meta.empty());
     }
 
     @After

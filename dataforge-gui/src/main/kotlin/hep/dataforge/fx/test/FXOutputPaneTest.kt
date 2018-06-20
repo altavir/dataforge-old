@@ -5,24 +5,26 @@
  */
 package hep.dataforge.fx.test
 
-import hep.dataforge.fx.output.FXOutputPane
+import hep.dataforge.context.Global
+import hep.dataforge.fx.output.FXTextOutput
 import javafx.application.Application
 import javafx.scene.Scene
 import javafx.stage.Stage
+import tornadofx.*
 
 /**
  *
  * @author Alexander Nozik
  */
-class FXOutputPaneTest : Application() {
+class FXOutputPaneTest : App() {
 
     override fun start(stage: Stage) {
 
-        val out = FXOutputPane()
+        val out = FXTextOutput(Global)
         out.setMaxLines(5)
 
         for (i in 0..11) {
-            out.appendLine("my text number " + i)
+            out.appendLine("my text number $i")
         }
 
         //        onComplete.appendLine("a\tb\tc");

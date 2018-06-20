@@ -1,10 +1,9 @@
 package hep.dataforge.tables;
 
 import hep.dataforge.exceptions.NameNotFoundException;
+import hep.dataforge.meta.MetaMorph;
 import hep.dataforge.meta.MorphTarget;
-import hep.dataforge.values.Value;
-import hep.dataforge.values.ValueType;
-import hep.dataforge.values.Values;
+import hep.dataforge.values.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -26,7 +25,7 @@ public class ColumnTable implements Table {
         if (table instanceof ColumnTable) {
             return (ColumnTable) table;
         } else {
-            return new ColumnTable(table.getColumns().collect(Collectors.toList()));
+            return new ColumnTable(new ArrayList<>(table.getColumns()));
         }
     }
 
@@ -70,7 +69,7 @@ public class ColumnTable implements Table {
 
     @Override
     public Values getRow(int i) {
-        return new ValueMap(getColumns().map(Column::getName).collect(Collectors.toMap(it -> it, it -> get(it, i))));
+        return new ValueMap(getColumns().stream().map(Column::getName).collect(Collectors.toMap(it -> it, it -> get(it, i))));
     }
 
     @Override
@@ -84,8 +83,8 @@ public class ColumnTable implements Table {
     }
 
     @Override
-    public Stream<Column> getColumns() {
-        return columns.values().stream();
+    public Collection<Column> getColumns() {
+        return columns.values();
     }
 
     @Override
@@ -95,7 +94,7 @@ public class ColumnTable implements Table {
 
     @Override
     public TableFormat getFormat() {
-        return () -> getColumns().map(Column::getFormat);
+        return () -> getColumns().stream().map(Column::getFormat);
     }
 
     @NotNull
@@ -133,7 +132,7 @@ public class ColumnTable implements Table {
      */
     public ColumnTable addColumn(String name, ValueType type, Stream<?> data, String... tags) {
         ColumnFormat format = ColumnFormat.build(name, type, tags);
-        Column column = new ListColumn(format, data.map(Value::of));
+        Column column = new ListColumn(format, data.map(ValueFactory::of));
         return addColumn(column);
     }
 
@@ -188,5 +187,10 @@ public class ColumnTable implements Table {
             map.remove(c);
         }
         return new ColumnTable(map.values());
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj != null && getClass() == obj.getClass() && ((MetaMorph) obj).toMeta().equals(this.toMeta());
     }
 }

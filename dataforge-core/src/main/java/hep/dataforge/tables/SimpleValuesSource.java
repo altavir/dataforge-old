@@ -31,7 +31,7 @@ public class SimpleValuesSource implements ValuesSource {
     }
 
     public SimpleValuesSource(String... names) {
-        this.format = MetaTableFormat.forNames(names);
+        this.format = MetaTableFormat.Companion.forNames(names);
         this.points = new ArrayList<>();
     }
 

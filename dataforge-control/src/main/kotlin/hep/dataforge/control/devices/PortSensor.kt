@@ -24,7 +24,6 @@ package hep.dataforge.control.devices
 import hep.dataforge.context.Context
 import hep.dataforge.control.devices.PortSensor.Companion.CONNECTED_STATE
 import hep.dataforge.control.devices.PortSensor.Companion.DEBUG_STATE
-import hep.dataforge.control.devices.PortSensor.Companion.PORT_STATE
 import hep.dataforge.control.ports.GenericPortController
 import hep.dataforge.control.ports.PortFactory
 import hep.dataforge.description.NodeDef
@@ -32,10 +31,9 @@ import hep.dataforge.description.ValueDef
 import hep.dataforge.description.ValueDefs
 import hep.dataforge.events.EventBuilder
 import hep.dataforge.exceptions.ControlException
-import hep.dataforge.kodex.useMeta
 import hep.dataforge.kodex.useValue
 import hep.dataforge.meta.Meta
-import hep.dataforge.values.Value
+import hep.dataforge.states.*
 import hep.dataforge.values.ValueType.BOOLEAN
 import hep.dataforge.values.ValueType.NUMBER
 import java.time.Duration
@@ -47,134 +45,118 @@ import java.time.Duration
  * @author darksnake
  */
 @StateDefs(
-        StateDef(value = ValueDef(name = CONNECTED_STATE, type = [BOOLEAN], def = "false", info = "The connection state for this device"), writable = true),
-        StateDef(value = ValueDef(name = PORT_STATE, info = "The name of the port to which this device is connected")),
-        StateDef(value = ValueDef(name = DEBUG_STATE, type = [BOOLEAN], def = "false", info = "If true, then all received phrases would be shown in the log"), writable = true)
+        StateDef(value = ValueDef(key = CONNECTED_STATE, type = [BOOLEAN], def = "false", info = "The connection state for this device"), writable = true),
+        //StateDef(value = ValueDef(name = PORT_STATE, info = "The name of the port to which this device is connected")),
+        StateDef(value = ValueDef(key = DEBUG_STATE, type = [BOOLEAN], def = "false", info = "If true, then all received phrases would be shown in the log"), writable = true)
 )
-@MetaStateDef(value = NodeDef(name = "port", from = "method::hep.dataforge.control.ports.PortFactory.build", info = "Information about port"), writable = true)
+@MetaStateDef(value = NodeDef(key = "port", from = "method::hep.dataforge.control.ports.PortFactory.build", info = "Information about port"), writable = true)
 @ValueDefs(
-        ValueDef(name = "timeout", type = arrayOf(NUMBER), def = "400", info = "A timeout for port response in milliseconds")
+        ValueDef(key = "timeout", type = arrayOf(NUMBER), def = "400", info = "A timeout for port response in milliseconds")
 )
-abstract class PortSensor<T>(context: Context, meta: Meta) : Sensor(context, meta) {
+abstract class PortSensor(context: Context, meta: Meta) : Sensor(context, meta) {
 
-    protected var connection: GenericPortController? = null
+    private var _connection: GenericPortController? = null
+    protected val connection: GenericPortController
+        get() = _connection ?: throw RuntimeException("Not connected")
 
-    var connected by booleanState(CONNECTED_STATE)
-    var debug by booleanState(DEBUG_STATE)
+    val connected = valueState(CONNECTED_STATE, getter = { connection.port.isOpen }) { old, value ->
+        if (old != value) {
+            logger.info("State 'connect' changed to $value")
+            connect(value.boolean)
+        }
+        update(value)
+    }
+
+    var debug by valueState(DEBUG_STATE) { old, value ->
+        if (old != value) {
+            logger.info("Turning debug mode to $value")
+            setDebugMode(value.boolean)
+        }
+        update(value)
+    }.booleanDelegate
+
+    var port by metaState(PORT_STATE, getter = { connection.port.meta }) { old, value ->
+        if (old != value) {
+            setupConnection(value)
+        }
+        update(value)
+    }.delegate
 
     private val defaultTimeout: Duration = Duration.ofMillis(meta.getInt("timeout", 400).toLong())
 
     init {
-        meta.useMeta(PORT_STATE) {
-            setMetaState(PORT_STATE, it)
-        }
+//        meta.useMeta(PORT_STATE) {
+//            port = it
+//        }
         meta.useValue(DEBUG_STATE) {
-            setState(DEBUG_STATE, it)
-        }
-    }
-
-    @Throws(ControlException::class)
-    override fun computeState(stateName: String): Any {
-        return if (CONNECTED_STATE == stateName) {
-            connection?.port?.isOpen ?: false
-        } else {
-            super.computeState(stateName)
+            updateState(DEBUG_STATE, it.boolean)
         }
     }
 
     private fun setDebugMode(debugMode: Boolean) {
         //Add debug listener
         if (debugMode) {
-            connection?.apply {
-                onAnyPhrase("$name[debug]") { phrase -> logger.debug("Device {} received phrase: {}", name, phrase) }
-                onError("$name[debug]") { message, error -> logger.error("Device {} exception: {}", name, message, error) }
+            connection.apply {
+                onAnyPhrase("$name[debug]") { phrase -> logger.debug("Device {} received phrase: \n{}", name, phrase) }
+                onError("$name[debug]") { message, error -> logger.error("Device {} exception: \n{}", name, message, error) }
             }
         } else {
-            connection?.apply {
+            connection.apply {
                 removePhraseListener("$name[debug]")
                 removeErrorListener("$name[debug]")
             }
         }
-        updateLogicalState(DEBUG_STATE, debugMode)
+        updateState(DEBUG_STATE, debugMode)
     }
 
-    @Throws(ControlException::class)
-    override fun requestStateChange(stateName: String, value: Value) {
-        when (stateName) {
-            CONNECTED_STATE -> if (value.booleanValue()) {
-                connection?.open() ?: throw ControlException("Not connected to port")
-                updateLogicalState(CONNECTED_STATE, true)
-            } else {
-                connection?.close()
-                connection = null
-                updateLogicalState(CONNECTED_STATE, false)
-            }
-            DEBUG_STATE -> setDebugMode(value.booleanValue())
-            else -> super.requestStateChange(stateName, value)
-        }
-    }
-
-    override fun requestMetaStateChange(stateName: String, meta: Meta) {
-        if (stateName == PORT_STATE) {
-            val port = PortFactory.build(meta)
-            connection?.close()
-            this.connection = GenericPortController(context, port).apply {
-                if (connected) {
-                    open()
+    private fun connect(connected: Boolean) {
+        if (connected) {
+            try {
+                if (_connection == null) {
+                    logger.debug("Setting up connection using device meta")
+                    setupConnection(meta.getMetaOrEmpty(PORT_STATE))
                 }
-                setDebugMode(debug)
+                connection.open()
+                this.connected.update(true)
+            } catch (ex: Exception) {
+                notifyError("Failed to open connection", ex)
+                this.connected.update(false)
             }
-            updateLogicalMetaState(PORT_STATE, port.meta)
-            updateLogicalState(PORT_STATE, port.name)
         } else {
-            super.requestMetaStateChange(stateName, meta)
+            _connection?.close()
+            _connection = null
+            this.connected.update(false)
         }
     }
-//
-//    private fun disconnect() {
-//        connection?.close()
-//        connection = null
-//        updateLogicalState(CONNECTED_STATE, false)
-//    }
-//
-//    private fun connect(portMeta: Meta) {
-//        this.connection = GenericPortController(context, buildPort(port)).apply {
-//            //Add debug listener
-//            if (meta.getBoolean("debugMode", false)) {
-//                onAnyPhrase { phrase -> logger.debug("Device {} received phrase: {}", name, phrase) }
-//                onError { message, error -> logger.error("Device {} exception: {}", name, message, error) }
-//            }
-//            open()
-//        }
-//        updateLogicalState(CONNECTED_STATE, true)
-//    }
 
+    protected open fun buildConnection(meta: Meta): GenericPortController {
+        val port = PortFactory.build(meta)
+        return GenericPortController(context, port)
+    }
 
-    override fun init() {
-
-        super.init()
+    private fun setupConnection(portMeta: Meta) {
+        _connection?.close()
+        this._connection = buildConnection(portMeta)
+        setDebugMode(debug)
+        updateState(PORT_STATE, portMeta)
     }
 
     @Throws(ControlException::class)
     override fun shutdown() {
-        setState(CONNECTED_STATE, false)
-//        connection?.port?.close()
         super.shutdown()
+        connected.set(false)
     }
 
     protected fun sendAndWait(request: String, timeout: Duration = defaultTimeout): String {
-        return connection?.sendAndWait(request, timeout) { true } ?: throw ControlException("Not connected to port")
+        return connection.sendAndWait(request, timeout) { true }
     }
 
     protected fun sendAndWait(request: String, timeout: Duration = defaultTimeout, predicate: (String) -> Boolean): String {
-        return connection?.sendAndWait(request, timeout, predicate) ?: throw ControlException("Not connected to port")
+        return connection.sendAndWait(request, timeout, predicate)
     }
 
     protected fun send(message: String) {
-        if (connection == null) {
-            throw ControlException("Not connected to port")
-        }
-        connection?.send(message)
+        connection.send(message)
         dispatchEvent(
                 EventBuilder
                         .make(name)
@@ -184,24 +166,8 @@ abstract class PortSensor<T>(context: Context, meta: Meta) : Sensor(context, met
     }
 
     companion object {
-
         const val CONNECTED_STATE = "connected"
         const val PORT_STATE = "port"
         const val DEBUG_STATE = "debug"
     }
-
-    /*
-     * @return the port
-     * @throws hep.dataforge.exceptions.ControlException
-     */
-    //    protected Port getPort() throws ControlException {
-    //        if (port == null) {
-    //            String port = meta().getString(PORT_STATE);
-    //            setPort(buildPort(port));
-    //            this.port.open();
-    //            updateLogicalState(CONNECTED_STATE, true);
-    //        }
-    //        return port;
-    //    }
-
 }

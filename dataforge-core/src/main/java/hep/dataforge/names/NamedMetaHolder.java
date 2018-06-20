@@ -5,6 +5,7 @@
  */
 package hep.dataforge.names;
 
+import hep.dataforge.Named;
 import hep.dataforge.exceptions.AnonymousNotAlowedException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaHolder;

@@ -19,7 +19,7 @@ import hep.dataforge.context.Global;
 import hep.dataforge.storage.api.StateLoader;
 import hep.dataforge.storage.commons.LoaderFactory;
 import hep.dataforge.storage.commons.StorageManager;
-import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueFactory;
 import org.junit.*;
 
 import java.io.File;
@@ -46,7 +46,7 @@ public class FileStateLoaderTest {
 
     @Before
     public void setUp() throws IOException {
-        new StorageManager().startGlobal();
+        Global.INSTANCE.load(StorageManager.class);
         dir = Files.createTempDirectory("df_storage").toFile();
     }
 
@@ -60,19 +60,19 @@ public class FileStateLoaderTest {
 
     @Test
     public void testIO() throws Exception {
-        FileStorage storage = FileStorageFactory.buildLocal(Global.Companion.instance(),dir,false,true);
-        StateLoader loader = LoaderFactory.buildStateLoder(storage, "test_states", null);
+        FileStorage storage = FileStorageFactory.Companion.buildLocal(Global.INSTANCE, dir, false, true);
+        StateLoader loader = LoaderFactory.buildStateLoder(storage, "test_states", "");
 
         System.out.println("***starting write test***");
-        loader.pushState("my.favorite.key", Value.of("my.favorite.value"));
-        loader.pushState("pi", Value.of(Math.PI));
-        loader.pushState("giberish", Value.of("Воркальось, хрипкие шарьки пырялись по мове и хрюкатали зелюки, как мюмзики в мове"));
+        loader.push("my.favorite.key", ValueFactory.of("my.favorite.value"));
+        loader.push("pi", ValueFactory.of(Math.PI));
+        loader.push("giberish", ValueFactory.of("Воркальось, хрипкие шарьки пырялись по мове и хрюкатали зелюки, как мюмзики в мове"));
         loader.close();
         System.out.println("passed!");
         System.out.println("***starting read test***");
         loader = (StateLoader) storage.optLoader("test_states").get();
         System.out.println(loader.getValue("giberish"));
-        assertEquals(Math.PI, loader.getValue("pi").doubleValue(), 0.01);
+        assertEquals(Math.PI, loader.getValue("pi").getDouble(), 0.01);
 
     }
 

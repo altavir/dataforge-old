@@ -1,18 +1,31 @@
+/*
+ * Copyright  2018 Alexander Nozik.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package hep.dataforge.grind.workspace
 
 import hep.dataforge.actions.Action
 import hep.dataforge.data.Data
 import hep.dataforge.data.DataNode
+import hep.dataforge.data.DataNodeEditor
 import hep.dataforge.data.DataSet
-import hep.dataforge.grind.actions.GrindJoin
-import hep.dataforge.grind.actions.GrindPipe
+import hep.dataforge.kodex.ActionEnv
 import hep.dataforge.meta.Meta
 import hep.dataforge.workspace.tasks.AbstractTask
-import hep.dataforge.workspace.tasks.SingleActionTask
 import hep.dataforge.workspace.tasks.Task
 import hep.dataforge.workspace.tasks.TaskModel
-
-import java.util.function.BiConsumer
 
 /**
  * A collection of static methods to create tasks for WorkspaceSpec
@@ -45,60 +58,50 @@ class DefaultTaskLib {
      * @return
      */
     static Task build(String taskName,
-                      @DelegatesTo(value = TaskSpec, strategy = Closure.DELEGATE_ONLY) Closure closure) {
-        def taskSpec = new TaskSpec().name(taskName);
+                      @DelegatesTo(value = GrindTaskBuilder, strategy = Closure.DELEGATE_ONLY) Closure closure) {
+        def taskSpec = new GrindTaskBuilder(taskName);
         def code = closure.rehydrate(taskSpec, null, null)
         code.resolveStrategy = Closure.DELEGATE_ONLY
         code.call()
         return taskSpec.build();
     }
 
-    //TODO build dependency from closure
     /**
-     * Build dependencies from parameter map
+     * A task with single join action delegated to {@link hep.dataforge.kodex.KTaskBuilder#pipe}
      * @param params
+     * @param name
+     * @param action
      * @return
      */
-    private static BiConsumer<TaskModel.Builder, Meta> dependencyBuilder(Map params) {
-        //TODO add tests
-        return { model, meta ->
-            Optional.ofNullable(params.get("data")).ifPresent {
-                if (it instanceof List) {
-                    it.each { model.data(it as String) }
-                } else {
-                    model.data(it as String)
-                }
-            }
-            Optional.ofNullable(params.get("dependsOn")).ifPresent {
-                model.dependsOn(it as String, meta)
-            }
+    static Task pipe(String name, Map params = [:],
+                     @DelegatesTo(value = ActionEnv, strategy = Closure.DELEGATE_ONLY) Closure action) {
+        def builder = new GrindTaskBuilder(name)
+        builder.model(params)
+        builder.pipe { env ->
+            def innerAction = action.rehydrate(env, null, null)
+            innerAction.resolveStrategy = Closure.DELEGATE_ONLY;
+            return { input -> innerAction.call(input) }
         }
+        return builder.build()
     }
 
     /**
-     *  A task with single pipe action defined by {@link hep.dataforge.grind.actions.GrindPipe}
+     * A task with single join action delegated to {@link hep.dataforge.kodex.KTaskBuilder#join}
      * @param params
      * @param name
      * @param action
      * @return
      */
-    static Task pipe(Map params = [:],
-                     String name,
-                     @DelegatesTo(value = GrindPipe.PipeBuilder, strategy = Closure.DELEGATE_FIRST) Closure action) {
-        return SingleActionTask.from(GrindPipe.build(params, name, action), dependencyBuilder(params));
-    }
-
-    /**
-     * A task with single join action defined by {@link hep.dataforge.grind.actions.GrindJoin}
-     * @param params
-     * @param name
-     * @param action
-     * @return
-     */
-    static Task join(Map params = [:],
-                     String name,
-                     @DelegatesTo(value = GrindJoin.JoinGroupBuilder, strategy = Closure.DELEGATE_FIRST) Closure action) {
-        return SingleActionTask.from(GrindJoin.build(params, name, action), dependencyBuilder(params));
+    static Task join(String name, Map params = [:],
+                     @DelegatesTo(value = ActionEnv, strategy = Closure.DELEGATE_FIRST) Closure action) {
+        def builder = new GrindTaskBuilder(name)
+        builder.model(params)
+        builder.join { env ->
+            def innerAction = action.rehydrate(env, null, null)
+            innerAction.resolveStrategy = Closure.DELEGATE_ONLY;
+            return { input -> innerAction.call(input) }
+        }
+        return builder.build()
     }
 
     /**
@@ -106,8 +109,11 @@ class DefaultTaskLib {
      * @param action
      * @return
      */
-    static Task action(Map parameters = [:], Action action) {
-        return SingleActionTask.from(action, dependencyBuilder(parameters));
+    static Task action(Action action, Map params = [:]) {
+        def builder = new GrindTaskBuilder(action.name)
+        builder.model(params)
+        builder.action(action)
+        return builder.build()
     }
 
     /**
@@ -116,14 +122,15 @@ class DefaultTaskLib {
      * @param dependencyBuilder
      * @return
      */
-    static Task action(Map parameters = [:], Class<Action> action) {
-        return SingleActionTask.from(action.newInstance(), dependencyBuilder(parameters));
+    static Task action(Class<Action> actionClass, Map params = [:]) {
+        Action ac = actionClass.newInstance()
+        return action(ac,params)
     }
 
     static class CustomTaskSpec {
         final TaskModel model
         final DataNode input
-        final DataNode.Builder result = DataSet.builder();
+        final DataNodeEditor result = DataSet.Companion.edit();
 
         CustomTaskSpec(TaskModel model, DataNode input) {
             this.model = model
@@ -170,7 +177,7 @@ class DefaultTaskLib {
      * @param name the name of the task
      * @return
      */
-    static Task exec(Map paremeters = [:], String name,
+    static Task exec(String name, Map params = [:],
                      @DelegatesTo(value = ExecSpec, strategy = Closure.DELEGATE_ONLY) Closure cl) {
         ExecSpec spec = new ExecSpec();
         spec.actionName = name;
@@ -179,6 +186,6 @@ class DefaultTaskLib {
         script.call()
 
         Action execAction = spec.build();
-        return SingleActionTask.from(execAction, dependencyBuilder(paremeters))
+        return action(execAction, params)
     }
 }

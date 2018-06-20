@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,7 +22,7 @@ import hep.dataforge.plots.jfreechart.JFreeChartFrame;
 import hep.dataforge.tables.Adapters;
 import hep.dataforge.tables.ListTable;
 import hep.dataforge.tables.Table;
-import hep.dataforge.tables.ValueMap;
+import hep.dataforge.values.ValueMap;
 import hep.dataforge.values.Values;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -31,7 +31,6 @@ import javafx.stage.Stage;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 
 /**
  * @author Alexander Nozik
@@ -52,21 +51,19 @@ public class JFreeFXTest extends Application {
         JFreeChartFrame frame = new JFreeChartFrame();
         root.setCenter(frame.getFXNode());
 
-        Function<Double, Double> func = (x1) -> x1 * x1;
-
-        XYFunctionPlot funcPlot = XYFunctionPlot.Companion.plot("func", func, 0.1, 4, 200);
+        XYFunctionPlot funcPlot = XYFunctionPlot.Companion.plot("func", 0.1, 4, 200, (x1) -> x1 * x1);
 
         frame.add(funcPlot);
 
         String[] names = {"myX", "myY", "myXErr", "myYErr"};
 
         List<Values> data = new ArrayList<>();
-        data.add(ValueMap.of(names, 0.5d, 0.2, 0.1, 0.1));
-        data.add(ValueMap.of(names, 1d, 1d, 0.2, 0.5));
-        data.add(ValueMap.of(names, 3d, 7d, 0, 0.5));
-        Table ds = new ListTable(data);
+        data.add(ValueMap.Companion.of(names, 0.5d, 0.2, 0.1, 0.1));
+        data.add(ValueMap.Companion.of(names, 1d, 1d, 0.2, 0.5));
+        data.add(ValueMap.Companion.of(names, 3d, 7d, 0, 0.5));
+        Table ds = ListTable.infer(data);
 
-        DataPlot dataPlot = DataPlot.plot("dataPlot", Adapters.buildXYAdapter("myX", "myY", "myXErr", "myYErr"), ds);
+        DataPlot dataPlot = DataPlot.Companion.plot("dataPlot", Adapters.buildXYAdapter("myX", "myY", "myXErr", "myYErr"), ds);
 
         frame.getConfig().putNode(new MetaBuilder("yAxis").putValue("logScale", true));
 

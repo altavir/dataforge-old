@@ -6,10 +6,7 @@
 package hep.dataforge.meta;
 
 import hep.dataforge.providers.Provider;
-import hep.dataforge.values.MapValueProvider;
-import hep.dataforge.values.Value;
-import hep.dataforge.values.ValueProvider;
-import hep.dataforge.values.ValueType;
+import hep.dataforge.values.*;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
@@ -71,9 +68,9 @@ public class Template implements Metoid, UnaryOperator<Meta> {
     public MetaBuilder compile(ValueProvider valueProvider, MetaProvider metaProvider) {
         MetaBuilder res = new MetaBuilder(getMeta());
         MetaUtils.nodeStream(res).forEach(pair -> {
-            MetaBuilder node = (MetaBuilder) pair.getValue();
+            MetaBuilder node = (MetaBuilder) pair.getSecond();
             if (node.hasValue("@include")) {
-                String includePath = pair.getValue().getString("@include");
+                String includePath = pair.getSecond().getString("@include");
                 if (metaProvider != null && metaProvider.hasMeta(includePath)) {
                     MetaBuilder parent = node.getParent();
                     parent.replaceChildNode(node, metaProvider.getMeta(includePath));
@@ -88,16 +85,16 @@ public class Template implements Metoid, UnaryOperator<Meta> {
         });
 
         MetaUtils.valueStream(res).forEach(pair -> {
-            Value val = pair.getValue();
-            if (val.getType().equals(ValueType.STRING) && val.stringValue().contains("$")) {
-                res.setValue(pair.getKey(), transformValue(val, valueProvider, def));
+            Value val = pair.getSecond();
+            if (val.getType().equals(ValueType.STRING) && val.getString().contains("$")) {
+                res.setValue(pair.getFirst(), transformValue(val, valueProvider, def));
             }
         });
         return res;
     }
 
     public MetaBuilder compile(Provider provider) {
-        return compile(ValueProvider.buildFrom(provider), MetaProvider.buildFrom(provider));
+        return compile(ValueUtils.asValueProvider(provider), MetaProvider.buildFrom(provider));
     }
 
     @Override

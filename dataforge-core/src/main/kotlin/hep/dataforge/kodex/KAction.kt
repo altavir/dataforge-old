@@ -9,6 +9,8 @@ import hep.dataforge.data.DataSet
 import hep.dataforge.data.NamedData
 import hep.dataforge.exceptions.AnonymousNotAlowedException
 import hep.dataforge.goals.Goal
+import hep.dataforge.goals.join
+import hep.dataforge.goals.pipe
 import hep.dataforge.io.history.Chronicle
 import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta
@@ -28,10 +30,10 @@ class ActionEnv(val context: Context, val name: String, val meta: Meta, val log:
 /**
  * Action environment
  */
-class PipeBuilder<T, R>(val context: Context, var name: String, var meta: MetaBuilder) {
+class PipeBuilder<T, R>(val context: Context, val actionName: String, var name: String, var meta: MetaBuilder) {
     lateinit var result: suspend ActionEnv.(T) -> R;
 
-    var logger: Logger = LoggerFactory.getLogger("${context.name}[name]")
+    var logger: Logger = LoggerFactory.getLogger("${context.name}[$actionName:$name]")
 
     /**
      * Calculate the result of goal
@@ -47,22 +49,23 @@ class PipeBuilder<T, R>(val context: Context, var name: String, var meta: MetaBu
  * KPipe is executed inside {@link PipeBuilder} object, which holds name of given data, execution context, meta and log.
  * Notice that name and meta could be changed. Output object receives modified name and meta.
  */
-class KPipe<T, R>(
-        name: String? = null,
+class KPipe<T: Any, R: Any>(
+        actionName: String,
         private val inType: Class<T>? = null,
         private val outType: Class<R>? = null,
-        private val action: PipeBuilder<T, R>.() -> Unit) : GenericAction<T, R>(name) {
+        private val action: PipeBuilder<T, R>.() -> Unit) : GenericAction<T, R>(actionName) {
 
     override fun run(context: Context, data: DataNode<out T>, meta: Meta): DataNode<R> {
-        if (!this.inputType.isAssignableFrom(data.type())) {
-            throw RuntimeException("Type mismatch in action $name. $inputType expected, but ${data.type()} received")
+        if (!this.inputType.isAssignableFrom(data.type)) {
+            throw RuntimeException("Type mismatch in action $name. $inputType expected, but ${data.type} received")
         }
-        val builder = DataSet.builder(outputType)
+        val builder = DataSet.edit(outputType)
         data.dataStream(true).forEach {
             val laminate = Laminate(it.meta, meta)
 
             val pipe = PipeBuilder<T, R>(
                     context,
+                    name,
                     it.name,
                     laminate.builder
             ).apply(action)
@@ -82,8 +85,8 @@ class KPipe<T, R>(
                     pipe.logger.debug("Finished action ${this.name} on ${pipe.name}")
                 }
             }
-            val res = NamedData(env.name, goal, outputType, env.meta)
-            builder.putData(res)
+            val res = NamedData(env.name, outputType, goal, env.meta)
+            builder.add(res)
         }
 
         return builder.build();
@@ -99,7 +102,7 @@ class KPipe<T, R>(
 }
 
 
-class JoinGroup<T, R>(val context: Context, name: String? = null, internal val node: DataNode<out T>) {
+class JoinGroup<T: Any, R: Any>(val context: Context,  name: String? = null, internal val node: DataNode<out T>) {
     var name: String = name ?: node.name;
     var meta: MetaBuilder = node.meta.builder
 
@@ -112,7 +115,7 @@ class JoinGroup<T, R>(val context: Context, name: String? = null, internal val n
 }
 
 
-class JoinGroupBuilder<T, R>(val context: Context, val meta: Meta) {
+class JoinGroupBuilder<T: Any, R: Any>(val context: Context, val meta: Meta) {
 
 
     private val groupRules: MutableList<(Context, DataNode<out T>) -> List<JoinGroup<T, R>>> = ArrayList();
@@ -165,18 +168,18 @@ class JoinGroupBuilder<T, R>(val context: Context, val meta: Meta) {
 /**
  * The same rules as for KPipe
  */
-class KJoin<T, R>(
-        name: String? = null,
+class KJoin<T: Any, R: Any>(
+        actionName: String,
         private val inType: Class<T>? = null,
         private val outType: Class<R>? = null,
-        private val action: JoinGroupBuilder<T, R>.() -> Unit) : GenericAction<T, R>(name) {
+        private val action: JoinGroupBuilder<T, R>.() -> Unit) : GenericAction<T, R>(actionName) {
 
     override fun run(context: Context, data: DataNode<out T>, meta: Meta): DataNode<R> {
-        if (!this.inputType.isAssignableFrom(data.type())) {
-            throw RuntimeException("Type mismatch in action $name. $inputType expected, but ${data.type()} received")
+        if (!this.inputType.isAssignableFrom(data.type)) {
+            throw RuntimeException("Type mismatch in action $name. $inputType expected, but ${data.type} received")
         }
 
-        val builder = DataSet.builder(outputType)
+        val builder = DataSet.edit(outputType)
 
         JoinGroupBuilder<T, R>(context, meta).apply(action).buildGroups(context, data).forEach { group ->
 
@@ -203,8 +206,8 @@ class KJoin<T, R>(
             val dispatcher = getExecutorService(context, group.meta).asCoroutineDispatcher()
 
             val goal = goalMap.join(dispatcher) { group.result.invoke(env, it) }
-            val res = NamedData(env.name, goal, outputType, env.meta)
-            builder.putData(res)
+            val res = NamedData(env.name, outputType, goal, env.meta)
+            builder.add(res)
         }
 
         return builder.build();
@@ -220,7 +223,7 @@ class KJoin<T, R>(
 }
 
 
-class FragmentEnv<T, R>(val context: Context, val name: String, var meta: MetaBuilder, val log: Chronicle) {
+class FragmentEnv<T: Any, R: Any>(val context: Context, val name: String, var meta: MetaBuilder, val log: Chronicle) {
     lateinit var result: suspend (T) -> R
 
     fun result(f: suspend (T) -> R) {
@@ -229,7 +232,7 @@ class FragmentEnv<T, R>(val context: Context, val name: String, var meta: MetaBu
 }
 
 
-class SplitBuilder<T, R>(val context: Context, val name: String, val meta: Meta) {
+class SplitBuilder<T: Any, R: Any>(val context: Context, val name: String, val meta: Meta) {
     internal val fragments: MutableMap<String, FragmentEnv<T, R>.() -> Unit> = HashMap()
 
     /**
@@ -242,18 +245,18 @@ class SplitBuilder<T, R>(val context: Context, val name: String, val meta: Meta)
     }
 }
 
-class KSplit<T, R>(
+class KSplit<T: Any, R: Any>(
         name: String? = null,
         private val inType: Class<T>? = null,
         private val outType: Class<R>? = null,
         private val action: SplitBuilder<T, R>.() -> Unit) : GenericAction<T, R>(name) {
 
     override fun run(context: Context, data: DataNode<out T>, meta: Meta): DataNode<R> {
-        if (!this.inputType.isAssignableFrom(data.type())) {
-            throw RuntimeException("Type mismatch in action $name. $inputType expected, but ${data.type()} received")
+        if (!this.inputType.isAssignableFrom(data.type)) {
+            throw RuntimeException("Type mismatch in action $name. $inputType expected, but ${data.type} received")
         }
 
-        val builder = DataSet.builder(outputType)
+        val builder = DataSet.edit(outputType)
 
 
         runBlocking {
@@ -282,8 +285,8 @@ class KSplit<T, R>(
 
                     val goal = it.goal.pipe(dispatcher, env.result)
 
-                    val res = NamedData(env.name, goal, outputType, env.meta)
-                    builder.putData(res)
+                    val res = NamedData(env.name, outputType, goal, env.meta)
+                    builder.add(res)
                 }
             }
         }
@@ -300,6 +303,6 @@ class KSplit<T, R>(
     }
 }
 
-inline fun <reified T, reified R> DataNode<T>.pipe(context: Context, meta: Meta, name: String = "pipe", noinline action: PipeBuilder<T, R>.() -> Unit): DataNode<R> {
+inline fun <reified T: Any, reified R: Any> DataNode<T>.pipe(context: Context, meta: Meta, name: String = "pipe", noinline action: PipeBuilder<T, R>.() -> Unit): DataNode<R> {
     return KPipe(name, T::class.java, R::class.java, action).run(context, this, meta);
 }

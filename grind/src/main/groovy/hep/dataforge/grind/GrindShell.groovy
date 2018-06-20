@@ -10,17 +10,16 @@ import hep.dataforge.grind.helpers.GrindHelperFactory
 import hep.dataforge.meta.Meta
 import org.codehaus.groovy.control.CompilerConfiguration
 import org.codehaus.groovy.control.customizers.ImportCustomizer
+import org.slf4j.LoggerFactory
 
 /**
  * Created by darksnake on 15-Dec-16.
  */
 
 @CompileStatic
-
-
 @NodeDefs([
-        @NodeDef(name = "import", info = "Import customization"),
-        @NodeDef(name = "import.one", multiple = true, info = "A single import. Can contain alas. If field is present, then using static import")
+        @NodeDef(key = "import", info = "Import customization"),
+        @NodeDef(key = "import.one", multiple = true, info = "A single import. Can contain alas. If field is present, then using static import")
 ])
 class GrindShell implements ContextAware {
 
@@ -66,6 +65,10 @@ class GrindShell implements ContextAware {
             binding.setInternal(it.name, helper);
         }
         shell = new GroovyShell(context.classLoader, binding, configuration);
+    }
+
+    org.slf4j.Logger getLogger(){
+        return LoggerFactory.getLogger(context.name + ".grind")
     }
 
     def bind(String key, Object value) {

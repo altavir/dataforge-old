@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,6 +22,7 @@ import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.meta.MetaMorph;
 import hep.dataforge.names.Names;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueFactory;
 import hep.dataforge.values.Values;
 import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.linear.ArrayRealVector;
@@ -82,7 +83,7 @@ public class NamedVector implements Values, MetaMorph {
         this.nameList = Names.of(set.getNames());
     }
 
-    public NamedVector(Meta meta){
+    public NamedVector(Meta meta) {
         nameList = Names.of(meta.getValueNames());
         double[] values = new double[nameList.size()];
         for (int i = 0; i < nameList.size(); i++) {
@@ -97,7 +98,7 @@ public class NamedVector implements Values, MetaMorph {
         if (n < 0) {
             return Optional.empty();
         } else {
-            return Optional.of(Value.of(vector.getEntry(n)));
+            return Optional.of(ValueFactory.of(vector.getEntry(n)));
         }
     }
 
@@ -111,9 +112,8 @@ public class NamedVector implements Values, MetaMorph {
      *
      * @param name
      */
-    @NotNull
     @Override
-    public Double getDouble(String name) {
+    public double getDouble(String name) {
         int n = this.getNumberByName(name);
         if (n < 0) {
             throw new NameNotFoundException(name);
@@ -172,6 +172,7 @@ public class NamedVector implements Values, MetaMorph {
         vector.setEntry(n, val);
     }
 
+    @NotNull
     @Override
     public Meta toMeta() {
         MetaBuilder builder = new MetaBuilder("vector");

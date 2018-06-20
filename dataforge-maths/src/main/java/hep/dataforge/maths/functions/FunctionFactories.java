@@ -7,8 +7,9 @@ package hep.dataforge.maths.functions;
 
 import hep.dataforge.utils.MetaFactory;
 import hep.dataforge.values.Value;
-import java.util.List;
 import org.apache.commons.math3.analysis.UnivariateFunction;
+
+import java.util.List;
 
 /**
  *
@@ -27,12 +28,12 @@ public class FunctionFactories {
 
     public static MetaFactory<UnivariateFunction> polynomial() {
         return meta -> {
-            List<Value> coefs = meta.getValue("coef").listValue();
+            List<Value> coefs = meta.getValue("coef").getList();
             return x -> {
                 double sum = 0;
                 double curX = 1;
                 for (int i = 0; i < coefs.size(); i++) {
-                    sum += coefs.get(i).doubleValue()*curX;
+                    sum += coefs.get(i).getDouble()*curX;
                     curX = curX*x;
                 }
                 return sum;

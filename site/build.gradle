@@ -57,11 +57,11 @@ remotes {
         role 'webServers'
         host = 'npm.mipt.ru'
         user = findProperty('npm.user')
-        password = findProperty('npm.pass')
+        password =findProperty('npm.pass')
     }
 }
 
-task deploy(dependsOn: ":site:generate") {
+task deploy(dependsOn: [":site:generate",":site:buildDocs"]) {
     group 'grain'
     doLast {
         println "Starting deploy"
@@ -106,37 +106,54 @@ task gather() {
     }
 }
 
-task buildDocs(type: Javadoc) {
+//TODO consider using https://github.com/Kotlin/dokka/issues/157#issuecomment-301873717
+
+task buildDocs(type: org.jetbrains.dokka.gradle.DokkaTask) {
+    group 'docs'
+    mustRunAfter ":site:generate"
     def version = rootProject.version
 
-    title "DataForge framework ${version}"
-    source documentedProjects.collect { it.sourceSets.main.allJava }
-    classpath = files(documentedProjects.collect { it.sourceSets.main.compileClasspath })
-    destinationDir = file("target/docs/${version}/javadoc")
+    outputFormat = 'javadoc'
+    moduleName = "DataForge"
+    jdkVersion = 8
 
-    options {
-        failOnError = false
-        encoding "UTF-8"
-        docEncoding "UTF-8"
-        charSet "UTF-8"
-        linkSource true
-        links("http://docs.oracle.com/javase/8/docs/api/");
-//        header = "<script type=\"text/javascript\" src=\"http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML\"></script>";
+    documentedProjects.each { p ->
+        def kotlinPath = p.file("/src/main/kotlin")
+        if(kotlinPath.exists()) {
+            sourceRoot {
+                path = kotlinPath.toString()
+            }
+        }
+        def javaPath = p.file("/src/main/java")
+        if(javaPath.exists()) {
+            sourceRoot {
+                path = javaPath.toString()
+            }
+        }
     }
-}
 
-//junk
+    reportUndocumented = false
 
-//task gendeps {
-//    doLast {
-//        def classpath = project.classpath.files
-//        def depFile = new File(".site-${project.grainVersion}.dep")
-//        depFile.withWriter { writer ->
-//            classpath.findAll { it.name.endsWith('.jar') }.sort {
-//                !it.name.endsWith("grain-${project.grainVersion}.jar")
-//            }.each {
-//                writer.append(it.toString()).append('\n')
-//            }
-//        }
+    //classpath = files(documentedProjects.collect { it.sourceSets.main.compileClasspath })
+    outputDirectory = file("target/docs/${version}/javadoc")
+
+    externalDocumentationLink {
+        url = new URL("http://docs.oracle.com/javase/8/docs/api/")
+    }
+
+//
+//    title "DataForge framework ${version}"
+//    source documentedProjects.collect { it.sourceSets.main.allJava }
+//    classpath = files(documentedProjects.collect { it.sourceSets.main.compileClasspath })
+//    destinationDir = file("target/docs/${version}/javadoc")
+//
+//    options {
+//        failOnError = false
+//        encoding "UTF-8"
+//        docEncoding "UTF-8"
+//        charSet "UTF-8"
+//        linkSource true
+//        links("http://docs.oracle.com/javase/8/docs/api/");
+////        header = "<script type=\"text/javascript\" src=\"http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML\"></script>";
 //    }
-//}
+}

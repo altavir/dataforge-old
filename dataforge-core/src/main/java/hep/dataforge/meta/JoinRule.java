@@ -17,6 +17,7 @@ package hep.dataforge.meta;
 
 import hep.dataforge.names.Name;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,9 +41,9 @@ public class JoinRule extends MergeRule {
     @Override
     protected Value mergeValues(Name valueName, Value first, Value second) {
         List<Value> list = new ArrayList<>();
-        list.addAll(first.listValue());
-        list.addAll(second.listValue());
-        return Value.of(list);
+        list.addAll(first.getList());
+        list.addAll(second.getList());
+        return ValueFactory.of(list);
     }
 
     @Override

@@ -5,6 +5,7 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.names.Name;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueMap;
 import hep.dataforge.values.Values;
 import org.jetbrains.annotations.NotNull;
 
@@ -66,19 +67,19 @@ public class Adapters {
     }
 
     public static Double getUpperBound(ValuesAdapter adapter, String axis, Values point) {
-        return adapter.optComponent(point, Name.joinString(axis, UP_KEY)).map(Value::doubleValue)
+        return adapter.optComponent(point, Name.joinString(axis, UP_KEY)).map(Value::getDouble)
                 .orElseGet(() ->
-                        getValue(adapter, axis, point).doubleValue() +
-                                optError(adapter, axis, point).map(Value::doubleValue).orElse(0d)
+                        getValue(adapter, axis, point).getDouble() +
+                                optError(adapter, axis, point).map(Value::getDouble).orElse(0d)
                 );
 
     }
 
     public static Double getLowerBound(ValuesAdapter adapter, String axis, Values point) {
-        return adapter.optComponent(point, Name.joinString(axis, LO_KEY)).map(Value::doubleValue)
+        return adapter.optComponent(point, Name.joinString(axis, LO_KEY)).map(Value::getDouble)
                 .orElseGet(() ->
-                        getValue(adapter, axis, point).doubleValue() -
-                                optError(adapter, axis, point).map(Value::doubleValue).orElse(0d)
+                        getValue(adapter, axis, point).getDouble() -
+                                optError(adapter, axis, point).map(Value::getDouble).orElse(0d)
                 );
     }
 
@@ -98,7 +99,7 @@ public class Adapters {
     }
 
     public static Optional<Double> optXError(ValuesAdapter adapter, Values point) {
-        return adapter.optComponent(point, X_ERROR_KEY).map(Value::doubleValue);
+        return adapter.optComponent(point, X_ERROR_KEY).map(Value::getDouble);
     }
 
     public static Value getYValue(ValuesAdapter adapter, Values point) {
@@ -106,11 +107,11 @@ public class Adapters {
     }
 
     public static Optional<Double> optYError(ValuesAdapter adapter, Values point) {
-        return adapter.optComponent(point, Y_ERROR_KEY).map(Value::doubleValue);
+        return adapter.optComponent(point, Y_ERROR_KEY).map(Value::getDouble);
     }
 
     public static Values buildXYDataPoint(ValuesAdapter adapter, double x, double y, double yErr) {
-        return ValueMap.of(new String[]{
+        return ValueMap.Companion.of(new String[]{
                 adapter.getComponentName(X_VALUE_KEY),
                 adapter.getComponentName(Y_VALUE_KEY),
                 adapter.getComponentName(Y_ERROR_KEY)
@@ -118,7 +119,7 @@ public class Adapters {
     }
 
     public static Values buildXYDataPoint(ValuesAdapter adapter, double x, double y) {
-        return ValueMap.of(new String[]{
+        return ValueMap.Companion.of(new String[]{
                 adapter.getComponentName(X_VALUE_KEY),
                 adapter.getComponentName(Y_VALUE_KEY)
         }, x, y);

@@ -28,15 +28,13 @@ private val VIRTUAL_SENSOR_TYPE = "@test"
 private val generator = Random()
 
 class VirtualSensor(context: Context) : Sensor(context, Meta.empty()) {
-
-    override fun startMeasurement(oldMeta: Meta, newMeta: Meta) {
+    override fun startMeasurement(oldMeta: Meta?, newMeta: Meta) {
         if (oldMeta !== newMeta) {
-            stopMeasurement(oldMeta)
             val delay = Duration.parse(newMeta.getString("duration", "PT0.2S"))
-            val mean = newMeta.getDouble("mean", 1.0)!!
-            val sigma = newMeta.getDouble("sigma", 0.1)!!
+            val mean = newMeta.getDouble("mean", 1.0)
+            val sigma = newMeta.getDouble("sigma", 0.1)
 
-            startMeasurement {
+            measurement {
                 Thread.sleep(delay.toMillis())
                 val value = generator.nextDouble() * sigma + mean
                 MetaBuilder("result").setValue("value", value).setValue("timestamp", Instant.now())
@@ -45,8 +43,9 @@ class VirtualSensor(context: Context) : Sensor(context, Meta.empty()) {
     }
 
 
-    override fun getType(): String {
-        return VIRTUAL_SENSOR_TYPE
-    }
+    override val type: String
+        get() {
+            return VIRTUAL_SENSOR_TYPE
+        }
 
 }

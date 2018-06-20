@@ -15,10 +15,10 @@
  */
 package hep.dataforge.stat.fit;
 
+import hep.dataforge.Named;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.meta.MetaMorph;
-import hep.dataforge.names.Named;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.regex.Matcher;

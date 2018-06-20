@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,17 +15,16 @@
  */
 package hep.dataforge.meta;
 
+import hep.dataforge.NamedKt;
 import hep.dataforge.exceptions.AnonymousNotAlowedException;
 import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.names.Name;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueFactory;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * A mutable annotation node equipped with observers.
@@ -47,7 +46,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
         this.parent = null;
     }
 
-    protected MutableMetaNode(Meta meta){
+    protected MutableMetaNode(Meta meta) {
         this.name = meta.getName();
         meta.getValueNames().forEach(valName -> setValue(valName, meta.getValue(valName), false));
         meta.getNodeNames().forEach(nodeName -> setNode(nodeName, meta.getMetaList(nodeName), false));
@@ -167,7 +166,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
         if (element.isEmpty()) {
             return self();
         }
-        if (element.isAnonimous() && !element.hasValue("@name")) {
+        if (NamedKt.isAnonymous(element) && !element.hasValue("@name")) {
             throw new AnonymousNotAlowedException();
         }
         return putNode(element.getName(), element, true);
@@ -193,30 +192,32 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
      * @param value
      * @param notify notify listeners
      */
-    public T putValue(String name, Value value, boolean notify) {
-        if (!isValidElementName(name)) {
-            throw new NamingException(String.format("'%s' is not a valid element name in the meta", name));
-        }
-
+    public T putValue(Name name, Value value, boolean notify) {
         if (value != null) {
-            if (hasValue(name)) {
-                Value oldValue = getValue(name);
-
-                List<Value> list = new ArrayList<>(oldValue.listValue());
+            Optional<Value> oldValue = optValue(name);
+            if (oldValue.isPresent()) {
+                List<Value> list = new ArrayList<>(oldValue.get().getList());
                 list.add(value);
 
-                Value newValue = Value.of(list);
+                Value newValue = Value.Companion.of(list);
 
                 setValueItem(name, newValue);
 
                 if (notify) {
-                    notifyValueChanged(Name.of(name), oldValue, newValue);
+                    notifyValueChanged(name, oldValue.get(), newValue);
                 }
             } else {
                 setValueItem(name, value);
             }
         }
         return self();
+    }
+
+    public T putValue(String name, Value value, boolean notify) {
+        if (!isValidElementName(name)) {
+            throw new NamingException(String.format("'%s' is not a valid element name in the meta", name));
+        }
+        return putValue(Name.of(name), value, notify);
     }
 
     /**
@@ -237,7 +238,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
      * @param element
      */
     public T setNode(Meta element) {
-        if (element.isAnonimous()) {
+        if (NamedKt.isAnonymous(element)) {
             throw new AnonymousNotAlowedException();
         }
 
@@ -304,22 +305,22 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
      * @param name
      * @param value
      */
-    public T setValue(String name, Value value, boolean notify) {
+    public T setValue(Name name, Value value, boolean notify) {
         if (value == null || value.isNull()) {
             removeValue(name);
         } else {
-            Value oldValueItem;
-            if (hasValue(name)) {
-                oldValueItem = getValue(name);
-            } else {
-                oldValueItem = null;
-            }
+            Optional<Value> oldValueItem = optValue(name);
+
             setValueItem(name, value);
             if (notify) {
-                notifyValueChanged(Name.of(name), oldValueItem, value);
+                notifyValueChanged(name, oldValueItem.orElse(null), value);
             }
         }
         return self();
+    }
+
+    public T setValue(String name, Value value, boolean notify) {
+        return setValue(Name.of(name), value, notify);
     }
 
     /**
@@ -335,7 +336,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
 
 
     public T setValue(String name, Object object) {
-        return setValue(name, Value.of(object));
+        return setValue(name, ValueFactory.of(object));
     }
 
     /**
@@ -348,7 +349,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
      */
     public T putValue(String name, Object value) {
         if (value != null) {
-            putValue(name, Value.of(value));
+            putValue(name, Value.Companion.of(value));
         }
         return self();
     }
@@ -434,19 +435,20 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
      *
      * @param path
      */
-    public void removeValue(String path) {
-        if (this.hasValue(path)) {
-            Value oldValue = getValue(path);
-            if (values.containsKey(path)) {
-                values.remove(path);
+    public void removeValue(Name path) {
+        Optional<Value> oldValue = optValue(path);
+        if (oldValue.isPresent()) {
+            if (path.getLength() > 1) {
+                getHead(path).removeValue(path.cutFirst().toString());
             } else {
-                Name namePath = Name.of(path);
-                if (namePath.getLength() > 1) {
-                    getHead(namePath).removeValue(namePath.cutFirst().toString());
-                }
+                this.values.remove(path.toUnescaped());
             }
-            notifyValueChanged(Name.of(path), oldValue, null);
+            notifyValueChanged(path, oldValue.get(), null);
         }
+    }
+
+    public void removeValue(String path) {
+        removeValue(Name.of(path));
     }
 
     /**
@@ -479,27 +481,25 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
         }
     }
 
-    protected void setValueItem(String path, Value value) {
-        if (!this.values.containsKey(path)) {
-            Name namePath = Name.of(path);
-            if (namePath.getLength() > 1) {
-                String headName = namePath.getFirst().entry();
-                T headNode;
-                if (nodes.containsKey(headName)) {
-                    headNode = getHead(namePath);
-                } else {
-                    headNode = createChildNode(headName);
-                    attachNode(headNode);
-                }
-                headNode.setValueItem(namePath.cutFirst().toString(), value);
+    protected void setValueItem(Name namePath, Value value) {
+        if (namePath.getLength() > 1) {
+            String headName = namePath.getFirst().entry();
+            T headNode;
+            if (nodes.containsKey(headName)) {
+                headNode = getHead(namePath);
             } else {
-                //single token path
-                this.values.put(path, value);
+                headNode = createChildNode(headName);
+                attachNode(headNode);
             }
+            headNode.setValueItem(namePath.cutFirst(), value);
         } else {
-            // else reset contents of the node
-            this.values.put(path, value);
+            //single token path
+            this.values.put(namePath.toUnescaped(), value);
         }
+    }
+
+    protected void setValueItem(String path, Value value) {
+        setValueItem(Name.of(path), value);
     }
 
     /**

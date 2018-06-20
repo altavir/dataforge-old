@@ -111,7 +111,7 @@ public abstract class MultiInputGoal<T> extends AbstractGoal<T> {
         @Override
         public T getResult() {
             goal.run();
-            Object res = goal.result().join();
+            Object res = goal.asCompletableFuture().join();
             if (type.isInstance(res)) {
                 return (T) res;
             } else {
@@ -152,7 +152,7 @@ public abstract class MultiInputGoal<T> extends AbstractGoal<T> {
         public Set<T> getResult() {
             return goals.stream().parallel().map(goal -> {
                 goal.run();
-                Object res = goal.result().join();
+                Object res = goal.asCompletableFuture().join();
                 if (type.isInstance(res)) {
                     return (T) res;
                 } else {

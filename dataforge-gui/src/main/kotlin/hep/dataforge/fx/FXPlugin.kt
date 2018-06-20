@@ -1,9 +1,6 @@
 package hep.dataforge.fx
 
-import hep.dataforge.context.BasicPlugin
-import hep.dataforge.context.Plugin
-import hep.dataforge.context.PluginDef
-import hep.dataforge.context.PluginFactory
+import hep.dataforge.context.*
 import hep.dataforge.description.ValueDef
 import hep.dataforge.description.ValueDefs
 import hep.dataforge.meta.Meta
@@ -23,7 +20,7 @@ import tornadofx.*
  */
 @PluginDef(name = "fx", group = "hep.dataforge", info = "JavaFX window manager")
 @ValueDefs(
-        ValueDef(name = "consoleMode", type = [BOOLEAN], def = "true", info = "Start an application surrogate if actual application not found")
+        ValueDef(key = "consoleMode", type = [BOOLEAN], def = "true", info = "Start an application surrogate if actual application not found")
 )
 class FXPlugin(meta: Meta = Meta.empty()) : BasicPlugin(meta) {
 
@@ -44,13 +41,14 @@ class FXPlugin(meta: Meta = Meta.empty()) : BasicPlugin(meta) {
     }
 
     /**
-     * Wait for application and toolkit to start
+     * Wait for application and toolkit to start if needed
      */
-    fun checkApp() {
+    fun startApp() {
         synchronized(this) {
             if (FX.getApplication(DefaultScope) == null) {
                 if (consoleMode) {
                     Thread {
+                        context.logger.debug("Starting FX application surrogate")
                         launch<ApplicationSurrogate>()
                     }.apply {
                         name = "${context.name} FX application thread"
@@ -64,7 +62,7 @@ class FXPlugin(meta: Meta = Meta.empty()) : BasicPlugin(meta) {
                     }
                     Platform.setImplicitExit(false)
                 } else {
-                    throw RuntimeException("Application not defined")
+                    throw RuntimeException("FX Application not defined")
                 }
             }
         }
@@ -78,7 +76,7 @@ class FXPlugin(meta: Meta = Meta.empty()) : BasicPlugin(meta) {
     }
 
     fun getStage(): Stage {
-        checkApp()
+        startApp()
         return FX.getPrimaryStage(DefaultScope)!!
     }
 
@@ -118,9 +116,13 @@ class FXPlugin(meta: Meta = Meta.empty()) : BasicPlugin(meta) {
 /**
  * An application surrogate without any visible primary stage
  */
-class ApplicationSurrogate : Application() {
-    override fun start(primaryStage: Stage) {
-        FX.registerApplication(this, primaryStage)
+class ApplicationSurrogate : App() {
+    override fun start(stage: Stage) {
+        FX.registerApplication(this, stage)
         FX.initialized.value = true
     }
+}
+
+fun Context.display(component: UIComponent, width: Double = 800.0, height: Double = 600.0) {
+    this.pluginManager.load<FXPlugin>().display(component, width, height)
 }

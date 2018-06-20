@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,7 +38,7 @@ public interface Provider {
      */
     default Stream<String> listContent(String target) {
         if (target.isEmpty()) {
-            target = defaultTarget();
+            target = getDefaultTarget();
         }
         return Providers.listContent(this, target);
     }
@@ -48,7 +48,7 @@ public interface Provider {
      *
      * @return
      */
-    default String defaultTarget() {
+    default String getDefaultTarget() {
         return "";
     }
 
@@ -57,7 +57,7 @@ public interface Provider {
      *
      * @return
      */
-    default String defaultChainTarget() {
+    default String getDefaultChainTarget() {
         return "";
     }
 
@@ -77,37 +77,22 @@ public interface Provider {
         return provide(Path.of(path)).map(type::cast);
     }
 
+    default <T> Optional<T> provide(String target, String name, Class<T> type) {
+        return provide(Path.of(target, name)).map(type::cast);
+    }
+
     default <T> Optional<T> provide(Path path, Class<T> type) {
         return provide(path).map(type::cast);
     }
-//
-//    /**
-//     * Type checked provide
-//     *
-//     * @param <T>
-//     * @param path
-//     * @param type
-//     * @return
-//     */
-//    default <T> T provide(Path path, Class<T> type) {
-//        return type.cast(provide(path));
-//    }
-//
-//    default boolean provides(String path) {
-//        return this.provides(Path.of(path));
-//    }
-//
-//
-//    /**
-//     * Provides by path generated from string
-//     *
-//     * @param path
-//     * @return
-//     */
-//    default Object provide(String path) {
-//        return this.provide(Path.of(path));
-//    }
-//
 
-
+    /**
+     * Stream of all elements with given target
+     * @param target
+     * @param type
+     * @param <T>
+     * @return
+     */
+    default <T> Stream<T> provideAll(String target, Class<T> type) {
+        return listContent(target).map(it -> provide(target, it, type).get());
+    }
 }

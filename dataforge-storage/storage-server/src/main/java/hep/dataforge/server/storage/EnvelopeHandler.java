@@ -1,11 +1,12 @@
 package hep.dataforge.server.storage;
 
+import hep.dataforge.io.JSONMetaWriter;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.envelopes.EnvelopeBuilder;
 import hep.dataforge.io.envelopes.MetaType;
 import hep.dataforge.io.messages.Responder;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.storage.commons.JSONMetaWriter;
+import org.jetbrains.annotations.NotNull;
 import ratpack.form.Form;
 import ratpack.handling.Context;
 import ratpack.handling.Handler;
@@ -24,24 +25,26 @@ public class EnvelopeHandler implements Handler, Responder {
     @Override
     public void handle(Context ctx) throws Exception {
         ctx.parse(Form.class).then(request -> {
-            String metaType = request.get(Envelope.META_TYPE_KEY);
+            String metaType = request.get(Envelope.META_TYPE_PROPERTY);
             String metaString = request.get("meta");
 
             EnvelopeBuilder builder = new EnvelopeBuilder();
 
-            Meta meta = MetaType.resolve(metaType).getReader().readString(metaString);
+            Meta meta = MetaType.Companion.resolve(metaType).getReader().readString(metaString);
             byte[] data = request.file("data").getBytes();
 
             builder.setMeta(meta);
             builder.setData(data);
 
             Envelope response = respond(builder.build());
-            ctx.render(new JSONMetaWriter().writeString(response.getMeta()));
+            ctx.render(JSONMetaWriter.INSTANCE.writeString(response.getMeta()));
         });
     }
 
+    @NotNull
     @Override
-    public Envelope respond(Envelope message) {
+    public Envelope respond(@NotNull Envelope message) {
         return responder.respond(message);
     }
+
 }

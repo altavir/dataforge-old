@@ -51,16 +51,16 @@ class CachePlugin(meta: Meta) : BasicPlugin(meta) {
      *
      * @param bypass
      */
-    var bypass: (Data<*>) -> Boolean = { data -> false }
+    var bypass: (Data<*>) -> Boolean = { _ -> false }
 
     private val manager: CacheManager by lazy {
         try {
             Caching.getCachingProvider(context.classLoader).cacheManager.also {
-                context.logger.info("Loaded immutable manager $it")
+                context.logger.info("Loaded cache manager $it")
             }
         } catch (ex: CacheException) {
             context.logger.warn("Cache provider not found. Will use default immutable implementation.")
-            DefaultCacheManager(getContext(), meta)
+            DefaultCacheManager(context, meta)
         }
     }
 
@@ -71,10 +71,10 @@ class CachePlugin(meta: Meta) : BasicPlugin(meta) {
 
 
     fun <V> cache(cacheName: String, id: Meta, data: Data<V>): Data<V> {
-        if (bypass(data) || !Serializable::class.java.isAssignableFrom(data.type())) {
+        if (bypass(data) || !Serializable::class.java.isAssignableFrom(data.type)) {
             return data
         } else {
-            val cache = getCache(cacheName, data.type())
+            val cache = getCache(cacheName, data.type)
             val cachedGoal = object : Goal<V> {
                 private val result = CompletableFuture<V>()
 
@@ -90,9 +90,9 @@ class CachePlugin(meta: Meta) : BasicPlugin(meta) {
                     //TODO add executor
                     synchronized(cache) {
                         when {
-                            data.goal.isDone -> data.inFuture.thenAccept { result.complete(it) }
+                            data.goal.isDone -> data.future.thenAccept { result.complete(it) }
                             cache.containsKey(id) -> {
-                                logger.info("Cached result found. Restoring data from immutable for id {}", id.hashCode())
+                                logger.info("Cached result found. Restoring data from cache for id {}", id.hashCode())
                                 CompletableFuture.supplyAsync { cache.get(id) }.whenComplete { res, err ->
                                     if (res != null) {
                                         result.complete(res)
@@ -101,7 +101,7 @@ class CachePlugin(meta: Meta) : BasicPlugin(meta) {
                                     }
 
                                     if (err != null) {
-                                        logger.error("Failed to load data from immutable", err)
+                                        logger.error("Failed to load data from cache", err)
                                     }
                                 }
                             }
@@ -112,7 +112,7 @@ class CachePlugin(meta: Meta) : BasicPlugin(meta) {
 
                 private fun evalData() {
                     data.goal.run()
-                    data.goal.result().whenComplete { res, err ->
+                    data.goal.onComplete { res, err ->
                         if (err != null) {
                             result.completeExceptionally(err)
                         } else {
@@ -120,14 +120,14 @@ class CachePlugin(meta: Meta) : BasicPlugin(meta) {
                             try {
                                 cache.put(id, res)
                             } catch (ex: Exception) {
-                                context.logger.error("Failed to put result into the immutable", ex)
+                                context.logger.error("Failed to put result into the cache", ex)
                             }
 
                         }
                     }
                 }
 
-                override fun result(): CompletableFuture<V> {
+                override fun asCompletableFuture(): CompletableFuture<V> {
                     return result
                 }
 
@@ -139,20 +139,24 @@ class CachePlugin(meta: Meta) : BasicPlugin(meta) {
                     //do nothing
                 }
             }
-            return Data(cachedGoal, data.type(), data.meta)
+            return Data(data.type, cachedGoal, data.meta)
         }
     }
 
-    fun <V> cacheNode(cacheName: String, nodeId: Meta, node: DataNode<V>): DataNode<V> {
-        val builder = DataTree.builder(node.type()).setName(node.name).setMeta(node.meta)
-        //recursively caching nodes
-        node.nodeStream(false).forEach { child ->
-            builder.putNode(cacheNode(Name.joinString(cacheName, child.name), nodeId, child))
+    fun <V: Any> cacheNode(cacheName: String, nodeId: Meta, node: DataNode<V>): DataNode<V> {
+        val builder = DataTree.edit(node.type).also {
+            it.name = node.name
+            it.meta = node.meta
+            //recursively caching nodes
+            node.nodeStream(false).forEach { child ->
+                it.add(cacheNode(Name.joinString(cacheName, child.name), nodeId, child))
+            }
+            //caching direct data children
+            node.dataStream(false).forEach { datum ->
+                it.putData(datum.name, cache(cacheName, nodeId.builder.setValue("dataName", datum.name), datum))
+            }
         }
-        //caching direct data children
-        node.dataStream(false).forEach { datum ->
-            builder.putData(datum.name, cache(cacheName, nodeId.builder.setValue("dataName", datum.name), datum))
-        }
+
         return builder.build()
     }
 

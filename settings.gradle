@@ -1,12 +1,14 @@
 rootProject.name = 'dataforge'
 include ':dataforge-core' // core classes and data structures
+include ':dataforge-core:dataforge-json' // json meta converter
+//include ':dataforge-core:dataforge-html' // HTML tools
 //include ':dataforge-core:osgi' // osgi framework for easy plugin delivery
 
 include ':dataforge-plots' // plot library
 include ':dataforge-plots:plots-fx'
 include ':dataforge-plots:plots-viewer' // Viewer application for exported plots
 include ':dataforge-plots:plots-jfc'
-include ':dataforge-plots:plots-gnuplot'
+//include ':dataforge-plots:plots-gnuplot'
 //include ':dataforge-plots:plots-jzy3d'
 
 include ':dataforge-maths' // mathematical tools
@@ -20,13 +22,21 @@ include 'kodex-server' // ktor based http server
 
 include ':dataforge-gui' // javafx based gui
 include ':dataforge-gui:gui-demo' // javafx based gui
+include ':dataforge-gui:gui-workspace' // javafx based gui
 
 include ':dataforge-stat' // fitting tools
 include ':dataforge-stat:dataforge-minuit' // MINUIT plugin for fitting
 
 include ':dataforge-control' // tools for measurement and control applications
+
 include ':dataforge-storage' // storage module
 include ':dataforge-storage:storage-server' // Storage web servlet
 include ':dataforge-storage:storage-oak'
+
+include ':dataforge-storage2' // storage2 module
+
+include ':dataforge-markup'
+
+include ':dataforge-messages'
 
 include ':site'//the site

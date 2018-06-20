@@ -1,6 +1,7 @@
 package hep.dataforge.fx.values
 
 import hep.dataforge.values.Value
+import hep.dataforge.values.asValue
 import javafx.scene.control.ColorPicker
 import javafx.scene.paint.Color
 import org.slf4j.LoggerFactory
@@ -10,11 +11,11 @@ import org.slf4j.LoggerFactory
  */
 class ColorValueChooser : ValueChooserBase<ColorPicker>() {
     override fun setDisplayValue(value: Value) {
-        if (!value.stringValue().isEmpty()) {
+        if (!value.string.isEmpty()) {
             try {
-                node.value = Color.valueOf(value.stringValue())
+                node.value = Color.valueOf(value.string)
             } catch (ex: Exception) {
-                LoggerFactory.getLogger(javaClass).warn("Invalid color field value: " + value.stringValue())
+                LoggerFactory.getLogger(javaClass).warn("Invalid color field value: " + value.string)
             }
 
         }
@@ -24,7 +25,7 @@ class ColorValueChooser : ValueChooserBase<ColorPicker>() {
         val node = ColorPicker()
         node.styleClass.add("split-button")
         node.maxWidth = java.lang.Double.MAX_VALUE
-        node.setOnAction { _ -> value = Value.of(node.value.toString()) }
+        node.setOnAction { _ -> value = node.value.toString().asValue() }
         return node
     }
 }

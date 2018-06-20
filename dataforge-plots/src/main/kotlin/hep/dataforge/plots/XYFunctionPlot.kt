@@ -17,10 +17,11 @@ package hep.dataforge.plots
 
 import hep.dataforge.description.ValueDef
 import hep.dataforge.description.ValueDefs
-import hep.dataforge.kodex.buildMeta
-import hep.dataforge.kodex.toList
+import hep.dataforge.kodex.*
 import hep.dataforge.meta.Meta
+import hep.dataforge.names.Name
 import hep.dataforge.plots.data.XYPlot
+import hep.dataforge.tables.Adapters
 import hep.dataforge.tables.Adapters.DEFAULT_XY_ADAPTER
 import hep.dataforge.tables.Adapters.buildXYDataPoint
 import hep.dataforge.values.Value
@@ -35,15 +36,15 @@ import java.util.*
  * @author Alexander Nozik
  */
 @ValueDefs(
-        ValueDef(name = "showLine", type = arrayOf(BOOLEAN), def = "true", info = "Show the connecting line."),
-        ValueDef(name = "showSymbol", type = arrayOf(BOOLEAN), def = "false", info = "Show symbols for data point."),
-        ValueDef(name = "showErrors", type = arrayOf(BOOLEAN), def = "false", info = "Show errors for points."),
-        ValueDef(name = "range.from", type = arrayOf(NUMBER), def = "0.0", info = "Lower boundary for calculation range"),
-        ValueDef(name = "range.to", type = arrayOf(NUMBER), def = "1.0", info = "Upper boundary for calculation range"),
-        ValueDef(name = "density", type = arrayOf(NUMBER), def = "200", info = "Minimal number of points per plot"),
-        ValueDef(name = "connectionType", def = "spline")
+        ValueDef(key = "showLine", type = arrayOf(BOOLEAN), def = "true", info = "Show the connecting line."),
+        ValueDef(key = "showSymbol", type = arrayOf(BOOLEAN), def = "false", info = "Show symbols for data point."),
+        ValueDef(key = "showErrors", type = arrayOf(BOOLEAN), def = "false", info = "Show errors for points."),
+        ValueDef(key = "range.from", type = arrayOf(NUMBER), def = "0.0", info = "Lower boundary for calculation range"),
+        ValueDef(key = "range.to", type = arrayOf(NUMBER), def = "1.0", info = "Upper boundary for calculation range"),
+        ValueDef(key = "density", type = arrayOf(NUMBER), def = "200", info = "Minimal number of points per plot"),
+        ValueDef(key = "connectionType", def = "spline")
 )
-class XYFunctionPlot(name: String, val function: (Double) -> Double) : XYPlot(name) {
+class XYFunctionPlot(name: String, meta: Meta = Meta.empty(), val function: (Double) -> Double) : XYPlot(Name.ofSingle(name), meta, Adapters.DEFAULT_XY_ADAPTER) {
 
     private val cache = TreeMap<Double, Double>()
 
@@ -51,16 +52,16 @@ class XYFunctionPlot(name: String, val function: (Double) -> Double) : XYPlot(na
      * The minimal number of points per range
      */
 
-    var density by intValue()
-    var from by doubleValue("range.from")
-    var to by doubleValue("range.to")
+    var density by config.mutableIntValue()
+    var from by config.mutableDoubleValue("range.from")
+    var to by config.mutableDoubleValue("range.to")
 
     /**
      * Turns line smoothing on or off
      *
      * @param smoothing
      */
-    var smoothing by customValue("connectionType", read = { it.stringValue() == "spline" }) {
+    var smoothing by config.mutableCustomValue("connectionType", read = { it.string == "spline" }) {
         if (it) {
             "spline"
         } else {
@@ -68,13 +69,13 @@ class XYFunctionPlot(name: String, val function: (Double) -> Double) : XYPlot(na
         }
     }
 
-    var range by customNode("range", read = { Pair(it.getDouble("from"), it.getDouble("to")) }) {
+    var range by config.mutableCustomNode("range", read = { Pair(it.getDouble("from"), it.getDouble("to")) }) {
         invalidateCache()
         buildMeta("range", "from" to it.first, "to" to it.second)
     }
 
-    override fun applyValueChange(name: String, oldItem: Value?, newItem: Value?) {
-        super.applyValueChange(name, oldItem, newItem)
+    override fun applyValueChange(name: String, oldValue: Value?, newValue: Value?) {
+        super.applyValueChange(name, oldValue, newValue)
         if (name == "density") {
             invalidateCache()
         }
@@ -90,7 +91,7 @@ class XYFunctionPlot(name: String, val function: (Double) -> Double) : XYPlot(na
      */
     private fun validateCache() {
         // recalculate immutable if boundaries are finite, otherwise use existing immutable
-        val nodes = this.density.toInt()
+        val nodes = this.density
         if (java.lang.Double.isFinite(from) && java.lang.Double.isFinite(to)) {
             for (i in 0 until nodes) {
                 val blockBegin = from + i * (to - from) / (nodes - 1)
@@ -115,7 +116,7 @@ class XYFunctionPlot(name: String, val function: (Double) -> Double) : XYPlot(na
     @Synchronized
     private fun eval(x: Double): Double {
         val y = function(x)
-        this.cache.put(x, y)
+        this.cache[x] = y
         return y
     }
 
@@ -157,7 +158,7 @@ class XYFunctionPlot(name: String, val function: (Double) -> Double) : XYPlot(na
 
         @JvmOverloads
         fun plot(name: String, from: Double, to: Double, numPoints: Int = DEFAULT_DENSITY, function: (Double) -> Double): XYFunctionPlot {
-            val p = XYFunctionPlot(name, function)
+            val p = XYFunctionPlot(name, Meta.empty(), function)
             p.range = Pair(from, to)
             p.density = numPoints
             return p

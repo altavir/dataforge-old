@@ -78,7 +78,7 @@ class UnivariateFunctionExtension {
 
     static UnivariateFunction power(final UnivariateFunction self, Number num) {
         return { double x ->
-            return (self.value(x)**(num)).doubleValue()
+            return (self.value(x)**(num)).getDouble()
         }
     }
 

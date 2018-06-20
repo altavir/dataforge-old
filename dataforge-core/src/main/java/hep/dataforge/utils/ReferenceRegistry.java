@@ -10,22 +10,23 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
  * A registry of listener references. References could be weak to allow GC to
- * finilize referenced objects.
+ * finalize referenced objects.
  *
  * @author Alexander Nozik
  */
 public class ReferenceRegistry<T> extends AbstractCollection<T> {
 
-    private final Set<Reference<T>> weakRegistry = new HashSet<>();
+    private final Set<Reference<T>> weakRegistry = new CopyOnWriteArraySet<>();
     /**
      * Used only to store strongreferences
      */
-    private final Set<T> strongRegistry = new HashSet<>();
+    private final Set<T> strongRegistry = new CopyOnWriteArraySet<>();
 
     /**
      * Listeners could be added either as strong references or weak references. Thread safe
@@ -33,14 +34,10 @@ public class ReferenceRegistry<T> extends AbstractCollection<T> {
      * @param obj
      */
     public boolean add(T obj, boolean isStrong) {
-        synchronized (strongRegistry) {
-            if (isStrong) {
-                strongRegistry.add(obj);
-            }
+        if (isStrong) {
+            strongRegistry.add(obj);
         }
-        synchronized (weakRegistry) {
-            return weakRegistry.add(new WeakReference<>(obj));
-        }
+        return weakRegistry.add(new WeakReference<>(obj));
     }
 
     /**
@@ -55,51 +52,33 @@ public class ReferenceRegistry<T> extends AbstractCollection<T> {
 
     @Override
     public boolean remove(Object obj) {
-        synchronized (strongRegistry) {
-            strongRegistry.remove(obj);
-        }
-        synchronized (weakRegistry) {
-            Reference<T> reference = weakRegistry.stream().filter(it -> obj.equals(it.get())).findFirst().orElse(null);
-
-            return reference != null && weakRegistry.remove(reference);
-        }
+        strongRegistry.remove(obj);
+        Reference<T> reference = weakRegistry.stream().filter(it -> obj.equals(it.get())).findFirst().orElse(null);
+        return reference != null && weakRegistry.remove(reference);
     }
 
     @Override
     public boolean removeIf(Predicate<? super T> filter) {
-        boolean res = true;
-        synchronized (strongRegistry) {
-            res = strongRegistry.removeIf(filter);
-        }
-        synchronized (weakRegistry) {
-            res = res && weakRegistry.removeIf(it -> filter.test(it.get()));
-        }
-        return res;
+        return strongRegistry.removeIf(filter) && weakRegistry.removeIf(it -> filter.test(it.get()));
     }
 
     @Override
     public void clear() {
-        synchronized (strongRegistry) {
-            strongRegistry.clear();
-        }
-        synchronized (weakRegistry) {
-            weakRegistry.clear();
-        }
+        strongRegistry.clear();
+        weakRegistry.clear();
     }
 
     /**
      * Clean up all null entries from weak registry
      */
     private void cleanUp() {
-        synchronized (weakRegistry) {
-            weakRegistry.removeIf(ref -> ref.get() == null);
-        }
+        weakRegistry.removeIf(ref -> ref.get() == null);
     }
 
     @NotNull
     @Override
     public Iterator<T> iterator() {
-        cleanUp();
+//        cleanUp();
         return weakRegistry.stream().map(Reference::get).filter(Objects::nonNull).iterator();
     }
 

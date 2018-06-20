@@ -77,7 +77,7 @@ public class ActionUtils {
      * @throws ParseException
      */
     public static DataNode runConfig(Context context, String path) throws IOException, ParseException {
-        Meta config = MetaFileReader.instance().read(context, path);
+        Meta config = MetaFileReader.Companion.instance().read(context, path);
 
         //FIXME substitution of properties and context properties should be the same
         readProperties(context, config);

@@ -4,9 +4,10 @@ import hep.dataforge.maths.domains.HyperSquareDomain;
 import hep.dataforge.names.NameSetContainer;
 import hep.dataforge.names.Names;
 import hep.dataforge.names.NamesUtils;
-import hep.dataforge.tables.ValueMap;
 import hep.dataforge.utils.ArgumentChecker;
+import hep.dataforge.values.ValueMap;
 import hep.dataforge.values.Values;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
@@ -42,6 +43,7 @@ public class SquareBin extends HyperSquareDomain implements Bin, NameSetContaine
     }
 
     @Override
+    @NotNull
     public synchronized Names getNames() {
         if (names == null) {
             names = NamesUtils.generateNames(getDimension());

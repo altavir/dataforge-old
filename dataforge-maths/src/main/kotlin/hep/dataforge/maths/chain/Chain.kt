@@ -17,8 +17,8 @@
 package hep.dataforge.maths.chain
 
 import kotlinx.coroutines.experimental.channels.ReceiveChannel
+import kotlinx.coroutines.experimental.channels.asReceiveChannel
 import kotlinx.coroutines.experimental.channels.map
-import kotlinx.coroutines.experimental.channels.produce
 import kotlinx.coroutines.experimental.runBlocking
 
 /**
@@ -26,14 +26,14 @@ import kotlinx.coroutines.experimental.runBlocking
  * @param S - the state of the chain
  * @param R - the chain element type
  */
-interface Chain<out R> {
+interface Chain<out R> : Sequence<R> {
     /**
      * Last value of the chain
      */
     val value: R
 
     /**
-     * Generate next value, changin state if needed
+     * Generate next value, changing state if needed
      */
     suspend fun next(): R
 
@@ -46,13 +46,15 @@ interface Chain<out R> {
      * Chain as a coroutine receive channel
      */
     val channel: ReceiveChannel<R>
-        get() {
-            return produce {
-                while (true) {
-                    send(next())
-                }
-            }
+        get() = asReceiveChannel()
+
+    override fun iterator(): Iterator<R> {
+        return object : Iterator<R> {
+            override fun hasNext(): Boolean = true
+
+            override fun next(): R = runBlocking { this@Chain.next() }
         }
+    }
 
     /**
      * Map the chain result using suspended transformation. Initial chain result can no longer be safely consumed
@@ -64,7 +66,7 @@ interface Chain<out R> {
             override val value: T
                 get() = runBlocking { func.invoke(parent.value) }
 
-            suspend override fun next(): T {
+            override suspend fun next(): T {
                 return func(parent.next())
             }
 
@@ -93,7 +95,7 @@ class SimpleChain<out R : Any>(private val gen: suspend () -> R) : Chain<R> {
     override val value: R
         get() = _value ?: runBlocking { next() }
 
-    suspend override fun next(): R {
+    override suspend fun next(): R {
         _value = gen();
         return value;
     }
@@ -116,7 +118,7 @@ class MarkovChain<R : Any>(private val seed: () -> R, private val gen: suspend (
     override val value: R
         get() = _value ?: seed()
 
-    suspend override fun next(): R {
+    override suspend fun next(): R {
         synchronized(this) {
             _value = gen(value)
             return value
@@ -139,7 +141,7 @@ class StatefulChain<S, R : Any>(val state: S, private val seed: S.() -> R, priva
     override val value: R
         get() = _value ?: state.seed()
 
-    suspend override fun next(): R {
+    override suspend fun next(): R {
         synchronized(this) {
             _value = gen(state, value)
             return value
@@ -155,12 +157,11 @@ class StatefulChain<S, R : Any>(val state: S, private val seed: S.() -> R, priva
  * A chain that repeats the same value
  */
 class ConstantChain<out T>(override val value: T) : Chain<T> {
-    suspend override fun next(): T {
+    override suspend fun next(): T {
         return value
     }
 
     override fun fork(): Chain<T> {
         return this
     }
-
 }

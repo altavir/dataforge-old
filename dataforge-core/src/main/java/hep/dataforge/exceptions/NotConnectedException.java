@@ -5,7 +5,7 @@
  */
 package hep.dataforge.exceptions;
 
-import hep.dataforge.control.Connection;
+import hep.dataforge.connections.Connection;
 
 /**
  * An exception thrown when the request is sent to the closed connection

@@ -31,8 +31,6 @@ import java.util.stream.Stream;
  */
 @PluginDef(name = "actions", group = "hep.dataforge", info = "A list of available actions and task for given context")
 public class ActionManager extends BasicPlugin {
-
-
     private final Map<String, Action> actionMap = new HashMap<>();
     private final Map<String, Task> taskMap = new HashMap<>();
 
@@ -44,7 +42,7 @@ public class ActionManager extends BasicPlugin {
     }
 
     protected Optional<ActionManager> getParent() {
-        if (getContext() == null || getContext().getParent() == null) {
+        if (getContext().getParent() == null) {
             return Optional.empty();
         } else {
             return getContext().getParent().provide("actions", ActionManager.class);
@@ -98,10 +96,10 @@ public class ActionManager extends BasicPlugin {
 
     public final void putTask(Class<? extends Task> taskClass) {
         try {
-            put(taskClass.newInstance());
+            put(taskClass.getConstructor().newInstance());
         } catch (IllegalAccessException ex) {
             throw new RuntimeException("Task must have default empty constructor to be registered.");
-        } catch (InstantiationException ex) {
+        } catch (Exception ex) {
             throw new RuntimeException("Error while constructing Task", ex);
         }
     }
@@ -112,12 +110,8 @@ public class ActionManager extends BasicPlugin {
      * @return
      */
     @ProvidesNames(Action.ACTION_TARGET)
-    public Stream<String> getAllActions() {
-        return Stream.concat(
-                this.actionMap.keySet().stream(),
-                getContext().getPluginManager().stream(true)
-                        .flatMap(plugin -> plugin.listContent(Action.ACTION_TARGET))
-        ).distinct();
+    public Stream<String> listActions() {
+        return this.actionMap.keySet().stream();
     }
 
     /**
@@ -126,12 +120,8 @@ public class ActionManager extends BasicPlugin {
      * @return
      */
     @ProvidesNames(Task.TASK_TARGET)
-    public Stream<String> getAllTasks() {
-        return Stream.concat(
-                this.taskMap.keySet().stream(),
-                getContext().getPluginManager().stream(true)
-                        .flatMap(plugin -> plugin.listContent(Task.TASK_TARGET))
-        ).distinct();
+    public Stream<String> listTasks() {
+        return this.taskMap.keySet().stream();
     }
 
     public static class Factory extends PluginFactory {

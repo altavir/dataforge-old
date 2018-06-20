@@ -22,12 +22,12 @@ public class OakStorage extends AbstractStorage {
     }
 
     @Override
-    protected Loader createLoader(String name, Meta loaderConfiguration) throws StorageException {
+    protected Loader createLoader(String loaderName, Meta loaderConfiguration) throws StorageException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.    }
     }
 
     @Override
-    protected Storage createShelf(Meta shelfConfiguration, String name) throws StorageException {
+    protected Storage createShelf(Meta shelfConfiguration, String shelfName) throws StorageException {
             throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

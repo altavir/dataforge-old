@@ -7,11 +7,8 @@ package hep.dataforge.meta;
 
 import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.io.IOUtils;
-import hep.dataforge.values.Value;
-import hep.dataforge.values.ValueProvider;
-import hep.dataforge.values.ValueType;
-import hep.dataforge.values.ValueUtils;
-import javafx.util.Pair;
+import hep.dataforge.values.*;
+import kotlin.Pair;
 
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -83,7 +80,7 @@ public class MetaUtils {
      * @return
      */
     public static Optional<Meta> findNodeByValue(Meta root, String path, String key, Object value) {
-        return findNode(root, path, (m) -> m.hasValue(key) && m.getValue(key).equals(Value.of(value)));
+        return findNode(root, path, (m) -> m.hasValue(key) && m.getValue(key).equals(ValueFactory.of(value)));
     }
 
     /**
@@ -105,10 +102,10 @@ public class MetaUtils {
         if (contexts.length == 0) {
             return val;
         }
-        if (val.getType().equals(ValueType.STRING) && val.stringValue().contains("$")) {
-            String valStr = val.stringValue();
+        if (val.getType().equals(ValueType.STRING) && val.getString().contains("$")) {
+            String valStr = val.getString();
 //            Matcher matcher = Pattern.compile("\\$\\{(?<sub>.*)\\}").matcher(valStr);
-            Matcher matcher = Pattern.compile("\\$\\{(?<sub>[^|]*)(?:\\|(?<def>.*))?\\}").matcher(valStr);
+            Matcher matcher = Pattern.compile("\\$\\{(?<sub>[^|]*)(?:\\|(?<def>.*))?}").matcher(valStr);
             while (matcher.find()) {
                 String group = matcher.group();
                 String sub = matcher.group("sub");
@@ -123,7 +120,7 @@ public class MetaUtils {
                     valStr = valStr.replace(group, replacement);
                 }
             }
-            return Value.of(valStr);
+            return ValueFactory.parse(valStr, false);
         } else {
             return val;
         }
@@ -181,11 +178,10 @@ public class MetaUtils {
             String key = split[0].trim();
             String value = split[1].trim();
             //TODO implement compare operators
-            return meta -> meta.getValue(key, Value.getNull()).equals(Value.of(value));
+            return meta -> meta.getValue(key, ValueFactory.NULL).equals(ValueFactory.of(value));
         } else {
             throw new NamingException("'" + token + "' is not a valid query");
         }
-
     }
 
     /**
@@ -239,18 +235,17 @@ public class MetaUtils {
 
     public static Stream<Pair<String, Value>> valueStream(Meta node) {
         return nodeStream("", node, true).flatMap((Pair<String, Meta> entry) -> {
-            String key = entry.getKey();
-            Meta childMeta = entry.getValue();
-            return childMeta.getValueNames()
-                    .map((String valueName) -> {
-                        String prefix;
-                        if (key.isEmpty()) {
-                            prefix = "";
-                        } else {
-                            prefix = key + ".";
-                        }
-                        return new Pair<>(prefix + valueName, childMeta.getValue(valueName));
-                    });
+            String key = entry.getFirst();
+            Meta childMeta = entry.getSecond();
+            return childMeta.getValueNames().map((String valueName) -> {
+                String prefix;
+                if (key.isEmpty()) {
+                    prefix = "";
+                } else {
+                    prefix = key + ".";
+                }
+                return new Pair<>(prefix + valueName, childMeta.getValue(valueName));
+            });
         });
     }
 
@@ -260,7 +255,6 @@ public class MetaUtils {
      * @param out
      * @param meta        node to serialize
      * @param includeName include node name in serialization
-     * @throws IOException
      */
     public static void writeMeta(ObjectOutput out, Meta meta, boolean includeName) {
         try {
@@ -273,7 +267,7 @@ public class MetaUtils {
             meta.getValueNames(true).forEach(valName -> {
                 try {
                     IOUtils.writeString(out, valName);
-                    ValueUtils.writeValue(out, meta.getValue(valName));
+                    ValueUtilsKt.writeValue(out, meta.getValue(valName));
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -319,12 +313,7 @@ public class MetaUtils {
         short valSize = in.readShort();
         for (int i = 0; i < valSize; i++) {
             String valName = IOUtils.readString(in);
-            Value val = null;
-            try {
-                val = ValueUtils.readValue(in);
-            } catch (ClassNotFoundException e) {
-                throw new IOException("Failed to read custom number value from input stream.", e);
-            }
+            Value val = ValueUtilsKt.readValue(in);
             res.setValue(valName, val);
         }
         short nodeSize = in.readShort();

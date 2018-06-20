@@ -3,6 +3,7 @@ package hep.dataforge.stat.fit;
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.names.Names;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueFactory;
 import javafx.util.Pair;
 
 import java.io.PrintWriter;
@@ -28,7 +29,7 @@ public class BasicIntervalEstimate implements IntervalEstimate {
     }
 
     public BasicIntervalEstimate put(String parName, double cl, Object lower, Object upper) {
-        return this.put(parName, cl, Value.of(lower), Value.of(upper));
+        return this.put(parName, cl, ValueFactory.of(lower), ValueFactory.of(upper));
     }
 
 
@@ -42,7 +43,7 @@ public class BasicIntervalEstimate implements IntervalEstimate {
         out.printf("%s\t%s\t%-8s\t%-8s%n", "name", "CL ", "Lower", "Upper");
         ranges.stream().sorted().forEach(range -> {
             out.printf("%s\t%2.2g%%\t%8.8g\t%8.8g%n", range.parName, range.cl,
-                    range.lower.doubleValue(), range.upper.doubleValue());
+                    range.lower.getDouble(), range.upper.getDouble());
         });
         out.println();
     }

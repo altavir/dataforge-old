@@ -18,23 +18,23 @@ import java.util.stream.Stream;
  */
 public class PipeGoal<S, T> extends AbstractGoal<T> {
 
-    private final Goal<S> source;
-    private final Function<S, T> transfromation;
+    private final Goal<? extends S> source;
+    private final Function<S, T> transformation;
 
-    public PipeGoal(Goal<S> source, Executor executor, Function<S, T> transformation) {
+    public PipeGoal(Executor executor, Goal<? extends S> source, Function<S, T> transformation) {
         super(executor);
         this.source = source;
-        this.transfromation = transformation;
+        this.transformation = transformation;
     }
 
     public PipeGoal(Goal<S> source, Function<S, T> transformation) {
         this.source = source;
-        this.transfromation = transformation;
+        this.transformation = transformation;
     }
 
     @Override
     protected T compute() {
-        return transfromation.apply(source.get());
+        return transformation.apply(source.get());
     }
 
     @Override
@@ -50,7 +50,7 @@ public class PipeGoal<S, T> extends AbstractGoal<T> {
      * @return
      */
     public <R> PipeGoal<T, R> andThen(Function<T, R> trans) {
-        return new PipeGoal<>(this, getExecutor(), trans);
+        return new PipeGoal<>(getExecutor(), this, trans);
     }
 
 }

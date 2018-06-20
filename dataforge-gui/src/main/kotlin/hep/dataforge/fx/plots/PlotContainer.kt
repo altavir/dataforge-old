@@ -1,9 +1,11 @@
 package hep.dataforge.fx.plots
 
+import hep.dataforge.context.Context
 import hep.dataforge.description.Descriptors
 import hep.dataforge.description.NodeDescriptor
-import hep.dataforge.fx.configuration.ConfigEditor
-import hep.dataforge.fx.dfIcon
+import hep.dataforge.fx.dfIconView
+import hep.dataforge.fx.display
+import hep.dataforge.fx.meta.ConfigEditor
 import hep.dataforge.fx.table.TableDisplay
 import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta
@@ -18,7 +20,6 @@ import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.Scene
 import javafx.scene.control.TreeItem
-import javafx.scene.image.ImageView
 import javafx.scene.layout.Priority
 import javafx.scene.layout.StackPane
 import javafx.scene.layout.VBox
@@ -38,7 +39,7 @@ internal val defaultDisplay: (PlotFrame) -> Node = {
     }
 }
 
-class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = defaultDisplay) : Fragment(icon = ImageView(dfIcon)) {
+class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = defaultDisplay) : Fragment(icon = dfIconView) {
 
     private val configWindows = HashMap<hep.dataforge.meta.Configurable, Stage>()
     private val dataWindows = HashMap<Plot, Stage>()
@@ -90,14 +91,11 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
                                 }
                         )
                     }
-
                     progressindicator(progressProperty) {
                         maxWidth = 50.0
                         prefWidth = 50.0
-                        StackPane.setAlignment(this, Pos.CENTER)
                         visibleWhen(progressProperty.lessThan(1.0))
                     }
-
                 }
                 sidebar = vbox {
                     button(text = "Frame config") {
@@ -129,7 +127,7 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
 
                                     if (frame is XYPlotFrame) {
                                         frame.getActualColor(getFullName(this@cellFormat.treeItem)).ifPresent {
-                                            textFill = Color.valueOf(it.stringValue())
+                                            textFill = Color.valueOf(it.string)
                                         }
                                     } else if (item.config.hasValue("color")) {
                                         textFill = Color.valueOf(item.config.getString("color"))
@@ -140,14 +138,18 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
                                             "title" -> text = if (newItem == null) {
                                                 item.title
                                             } else {
-                                                newItem.stringValue()
+                                                newItem.string
                                             }
                                             "color" -> textFill = if (newItem == null) {
                                                 Color.BLACK
                                             } else {
-                                                Color.valueOf(newItem.stringValue())
+                                                try {
+                                                    Color.valueOf(newItem.string)
+                                                } catch (ex: Exception) {
+                                                    Color.BLACK
+                                                }
                                             }
-                                            "visible" -> isSelected = newItem?.booleanValue() ?: true
+                                            "visible" -> isSelected = newItem?.boolean ?: true
                                         }
                                     }
 
@@ -231,7 +233,7 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
     private fun displayConfigurator(header: String, obj: hep.dataforge.meta.Configurable, desc: NodeDescriptor) {
         configWindows.getOrPut(obj) {
             Stage().apply {
-                scene = Scene(ConfigEditor(obj.config, desc).root)
+                scene = Scene(ConfigEditor(obj.config, "Configuration editor", desc).root)
                 height = 400.0
                 width = 400.0
                 title = header
@@ -261,10 +263,10 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
     }
 
     private inner class ContainerChangeListener(val item: TreeItem<Plottable>) : PlotListener {
-        override fun dataChanged(name: Name?, plot: Plot?) {
+        override fun dataChanged(name: Name, plot: Plot) {
         }
 
-        override fun metaChanged(name: Name?, plottable: Plottable?, laminate: Laminate?) {
+        override fun metaChanged(name: Name, plottable: Plottable, laminate: Laminate) {
         }
 
         override fun plotAdded(name: Name, plottable: Plottable) {
@@ -298,4 +300,9 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
             Name.join(getFullName(item.parent), item.value.name)
         }
     }
+
+}
+
+fun Context.display(frame: PlotFrame, width: Double = 800.0, height: Double = 600.0) {
+    display(PlotContainer(frame), width, height)
 }

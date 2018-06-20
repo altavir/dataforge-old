@@ -101,7 +101,7 @@ public class IOUtils {
      * @return
      */
     public static Path resolvePath(String path) {
-        if (path.matches("\\w:[\\\\\\/].*")) {
+        if (path.matches("\\w:[\\\\/].*")) {
             return new File(path).toPath();
         } else {
             return Paths.get(URI.create(path));
@@ -126,7 +126,7 @@ public class IOUtils {
             }
             tokens.add(token);
         }
-        return tokens.toArray(new String[tokens.size()]);
+        return tokens.toArray(new String[0]);
 
     }
 
@@ -260,19 +260,17 @@ public class IOUtils {
 //        if (number instanceof BigDecimal) {
 //            bd = (BigDecimal) number;
 //        } else if (number instanceof Integer) {
-//            bd = BigDecimal.valueOf(number.intValue());
+//            bd = BigDecimal.valueOf(number.getInt());
 //        } else {
 //
 //            bd = BigDecimal.valueOf(number.doubleValue());
 //        }
 
-            int maxWidth = width;
-
             if (bd.precision() - bd.scale() > 2 - width) {
                 if (number instanceof Integer) {
                     return String.format("%d", number);
                 } else {
-                    return String.format("%." + (maxWidth - 1) + "g", bd.stripTrailingZeros());
+                    return String.format("%." + (width - 1) + "g", bd.stripTrailingZeros());
                 }
                 //return getFlatFormat().format(bd);
             } else {
@@ -287,8 +285,8 @@ public class IOUtils {
         switch (val.getType()) {
             case BOOLEAN:
                 if (width >= 5) {
-                    return Boolean.toString(val.booleanValue());
-                } else if (val.booleanValue()) {
+                    return Boolean.toString(val.getBoolean());
+                } else if (val.getBoolean()) {
                     return formatWidth("+", width);
                 } else {
                     return formatWidth("-", width);
@@ -296,12 +294,12 @@ public class IOUtils {
             case NULL:
                 return formatWidth(NULL_STRING, width);
             case NUMBER:
-                return formatWidth(formatNumber(val.numberValue(), width), width);
+                return formatWidth(formatNumber(val.getNumber(), width), width);
             case STRING:
-                return formatWidth(val.stringValue(), width);
+                return formatWidth(val.getString(), width);
             case TIME:
                 //TODO add time shortening
-                return formatWidth(val.stringValue(), width);
+                return formatWidth(val.getString(), width);
             default:
                 throw new IllegalArgumentException("Unsupported input value type");
         }
@@ -318,6 +316,7 @@ public class IOUtils {
      * @param action
      * @return the stop line (fist line that satisfies the stopping condition)
      */
+    @Deprecated
     public static String forEachLine(InputStream stream, String charset, Predicate<String> stopCondition, Consumer<String> action) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         while (true) {
@@ -375,16 +374,16 @@ public class IOUtils {
         }
     }
 
-    public static void writeString(ObjectOutput output, String string) throws IOException {
+    public static void writeString(DataOutput output, String string) throws IOException {
         byte[] bytes = string.getBytes(UTF8_CHARSET);
         output.writeShort(bytes.length);
         output.write(bytes);
     }
 
-    public static String readString(ObjectInput input) throws IOException {
+    public static String readString(DataInput input) throws IOException {
         int size = input.readShort();
         byte[] bytes = new byte[size];
-        input.read(bytes);
+        input.readFully(bytes);
         return new String(bytes, UTF8_CHARSET);
     }
 

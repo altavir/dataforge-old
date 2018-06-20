@@ -16,6 +16,7 @@
 package hep.dataforge.actions;
 
 import hep.dataforge.data.DataNode;
+import hep.dataforge.data.DataNodeEditor;
 import hep.dataforge.data.DataSet;
 import hep.dataforge.data.NamedData;
 import hep.dataforge.description.ValueDef;
@@ -47,27 +48,27 @@ public class GroupBuilder {
         return new GroupRule() {
             @Override
             public <T> List<DataNode<T>> group(DataNode<T> input) {
-                Map<String, DataSet.Builder<T>> map = new HashMap<>();
+                Map<String, DataNodeEditor<T>> map = new HashMap<>();
 
                 input.forEach((NamedData<? extends T> data) -> {
                     String tagValue = data.getMeta().getString(tag, defaultTagValue);
                     if (!map.containsKey(tagValue)) {
-                        DataSet.Builder<T> builder = DataSet.builder(input.type());
+                        DataNodeEditor<T> builder = DataSet.Companion.edit(input.getType());
                         builder.setName(tagValue);
                         //builder.setMeta(new MetaBuilder(DEFAULT_META_NAME).putValue("tagValue", tagValue));
                         //PENDING share meta here?
                         map.put(tagValue, builder);
                     }
-                    map.get(tagValue).putData(data);
+                    map.get(tagValue).add(data);
                 });
 
-                return map.values().stream().<DataNode<T>>map(DataSet.Builder::build).collect(Collectors.toList());
+                return map.values().stream().<DataNode<T>>map(DataNodeEditor::build).collect(Collectors.toList());
             }
         };
     }
 
-    @ValueDef(name = "byValue", required = true, info = "The name of annotation value by which grouping should be made")
-    @ValueDef(name = "defaultValue", def = "default", info = "Default value which should be used for content in which the grouping value is not presented")
+    @ValueDef(key = "byValue", required = true, info = "The name of annotation value by which grouping should be made")
+    @ValueDef(key = "defaultValue", def = "default", info = "Default value which should be used for content in which the grouping value is not presented")
     public static GroupRule byMeta(Meta config) {
         //TODO expand grouping options
         if (config.hasValue("byValue")) {

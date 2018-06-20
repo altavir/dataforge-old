@@ -23,7 +23,7 @@ public class TestServer {
      * @throws hep.dataforge.exceptions.StorageException
      */
     public static void main(String[] args) throws Exception {
-        Context context = Global.Companion.getContext("SERVER-TEST");
+        Context context = Global.INSTANCE.getContext("SERVER-TEST");
         StorageManager storageManager = context.getPluginManager().load(StorageManager.class);
 
         ServerManager serverManager = context.getPluginManager().load(ServerManager.class);
@@ -44,7 +44,7 @@ public class TestServer {
 
         System.out.println("Stopping ratpack");
         serverManager.stopServer();
-        Global.Companion.terminate();
+        Global.INSTANCE.terminate();
     }
 
 }

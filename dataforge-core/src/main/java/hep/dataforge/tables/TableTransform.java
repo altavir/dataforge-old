@@ -2,7 +2,7 @@ package hep.dataforge.tables;
 
 import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.values.Value;
-import hep.dataforge.values.ValueUtils;
+import hep.dataforge.values.ValueFactory;
 import hep.dataforge.values.Values;
 
 import java.util.Comparator;
@@ -23,7 +23,7 @@ public class TableTransform {
     public static Table sort(Table table, String name, boolean ascending) {
         return sort(table, (Values o1, Values o2) -> {
             int signum = ascending ? +1 : -1;
-            return ValueUtils.compare(o1.getValue(name), o2.getValue(name)) * signum;
+            return o1.getValue(name).compareTo(o2.getValue(name)) * signum;
         });
     }
 
@@ -53,7 +53,7 @@ public class TableTransform {
     }
 
     public static Table filter(Table table, String valueName, Number a, Number b) throws NamingException {
-        return filter(table, getValueCondition(valueName, Value.of(a), Value.of(b)));
+        return filter(table, getValueCondition(valueName, ValueFactory.of(a), ValueFactory.of(b)));
     }
 
     /**

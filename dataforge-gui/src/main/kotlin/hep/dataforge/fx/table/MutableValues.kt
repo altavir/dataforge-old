@@ -1,7 +1,7 @@
 package hep.dataforge.fx.table
 
-import hep.dataforge.tables.ValueMap
 import hep.dataforge.values.Value
+import hep.dataforge.values.ValueMap
 import hep.dataforge.values.Values
 import javafx.beans.property.ObjectProperty
 import javafx.beans.property.SimpleObjectProperty

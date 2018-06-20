@@ -15,15 +15,12 @@
  */
 package hep.dataforge.plots.demo
 
-import hep.dataforge.fx.plots.FXPlotManager
-import hep.dataforge.fx.plots.group
-import hep.dataforge.fx.plots.plot
 import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.plots.XYFunctionPlot
 import hep.dataforge.plots.data.DataPlot
 import hep.dataforge.tables.Adapters
 import hep.dataforge.tables.ListTable
-import hep.dataforge.tables.ValueMap
+import hep.dataforge.values.ValueMap
 import hep.dataforge.values.Values
 import java.util.*
 
@@ -45,7 +42,7 @@ fun main(args: Array<String>) {
     data.add(ValueMap.of(names, 0.5, 0.2, 0.1, 0.1))
     data.add(ValueMap.of(names, 1.0, 1.0, 0.2, 0.5))
     data.add(ValueMap.of(names, 3.0, 7.0, 0, 0.5))
-    val ds = ListTable(data)
+    val ds = ListTable.infer(data)
 
     val dataPlot = DataPlot.plot("data.Plot", Adapters.buildXYAdapter("myX", "myXErr", "myY", "myYErr"), ds)
 

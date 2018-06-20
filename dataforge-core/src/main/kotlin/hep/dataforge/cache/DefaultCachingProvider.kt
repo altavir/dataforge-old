@@ -27,7 +27,7 @@ import javax.cache.spi.CachingProvider
 /**
  * Created by darksnake on 08-Feb-17.
  */
-class DefaultCachingProvider(private val context: Context) : CachingProvider, ContextAware {
+class DefaultCachingProvider(override val context: Context) : CachingProvider, ContextAware {
 
     override fun getCacheManager(uri: URI, classLoader: ClassLoader, properties: Properties): CacheManager? {
         return null
@@ -67,9 +67,5 @@ class DefaultCachingProvider(private val context: Context) : CachingProvider, Co
 
     override fun isSupported(optionalFeature: OptionalFeature): Boolean {
         return false
-    }
-
-    override fun getContext(): Context {
-        return context
     }
 }

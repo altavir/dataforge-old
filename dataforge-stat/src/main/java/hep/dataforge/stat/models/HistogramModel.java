@@ -76,8 +76,8 @@ public class HistogramModel extends AbstractModel {
     public double disDeriv(String parName, Values point, Values pars) throws NotDefinedException {
         if (source.providesDeriv(parName)) {
             return this.derivValue(parName,
-                    adapter.getComponent(point, BIN_BEGIN_NAME).doubleValue(),
-                    adapter.getComponent(point, BIN_END_NAME).doubleValue(),
+                    adapter.getComponent(point, BIN_BEGIN_NAME).getDouble(),
+                    adapter.getComponent(point, BIN_END_NAME).getDouble(),
                     pars
             );
         } else {
@@ -91,8 +91,8 @@ public class HistogramModel extends AbstractModel {
     @Override
     public double dispersion(Values point, Values pars) {
         double res = this.value(
-                adapter.getComponent(point, BIN_BEGIN_NAME).doubleValue(),
-                adapter.getComponent(point, BIN_END_NAME).doubleValue(),
+                adapter.getComponent(point, BIN_BEGIN_NAME).getDouble(),
+                adapter.getComponent(point, BIN_END_NAME).getDouble(),
                 pars
         );
         if (res < 1) {
@@ -107,10 +107,10 @@ public class HistogramModel extends AbstractModel {
     @Override
     public double distance(Values point, Values pars) {
 //        double x = point.binCenter();
-        long y = adapter.getComponent(point, COUNT_NAME).longValue();
+        long y = adapter.getComponent(point, COUNT_NAME).getLong();
         return this.value(
-                adapter.getComponent(point, BIN_BEGIN_NAME).doubleValue(),
-                adapter.getComponent(point, BIN_END_NAME).doubleValue(),
+                adapter.getComponent(point, BIN_BEGIN_NAME).getDouble(),
+                adapter.getComponent(point, BIN_END_NAME).getDouble(),
                 pars
         ) - y;
     }

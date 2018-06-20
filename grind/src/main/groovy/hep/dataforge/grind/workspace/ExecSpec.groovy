@@ -6,8 +6,6 @@ import hep.dataforge.actions.OneToOneAction
 import hep.dataforge.context.Context
 import hep.dataforge.description.NodeDef
 import hep.dataforge.io.IOUtils
-import hep.dataforge.io.markup.Markedup
-import hep.dataforge.io.markup.SimpleMarkupRenderer
 import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaUtils
@@ -131,7 +129,7 @@ class ExecSpec {
          */
         OutputStream getStream() {
             if (stream == null) {
-                outputStream = context.getIo().out(actionName, name)
+                outputStream = context.getOutput().out(actionName, name)
             }
             return stream
         }
@@ -153,14 +151,14 @@ class ExecSpec {
             getStream().printf(format, args)
         }
 
-        /**
-         * Render a markedup object into default task output
-         * @param markedup
-         * @return
-         */
-        def render(Markedup markedup) {
-            new SimpleMarkupRenderer(getStream()).render(markedup.markup())
-        }
+//        /**
+//         * Render a markedup object into default task output
+//         * @param markedup
+//         * @return
+//         */
+//        def render(Markedup markedup) {
+//            new SimpleMarkupRenderer(getStream()).render(markedup.markup())
+//        }
     }
 
     @TupleConstructor
@@ -240,7 +238,7 @@ class ExecSpec {
 
 //    @ValueDef(name = "inheritIO", type = ValueType.BOOLEAN, def = "true", info = "Define if process should inherit IO from DataForge process")
     
-    @NodeDef(name = "env", info = "Environment variables as a key-value pairs")
+    @NodeDef(key = "env", info = "Environment variables as a key-value pairs")
 //    @NodeDef(name = "parameter", info = "The definition for command parameter")
     private class GrindExecAction extends OneToOneAction<Object, Object> {
 
@@ -310,7 +308,7 @@ class ExecSpec {
 
             // Setting working directory
             if (meta.hasValue("workDir")) {
-                builder.directory(context.getIo().getFile(meta.getString("workDir")));
+                builder.directory(context.getOutput().getFile(meta.getString("workDir")));
             }
 
 //            if (meta.getBoolean("inheritIO", true)) {

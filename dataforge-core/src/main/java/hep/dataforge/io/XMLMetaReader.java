@@ -6,9 +6,11 @@
 package hep.dataforge.io;
 
 import hep.dataforge.meta.MetaBuilder;
-import hep.dataforge.utils.NamingUtils;
+import hep.dataforge.values.LateParseValue;
 import hep.dataforge.values.NamedValue;
-import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueFactory;
+import kotlin.text.Charsets;
+import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -23,7 +25,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,28 +37,15 @@ import static javax.xml.parsers.DocumentBuilderFactory.newInstance;
  * @author <a href="mailto:altavir@gmail.com">Alexander Nozik</a>
  */
 public class XMLMetaReader implements MetaStreamReader {
-    Charset charset = IOUtils.UTF8_CHARSET;
-
     @Override
-    public MetaStreamReader withCharset(Charset charset) {
-        this.charset = charset;
-        return this;
-    }
-
-    @Override
-    public Charset getCharset() {
-        return charset;
-    }
-
-    @Override
-    public MetaBuilder read(InputStream stream, long length) throws IOException, ParseException {
+    public MetaBuilder read(@NotNull InputStream stream, long length) throws IOException, ParseException {
         try {
             DocumentBuilderFactory factory = newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
 
             InputSource source;
             if (length < 0) {
-                source = new InputSource(new InputStreamReader(stream, charset.newDecoder()));
+                source = new InputSource(new InputStreamReader(stream, Charsets.UTF_8.newDecoder()));
             } else {
                 byte[] bytes = new byte[(int) length];
                 stream.read(bytes);
@@ -71,13 +59,13 @@ public class XMLMetaReader implements MetaStreamReader {
         }
     }
 
-    private MetaBuilder buildNode(Element element)  {
-        MetaBuilder res = new MetaBuilder(normalizeName(element.getTagName()));
+    private MetaBuilder buildNode(Element element) {
+        MetaBuilder res = new MetaBuilder(decodeName(element.getTagName()));
         List<NamedValue> values = getValues(element);
         List<Element> elements = getElements(element);
 
         for (NamedValue value : values) {
-            res.putValue(normalizeName(value.getName()), value.getAnonymousValue());
+            res.putValue(decodeName(value.getName()), value.getAnonymous());
         }
 
         for (Element e : elements) {
@@ -90,7 +78,7 @@ public class XMLMetaReader implements MetaStreamReader {
 
         //записываем значения только если нет наследников
         if (!element.getTextContent().isEmpty() && (element.getElementsByTagName("*").getLength() == 0)) {
-            res.putValue(normalizeName(element.getTagName()), element.getTextContent());
+            res.putValue(decodeName(element.getTagName()), element.getTextContent());
         }
         //res.putContent(new AnnotatedData("xmlsource", element));
 
@@ -121,15 +109,7 @@ public class XMLMetaReader implements MetaStreamReader {
         for (int i = 0; i < attributes.getLength(); i++) {
             Node node = attributes.item(i);
             String name = node.getNodeName();
-            String str = normalizeValue(node.getNodeValue());
-
-            if (str.contains("[")) {
-                for (String s : NamingUtils.parseArray(str)) {
-                    res.add(new NamedValue(name, Value.of(s)));
-                }
-            } else {
-                res.add(new NamedValue(name, Value.of(str)));
-            }
+            res.add(new NamedValue(name, new LateParseValue(normalizeValue(node.getNodeValue()))));
         }
 
         List<Element> elements = getElements(element);
@@ -137,16 +117,9 @@ public class XMLMetaReader implements MetaStreamReader {
             if (!(elNode.getElementsByTagName("*").getLength() > 0 || elNode.hasAttributes())) {
                 String name = elNode.getTagName();
                 if (elNode.getTextContent().isEmpty()) {
-                    res.add(new NamedValue(name, Value.of(Boolean.TRUE)));
+                    res.add(new NamedValue(name, ValueFactory.of(Boolean.TRUE)));
                 } else {
-                    String str = elNode.getTextContent();
-                    if (str.contains("[")) {
-                        for (String s : NamingUtils.parseArray(str)) {
-                            res.add(new NamedValue(name, Value.of(s)));
-                        }
-                    } else {
-                        res.add(new NamedValue(name, Value.of(str)));
-                    }
+                    res.add(new NamedValue(name, new LateParseValue(elNode.getTextContent())));
                 }
 
             }
@@ -155,11 +128,12 @@ public class XMLMetaReader implements MetaStreamReader {
 
     }
 
-    private String normalizeValue(String value){
-        return value.replace("\\n","\n");
+    private String normalizeValue(String value) {
+        return value.replace("\\n", "\n");
     }
 
-    private String normalizeName(String str) {
-        return str.replace("_at_", "@");
+    private String decodeName(String str) {
+        return str.replaceFirst("^_(\\d)", "$1")
+                .replace("_at_", "@");
     }
 }

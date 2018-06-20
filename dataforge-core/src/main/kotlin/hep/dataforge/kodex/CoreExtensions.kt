@@ -6,9 +6,12 @@ import hep.dataforge.context.Global
 import hep.dataforge.context.Plugin
 import hep.dataforge.data.Data
 import hep.dataforge.data.NamedData
+import hep.dataforge.goals.Coal
 import hep.dataforge.goals.Goal
 import hep.dataforge.goals.StaticGoal
+import hep.dataforge.goals.pipe
 import hep.dataforge.meta.*
+import hep.dataforge.names.Names
 import hep.dataforge.values.NamedValue
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueProvider
@@ -19,8 +22,6 @@ import java.time.Instant
 import java.util.*
 import java.util.stream.Collectors
 import kotlin.coroutines.experimental.CoroutineContext
-import kotlin.properties.ReadOnlyProperty
-import kotlin.reflect.KProperty
 
 /**
  * Core DataForge classes extensions
@@ -49,23 +50,22 @@ fun buildContext(name: String, vararg plugins: Class<out Plugin>, init: ContextB
 
 operator fun Value.plus(other: Value): Value =
         when (this.type) {
-            ValueType.NUMBER -> Value.of(this.numberValue() + other.numberValue());
-            ValueType.STRING -> Value.of(this.stringValue() + other.stringValue());
-            ValueType.TIME -> Value.of(Instant.ofEpochMilli(this.timeValue().toEpochMilli() + other.timeValue().toEpochMilli()))
-            ValueType.BOOLEAN -> Value.of(this.booleanValue() || other.booleanValue());
+            ValueType.NUMBER -> Value.of(this.number + other.number);
+            ValueType.TIME -> Value.of(Instant.ofEpochMilli(this.time.toEpochMilli() + other.time.toEpochMilli()))
             ValueType.NULL -> other;
+            else -> throw RuntimeException("Operation plus not allowed for ${this.type}");
         }
 
 operator fun Value.minus(other: Value): Value =
         when (this.type) {
-            ValueType.NUMBER -> Value.of(this.numberValue() - other.numberValue());
-            ValueType.TIME -> Value.of(Instant.ofEpochMilli(this.timeValue().toEpochMilli() - other.timeValue().toEpochMilli()))
+            ValueType.NUMBER -> Value.of(this.number - other.number);
+            ValueType.TIME -> Value.of(Instant.ofEpochMilli(this.time.toEpochMilli() - other.time.toEpochMilli()))
             else -> throw RuntimeException("Operation minus not allowed for ${this.type}");
         }
 
 operator fun Value.times(other: Value): Value =
         when (this.type) {
-            ValueType.NUMBER -> Value.of(this.numberValue() * other.numberValue());
+            ValueType.NUMBER -> Value.of(this.number * other.number);
             else -> throw RuntimeException("Operation minus not allowed for ${this.type}");
         }
 
@@ -78,48 +78,27 @@ operator fun Value.times(other: Any): Value = this * Value.of(other)
 //Value comparison
 
 operator fun Value.compareTo(other: Value): Int = when (this.type) {
-    ValueType.NUMBER -> this.numberValue().compareTo(other.numberValue());
-    ValueType.STRING -> this.stringValue().compareTo(other.stringValue())
-    ValueType.TIME -> this.timeValue().compareTo(other.timeValue())
-    ValueType.BOOLEAN -> this.booleanValue().compareTo(other.booleanValue())
+    ValueType.NUMBER -> this.number.compareTo(other.number);
+    ValueType.STRING -> this.string.compareTo(other.string)
+    ValueType.TIME -> this.time.compareTo(other.time)
+    ValueType.BOOLEAN -> this.boolean.compareTo(other.boolean)
     ValueType.NULL -> if (other.isNull) 0 else 1
+    ValueType.BINARY -> this.binary.compareTo(other.binary)
 }
 
 fun Value?.isNull(): Boolean = this == null || this.isNull
-
-//ValueProvider delegates
-
-/**
- * Delegate class for valueProvider
- */
-
-
-private class ValueProviderDelegate<T>(private val valueName: String?, val conv: (Value) -> T) : ReadOnlyProperty<ValueProvider, T> {
-    override operator fun getValue(thisRef: ValueProvider, property: KProperty<*>): T =
-            conv(thisRef.getValue(valueName ?: property.name))
-}
-
-/**
- * Delegate ValueProvider element to read only property
- */
-fun ValueProvider.valueDelegate(valueName: String? = null): ReadOnlyProperty<ValueProvider, Value> = ValueProviderDelegate(valueName) { it }
-
-//
-//fun ValueProvider.stringValue(valueName: String? = null): ReadOnlyProperty<ValueProvider, String> = ValueProviderDelegate(valueName) { it.stringValue() }
-//fun ValueProvider.booleanValue(valueName: String? = null): ReadOnlyProperty<ValueProvider, Boolean> = ValueProviderDelegate(valueName) { it.booleanValue() }
-//fun ValueProvider.timeValue(valueName: String? = null): ReadOnlyProperty<ValueProvider, Instant> = ValueProviderDelegate(valueName) { it.timeValue() }
-//fun ValueProvider.numberValue(valueName: String? = null): ReadOnlyProperty<ValueProvider, Number> = ValueProviderDelegate(valueName) { it.numberValue() }
-//fun <T> ValueProvider.customValue(valueName: String? = null, conv: (Value) -> T): ReadOnlyProperty<ValueProvider, T> = ValueProviderDelegate(valueName, conv)
 
 
 //Meta operations
 
 operator fun Meta.get(path: String): Value = this.getValue(path)
 
+operator fun Value.get(index: Int): Value = this.list[index]
+
 operator fun <T : MutableMetaNode<*>> MutableMetaNode<T>.set(path: String, value: Any): T = this.setValue(path, value)
 
 operator fun <T : MutableMetaNode<*>> T.plusAssign(value: NamedValue) {
-    this.setValue(value.name, value.anonymousValue);
+    this.setValue(value.name, value.anonymous);
 }
 
 operator fun <T : MutableMetaNode<*>> T.plusAssign(meta: Meta) {
@@ -134,7 +113,7 @@ operator fun Meta.plus(meta: Meta): Meta = this.builder.putNode(meta)
 /**
  * create a new meta with added value
  */
-operator fun Meta.plus(value: NamedValue): Meta = this.builder.putValue(value.name, value.anonymousValue)
+operator fun Meta.plus(value: NamedValue): Meta = this.builder.putValue(value.name, value.anonymous)
 
 /**
  * Get a value if it is present and apply action to it
@@ -169,17 +148,14 @@ fun Meta.useMetaList(metaName: String, action: (List<Meta>) -> Unit) {
 }
 
 fun <T> Meta.asMap(transform: (Value) -> T): Map<String, T> {
-    return MetaUtils.valueStream(this).collect(Collectors.toMap({ it.key }, { transform(it.value) }))
+    return MetaUtils.valueStream(this).collect(Collectors.toMap({ it.first }, { transform(it.second) }))
 }
 
-//Meta provider delegate
+val <T : MetaNode<*>> MetaNode<T>.childNodes: List<T>
+    get() = this.nodeNames.map { this.getMeta(it) }.toList()
 
-private class MetaDelegate(private val metaName: String?) : ReadOnlyProperty<MetaProvider, Meta> {
-    override operator fun getValue(thisRef: MetaProvider, property: KProperty<*>): Meta =
-            thisRef.optMeta(metaName ?: property.name).orElse(null);
-}
-
-fun MetaProvider.metaNode(metaName: String? = null): ReadOnlyProperty<MetaProvider, Meta> = MetaDelegate(metaName)
+val Meta.childNodes: List<Meta>
+    get() = this.nodeNames.map { this.getMeta(it) }.toList()
 
 
 /**
@@ -192,10 +168,10 @@ fun <T : Configurable> T.configure(transform: KMetaBuilder.() -> Unit): T {
 
 //Annotations
 
-fun <T : Annotation> listAnnotations(source: AnnotatedElement, type: Class<T>, searchSuper: Boolean): List<T> {
+fun <T : Annotation> listAnnotations(source: AnnotatedElement, type: Class<T>, searchSuper: Boolean = true): List<T> {
     if (source is Class<*>) {
         val res = ArrayList<T>()
-        val array = source.getDeclaredAnnotationsByType(type)
+        val array = source.getAnnotationsByType(type)
         res.addAll(Arrays.asList(*array))
         if (searchSuper) {
             val superClass = source.superclass
@@ -217,7 +193,7 @@ fun <T : Annotation> listAnnotations(source: AnnotatedElement, type: Class<T>, s
 //suspending functions
 
 val Context.coroutineContext: CoroutineContext
-    get() = this.executor.kDispatcher
+    get() = this.executors.kDispatcher
 
 /**
  * Use goal as a suspending function
@@ -226,12 +202,16 @@ suspend fun <R> Goal<R>.await(): R {
     return when {
         this is Coal<R> -> this.await()//A special case for Coal
         this is StaticGoal<R> -> this.get()//optimization for static goals
-        else -> this.result().await()
+        else -> this.asCompletableFuture().await()
     }
 }
 
 inline fun <T, reified R> Data<T>.pipe(dispatcher: CoroutineContext, noinline transform: suspend (T) -> R): Data<R> =
-        Data(this.goal.pipe(dispatcher, transform), R::class.java, this.meta)
+        Data(R::class.java, this.goal.pipe(dispatcher, transform), this.meta)
 
 inline fun <T, reified R> NamedData<T>.pipe(dispatcher: CoroutineContext, noinline transform: suspend (T) -> R): NamedData<R> =
-        NamedData(this.name, this.goal.pipe(dispatcher, transform), R::class.java, this.meta)
+        NamedData(this.name, R::class.java, this.goal.pipe(dispatcher, transform), this.meta)
+
+operator fun Names.plus(other: Names): Names {
+    return this.plus(*other.asArray())
+}

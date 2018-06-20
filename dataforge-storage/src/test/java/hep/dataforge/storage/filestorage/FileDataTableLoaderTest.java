@@ -23,14 +23,13 @@ import hep.dataforge.storage.commons.LoaderFactory;
 import hep.dataforge.storage.commons.MapIndex;
 import hep.dataforge.storage.commons.StorageManager;
 import hep.dataforge.tables.MetaTableFormat;
-import hep.dataforge.tables.ValueMap;
 import hep.dataforge.utils.DateTimeUtils;
-import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueFactory;
+import hep.dataforge.values.ValueMap;
 import hep.dataforge.values.Values;
 import org.junit.*;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.time.Duration;
@@ -71,17 +70,17 @@ public class FileDataTableLoaderTest {
     }
 
     @Test
-    public void testReadWrite() throws FileNotFoundException, StorageException {
+    public void testReadWrite() throws StorageException {
         String[] names = {"key", "2key", "sqrt"};
 
-        FileStorage storage = FileStorageFactory.buildLocal(Global.Companion.instance(), dir, false, true);
+        FileStorage storage = FileStorageFactory.Companion.buildLocal(Global.INSTANCE, dir, false, true);
 
-        TableLoader loader = LoaderFactory.buildPointLoder(storage, "test_points", null, "key", MetaTableFormat.forNames(names));
+        TableLoader loader = LoaderFactory.buildPointLoader(storage, "test_points", "", "key", MetaTableFormat.Companion.forNames(names));
 
         System.out.println("push");
         Instant start = DateTimeUtils.now();
         for (int i = 0; i < 1000; i++) {
-            loader.push(ValueMap.of(names, i, i * 2, Math.sqrt(i)));
+            loader.push(ValueMap.Companion.of(names, i, i * 2, Math.sqrt(i)));
 //            System.out.printf("Point with number %d loaded%n", i);
         }
         System.out.printf("Push operation for 1000 element completed in %s%n", Duration.between(start, DateTimeUtils.now()));
@@ -109,14 +108,14 @@ public class FileDataTableLoaderTest {
         System.out.println("smart pull");
 
         start = DateTimeUtils.now();
-        int smartPullSize = index.pull(Value.NULL, Value.NULL, 100).collect(Collectors.toList()).size();
+        int smartPullSize = index.pull(ValueFactory.NULL, ValueFactory.NULL, 100).collect(Collectors.toList()).size();
         assertTrue(smartPullSize <= 100);
 
         System.out.printf("Smart pull operation on %d element completed in %s%n", smartPullSize, Duration.between(start, DateTimeUtils.now()));
 
         System.out.println("pull consistency check");
         Values dp = index.pull(24, 26).findFirst().get();
-        assertEquals(Math.sqrt(24), dp.getValue("sqrt").doubleValue(), 0.001);
+        assertEquals(Math.sqrt(24), dp.getValue("sqrt").getDouble(), 0.001);
 
         ((MapIndex) index).invalidate();
     }

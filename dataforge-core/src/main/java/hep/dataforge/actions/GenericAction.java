@@ -17,19 +17,24 @@ package hep.dataforge.actions;
 
 import hep.dataforge.context.Context;
 import hep.dataforge.data.DataNode;
+import hep.dataforge.data.DataNodeEditor;
 import hep.dataforge.data.DataSet;
 import hep.dataforge.data.NamedData;
 import hep.dataforge.description.ActionDescriptor;
 import hep.dataforge.description.TypedActionDef;
-import hep.dataforge.io.markup.MarkupBuilder;
+import hep.dataforge.io.output.Output;
+import hep.dataforge.io.output.SelfRendered;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
+
+import static hep.dataforge.io.output.Output.TEXT_MODE;
 
 /**
  * A basic implementation of Action interface
@@ -39,7 +44,7 @@ import java.util.stream.Stream;
  * @author Alexander Nozik
  */
 //@ValueDef(name = ALLOW_PARALLEL_KEY, type = "BOOLEAN", info = "A flag to allow or forbid parallel execution of this action")
-public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable {
+public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable, SelfRendered {
     public static final String RESULT_GROUP_KEY = "@action.resultGroup";
     //  public static final String ALLOW_PARALLEL_KEY = "@action.allowParallel";
 
@@ -82,18 +87,18 @@ public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable {
             name = getName();
         }
 
-        DataSet.Builder<R> builder = DataSet.builder(getOutputType());
-        result.forEach(builder::putData);
+        DataNodeEditor<R> builder = DataSet.Companion.edit(getOutputType());
+        result.forEach(builder::add);
         builder.setName(name);
         builder.setMeta(meta);
         return builder.build();
     }
 
     protected void checkInput(DataNode input) {
-        if (!getInputType().isAssignableFrom(input.type())) {
+        if (!getInputType().isAssignableFrom(input.getType())) {
             //FIXME add specific exception
             throw new RuntimeException(String.format("Type mismatch on action %s start. Expected %s but found %s.",
-                    getName(), getInputType().getName(), input.type().getName()));
+                    getName(), getInputType().getName(), input.getType().getName()));
         }
     }
 
@@ -104,7 +109,7 @@ public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable {
      */
     protected ExecutorService getExecutorService(Context context, Meta meta) {
         if (isParallelExecutionAllowed(meta)) {
-            return context.getExecutor().getDefaultExecutor();
+            return context.getExecutors().getDefaultExecutor();
         } else {
             return context.getDispatcher();
         }
@@ -152,14 +157,8 @@ public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable {
     }
 
     @Override
-    public MarkupBuilder getHeader() {
-        ActionDescriptor ad = getDescriptor();
-        return new MarkupBuilder().text(ad.getName(), "green")
-                .text(" {input : ")
-                .text(ad.inputType(), "cyan")
-                .text(", output : ")
-                .text(ad.outputType(), "cyan")
-                .text(String.format("}: %s", ad.info()));
+    public void render(@NotNull Output output, @NotNull Meta meta) {
+        output.render(getDescriptor(), meta);
     }
 
     /**
@@ -242,7 +241,7 @@ public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable {
      * @param meta
      */
     protected void push(Context context, String name, Object obj, Meta meta) {
-        context.getIo().output(Name.of(getName()), Name.of(name)).push(obj, meta);
+        context.getOutput().get(Name.of(name), Name.of(getName()), TEXT_MODE).render(obj, meta);
     }
 
     protected void push(Context context, String name, Object obj) {

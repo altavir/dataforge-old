@@ -15,36 +15,48 @@
  */
 package hep.dataforge.control.ports
 
+import hep.dataforge.Named
 import hep.dataforge.exceptions.PortException
 import hep.dataforge.exceptions.PortLockException
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaHolder
-import hep.dataforge.meta.Metoid
-import hep.dataforge.names.Named
+import hep.dataforge.meta.MetaID
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.concurrent.Executors
 import java.util.concurrent.locks.ReentrantLock
 
+
+/**
+ * The controller which is currently working with this handler. One
+ * controller can simultaneously hold many handlers, but handler could be
+ * held by only one controller.
+ */
+interface PortController {
+
+    fun accept(byte: Byte)
+
+    fun accept(bytes: ByteArray)
+
+    fun error(errorMessage: String, error: Throwable) {
+        //do nothing
+    }
+}
+
+
 /**
  * The universal asynchronous port handler
  *
  * @author Alexander Nozik
  */
-abstract class Port protected constructor(
-        meta: Meta,
-        private var phraseCondition: (String) -> Boolean
-) : MetaHolder(meta), AutoCloseable, Metoid, Named {
-
-    constructor(meta: Meta) : this(meta, { it.endsWith(meta.getString("delimiter", "\n")) })
+abstract class Port(meta: Meta) : MetaHolder(meta), AutoCloseable, MetaID, Named {
 
     private val portLock = ReentrantLock(true)
 
     private var controller: PortController? = null
 
-
-    private val executor = Executors.newSingleThreadExecutor { r ->
+    protected val executor = Executors.newSingleThreadExecutor { r ->
         val res = Thread(r)
         res.name = "port::$name"
         res.priority = Thread.MAX_PRIORITY
@@ -124,24 +136,19 @@ abstract class Port protected constructor(
         this.controller = controller
     }
 
+
     /**
-     * The condition that should be satisfied to complete the incoming message
-     *
-     * @param str
-     * @return
+     * Receive a single byte
      */
-    protected fun isPhrase(str: String): Boolean {
-        return phraseCondition(str)
+    fun receive(byte: Byte) {
+        controller?.accept(byte)
     }
 
     /**
-     * This method accepts complete phrase and sends it to current controller
-     *
-     * @param phrase
+     * Receive an array of bytes
      */
-    @Synchronized protected fun receivePhrase(phrase: String) {
-        logger.trace("RECEIVE: " + phrase)
-        controller?.acceptPhrase(phrase)
+    fun receive(bytes: ByteArray) {
+        controller?.accept(bytes)
     }
 
     /**
@@ -183,7 +190,7 @@ abstract class Port protected constructor(
             assert(controller != null)
             if (controller == this.controller) {
                 this.controller = null
-                run {
+                execute {
                     portLock.unlock()
                     logger.debug("Unlocked by {}", controller)
                 }
@@ -201,22 +208,12 @@ abstract class Port protected constructor(
         executor.shutdown()
     }
 
-    /**
-     * The controller which is currently working with this handler. One
-     * controller can simultaneously hold many handlers, but handler could be
-     * held by only one controller.
-     */
-    interface PortController {
-
-        fun acceptPhrase(message: String)
-
-        fun acceptError(errorMessage: String, error: Throwable) {
-            //do nothing
-        }
-    }
-
     class PortTimeoutException(private val timeout: Duration) : PortException() {
         override val message: String = String.format("The timeout time of '%s' is exceeded", timeout)
+    }
+
+    override fun toMeta(): Meta {
+        return meta
     }
 
     companion object {

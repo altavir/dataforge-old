@@ -1,9 +1,9 @@
 package hep.dataforge.tables;
 
+import hep.dataforge.Named;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.meta.SimpleMetaMorph;
-import hep.dataforge.names.Named;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueType;
 import org.jetbrains.annotations.NotNull;
@@ -27,30 +27,32 @@ public class ColumnFormat extends SimpleMetaMorph implements Named {
 
     /**
      * Construct simple column format
+     *
      * @param name
      * @param type
      * @return
      */
     @NotNull
-    public static ColumnFormat build(String name, ValueType type, String... tags){
+    public static ColumnFormat build(String name, ValueType type, String... tags) {
         return new ColumnFormat(new MetaBuilder("column")
-                .putValue("name",name)
-                .putValue("type",type)
+                .putValue("name", name)
+                .putValue("type", type)
                 .putValue(TAG_KEY, Stream.of(tags).collect(Collectors.toList()))
         );
     }
 
     /**
      * Create a new format instance with changed name. Returns argument if name is not changed
+     *
      * @param name
      * @param columnFormat
      * @return
      */
-    public static ColumnFormat rename(String name, ColumnFormat columnFormat){
-        if(name.equals(columnFormat.getName())){
+    public static ColumnFormat rename(String name, ColumnFormat columnFormat) {
+        if (name.equals(columnFormat.getName())) {
             return columnFormat;
         } else {
-            return new ColumnFormat(columnFormat.toMeta().getBuilder().setValue("name",name).build());
+            return new ColumnFormat(columnFormat.toMeta().getBuilder().setValue("name", name).build());
         }
     }
 
@@ -93,10 +95,10 @@ public class ColumnFormat extends SimpleMetaMorph implements Named {
     }
 
     /**
-     *
      * @return
      */
-    public List<String> getTags(){
+    public List<String> getTags() {
         return Arrays.asList(getStringArray(TAG_KEY));
     }
+
 }

@@ -15,9 +15,10 @@
  */
 package hep.dataforge.meta;
 
+import hep.dataforge.Named;
+import hep.dataforge.NamedKt;
 import hep.dataforge.exceptions.AnonymousNotAlowedException;
 import hep.dataforge.io.XMLMetaWriter;
-import hep.dataforge.names.Named;
 import hep.dataforge.providers.Provider;
 import hep.dataforge.providers.Provides;
 import hep.dataforge.providers.ProvidesNames;
@@ -76,6 +77,14 @@ public abstract class Meta implements Provider, Named, ValueProvider, MetaMorph,
     }
 
     /**
+     * Get guaranteed unmodifiable copy of this meta
+     * @return
+     */
+    public SealedNode getSealed(){
+        return new SealedNode(this);
+    }
+
+    /**
      * Return the meta node with given name
      *
      * @param path
@@ -84,22 +93,18 @@ public abstract class Meta implements Provider, Named, ValueProvider, MetaMorph,
     public abstract List<? extends Meta> getMetaList(String path);
 
     /**
-     * Return index of given meta node inside appropriate meta list if it present and has multiple nodes under single name.
+     * Return index of given meta node inside appropriate meta list if it present.
      * Otherwise return -1.
      *
      * @param node
      * @return
      */
     public int indexOf(Meta node) {
-        if (node.isAnonimous()) {
+        if (NamedKt.isAnonymous(node)) {
             throw new AnonymousNotAlowedException("Anonimous nodes are not allowed in 'indexOf'");
         }
         List<? extends Meta> list = getMetaList(node.getName());
-        if(list.size() <= 1){
-            return -1;
-        } else {
-            return getMetaList(node.getName()).indexOf(node);
-        }
+        return list.indexOf(node);
     }
 
     @Provides(META_TARGET)
@@ -192,12 +197,12 @@ public abstract class Meta implements Provider, Named, ValueProvider, MetaMorph,
     }
 
     @Override
-    public String defaultTarget() {
+    public String getDefaultTarget() {
         return META_TARGET;
     }
 
     @Override
-    public String defaultChainTarget() {
+    public String getDefaultChainTarget() {
         return VALUE_TARGET;
     }
 
@@ -206,6 +211,7 @@ public abstract class Meta implements Provider, Named, ValueProvider, MetaMorph,
     public Meta toMeta() {
         return this;
     }
+
 
     private static class EmptyMeta extends Meta {
 
@@ -229,6 +235,7 @@ public abstract class Meta implements Provider, Named, ValueProvider, MetaMorph,
             return Stream.empty();
         }
 
+        @NotNull
         @Override
         public String getName() {
             return "";

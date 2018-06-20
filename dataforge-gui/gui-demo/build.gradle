@@ -12,8 +12,6 @@ mainClassName = mainClass
 
 description = "A demonstration for plots capabilities"
 
-compileKotlin.kotlinOptions.jvmTarget = "1.8"
-
 dependencies {
     compile project(':dataforge-plots:plots-jfc')
     compile project(':dataforge-gui')

@@ -22,11 +22,14 @@
 package hep.dataforge.data
 
 import hep.dataforge.context.Context
-import hep.dataforge.context.IOManager
+import hep.dataforge.context.Context.Companion.DATA_DIRECTORY_CONTEXT_KEY
+import hep.dataforge.data.FileDataFactory.Companion.DIRECTORY_NODE
+import hep.dataforge.data.FileDataFactory.Companion.FILE_NODE
 import hep.dataforge.data.binary.Binary
 import hep.dataforge.description.NodeDef
 import hep.dataforge.description.NodeDefs
 import hep.dataforge.kodex.toList
+import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.utils.NamingUtils.wildcardMatch
@@ -36,19 +39,17 @@ import java.nio.file.Files
 import java.nio.file.Path
 
 @NodeDefs(
-        NodeDef(name = "file", info = "File data element or list of files with the same meta defined by mask."),
-        NodeDef(name = "dir", info = "Directory data node.")
+        NodeDef(key = FILE_NODE, info = "File data element or list of files with the same meta defined by mask."),
+        NodeDef(key = DIRECTORY_NODE, info = "Directory data node.")
 )
-class FileDataFactory : DataFactory<Binary>(Binary::class.java) {
+open class FileDataFactory : DataFactory<Binary>(Binary::class.java) {
 
-    override fun getName(): String {
-        return "file"
-    }
+    override val name: String = "file"
 
-    override fun fill(builder: DataTree.Builder<Binary>, context: Context, meta: Meta) {
+    override fun fill(builder: DataNodeEditor<Binary>, context: Context, meta: Meta) {
         val parentFile: Path = when {
-            meta.hasMeta(IOManager.DATA_DIRECTORY_CONTEXT_KEY) -> context.io.rootDir.resolve(meta.getString(IOManager.DATA_DIRECTORY_CONTEXT_KEY))
-            else -> context.io.dataDir
+            meta.hasMeta(DATA_DIRECTORY_CONTEXT_KEY) -> context.rootDir.resolve(meta.getString(DATA_DIRECTORY_CONTEXT_KEY))
+            else -> context.dataDir
         }
 
         /**
@@ -67,23 +68,31 @@ class FileDataFactory : DataFactory<Binary>(Binary::class.java) {
 
         if (meta.hasValue(FILE_NODE)) {
             val fileValue = meta.getValue(FILE_NODE)
-            fileValue.listValue().forEach { fileName ->
+            fileValue.list.forEach { fileName ->
                 addFile(context, builder, parentFile, MetaBuilder(FILE_NODE)
                         .putValue("path", fileName))
             }
         }
     }
 
-    fun buildFileData(context: Context, filePath: String, meta: Meta): Data<Binary> {
-        return buildFileData(context.io.getFile(filePath), meta)
-    }
+    /**
+     * Create a data from given file. Could be overridden for additional functionality
+     */
+    protected open fun buildFileData(file: FileReference, override: Meta): Data<Binary> {
+        val mb = override.builder.apply {
+            putValue(FILE_PATH_KEY, file.absolutePath.toString())
+            putValue(FILE_NAME_KEY, file.name)
+        }.sealed
 
-    private fun buildFileData(file: FileReference, meta: Meta): Data<Binary> {
-        val mb = MetaBuilder(meta)
-        mb.putValue(FILE_PATH_KEY, file.absolutePath.toString())
-        mb.putValue(FILE_NAME_KEY, file.name)
+        val externalMeta = DataUtils.readExternalMeta(file)
 
-        return DataUtils.readFile(file, mb)
+        val fileMeta = if (externalMeta == null) {
+            mb
+        } else {
+            Laminate(mb, externalMeta)
+        }
+
+        return Data.buildStatic(file.binary, fileMeta)
     }
 
     /**
@@ -93,7 +102,7 @@ class FileDataFactory : DataFactory<Binary>(Binary::class.java) {
      * @param parentFile
      * @param fileNode
      */
-    private fun addFile(context: Context, builder: DataTree.Builder<Binary>, parentFile: Path, fileNode: Meta) {
+    private fun addFile(context: Context, builder: DataNodeEditor<Binary>, parentFile: Path, fileNode: Meta) {
         val files = listFiles(context, parentFile, fileNode)
         when {
             files.isEmpty() -> context.logger.warn("No files matching the filter: " + fileNode.toString())
@@ -110,24 +119,27 @@ class FileDataFactory : DataFactory<Binary>(Binary::class.java) {
         }
     }
 
-    private fun listFiles(context: Context, oath: Path, fileNode: Meta): List<Path> {
+    /**
+     * List files in given path
+     */
+    protected open fun listFiles(context: Context, path: Path, fileNode: Meta): List<Path> {
         val mask = fileNode.getString("path")
-        val parent = context.io.rootDir.resolve(oath)
+        val parent = context.rootDir.resolve(path)
         try {
-            return Files.list(parent).filter { path -> wildcardMatch(mask, path.toString()) }.toList()
+            return Files.list(parent).filter { wildcardMatch(mask, it.toString()) }.toList()
         } catch (e: IOException) {
             throw RuntimeException(e)
         }
 
     }
 
-    private fun addDir(context: Context, builder: DataTree.Builder<Binary>, parentFile: Path, dirNode: Meta) {
-        val dirBuilder = DataTree.builder(Binary::class.java)
+    private fun addDir(context: Context, builder: DataNodeEditor<Binary>, parentFile: Path, dirNode: Meta) {
+        val dirBuilder = DataTree.edit(Binary::class.java)
         val dir = parentFile.resolve(dirNode.getString("path"))
         if (!Files.isDirectory(dir)) {
             throw RuntimeException("The directory $dir does not exist")
         }
-        dirBuilder.setName(dirNode.getString(DataFactory.NODE_NAME_KEY, dirNode.name))
+        dirBuilder.name = dirNode.getString(DataFactory.NODE_NAME_KEY, dirNode.name)
         if (dirNode.hasMeta(DataFactory.NODE_META_KEY)) {
             dirBuilder.meta = dirNode.getMeta(DataFactory.NODE_META_KEY)
         }
@@ -137,7 +149,7 @@ class FileDataFactory : DataFactory<Binary>(Binary::class.java) {
         try {
             Files.list(dir).forEach { path ->
                 if (Files.isRegularFile(path)) {
-                    val file = FileReference.openFile(context,path)
+                    val file = FileReference.openFile(context, path)
                     dirBuilder.putData(file.name, buildFileData(file, Meta.empty()))
                 } else if (recurse && dir.fileName.toString() != META_DIRECTORY) {
                     addDir(context, dirBuilder, dir, Meta.empty())
@@ -147,7 +159,7 @@ class FileDataFactory : DataFactory<Binary>(Binary::class.java) {
             throw RuntimeException(e)
         }
 
-        builder.putNode(dirBuilder.build())
+        builder.add(dirBuilder.build())
 
     }
 
