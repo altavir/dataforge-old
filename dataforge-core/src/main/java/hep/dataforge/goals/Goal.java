@@ -32,11 +32,11 @@ public interface Goal<T> extends RunnableFuture<T> {
     void run();
 
     /**
-     * The encapsulated {@link CompletableFuture}. Used to builder goal chains.
+     * Convert this goal to CompletableFuture.
      *
      * @return
      */
-    CompletableFuture<T> result();
+    CompletableFuture<T> asCompletableFuture();
 
     /**
      * Start and get sync result
@@ -46,15 +46,20 @@ public interface Goal<T> extends RunnableFuture<T> {
     default T get() {
         try {
             run();
-            return result().get();
+            return asCompletableFuture().get();
         } catch (Exception ex) {
             throw new RuntimeException("Failed to reach the goal", ex);
         }
     }
 
+    /**
+     * Cancel current goal
+     * @param mayInterruptIfRunning
+     * @return
+     */
     @Override
     default boolean cancel(boolean mayInterruptIfRunning) {
-        return result().cancel(mayInterruptIfRunning);
+        return asCompletableFuture().cancel(mayInterruptIfRunning);
     }
 
     default boolean cancel() {
@@ -63,19 +68,19 @@ public interface Goal<T> extends RunnableFuture<T> {
 
     @Override
     default boolean isCancelled() {
-        return result().isCancelled();
+        return asCompletableFuture().isCancelled();
     }
 
     @Override
     default boolean isDone() {
-        return result().isDone();
+        return asCompletableFuture().isDone();
     }
 
     boolean isRunning();
 
     @Override
     default T get(long timeout, @NotNull TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-        return result().get(timeout, unit);
+        return asCompletableFuture().get(timeout, unit);
     }
 
     /**
@@ -119,6 +124,8 @@ public interface Goal<T> extends RunnableFuture<T> {
     default Goal<T> onComplete(BiConsumer<T, Throwable> consumer) {
         return onComplete(Global.INSTANCE.getDispatcher(), consumer);
     }
+
+
 
     /**
      * handle using custom executor

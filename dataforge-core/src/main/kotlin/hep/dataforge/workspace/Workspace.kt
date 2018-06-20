@@ -297,7 +297,7 @@ interface Workspace : ContextAware, Provider {
         @Throws(IllegalAccessException::class, InstantiationException::class)
         @JvmDefault
         fun task(type: Class<Task<*>>): Workspace.Builder {
-            return task(type.newInstance())
+            return task(type.getConstructor().newInstance())
         }
     }
 

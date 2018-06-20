@@ -23,7 +23,7 @@ import hep.dataforge.meta.MetaHolder
  *
  * @author Alexander Nozik
  */
-abstract class BasicPlugin(tag: PluginTag? = null, meta: Meta = Meta.empty()) : MetaHolder(meta.sealed), Plugin {
+abstract class BasicPlugin(meta: Meta = Meta.empty(), tag: PluginTag? = null) : MetaHolder(meta.sealed), Plugin {
 
     private var _context: Context? = null
     override val context: Context

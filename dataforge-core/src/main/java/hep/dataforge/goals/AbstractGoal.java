@@ -20,19 +20,18 @@ public abstract class AbstractGoal<T> implements Goal<T> {
 
     private final ReferenceRegistry<GoalListener<T>> listeners = new ReferenceRegistry<>();
 
+
     private final Executor executor;
-    private final CompletableFuture<T> result;
+    protected final GoalResult result = new GoalResult();
     private CompletableFuture<?> computation;
     private Thread thread;
 
     public AbstractGoal(Executor executor) {
         this.executor = executor;
-        result = new GoalResult();//.whenComplete((res,err)-> onCompleteHooks.forEach(hook -> hook.accept(res, err)));
     }
 
     public AbstractGoal() {
         this.executor = ForkJoinPool.commonPool();
-        result = new GoalResult();//.whenComplete((res,err)-> onCompleteHooks.forEach(hook -> hook.accept(res, err)));
     }
 
     protected Logger getLogger() {
@@ -47,7 +46,7 @@ public abstract class AbstractGoal<T> implements Goal<T> {
                     .allOf(dependencies()
                             .map(dep -> {
                                 dep.run();//starting all dependencies
-                                return dep.result();
+                                return dep.asCompletableFuture();
                             })
                             .toArray(CompletableFuture[]::new))
                     .whenCompleteAsync((res, err) -> {
@@ -125,14 +124,15 @@ public abstract class AbstractGoal<T> implements Goal<T> {
     }
 
     @Override
-    public CompletableFuture<T> result() {
-        return result;
-    }
-
-    @Override
     public void registerListener(GoalListener<T> listener) {
         listeners.add(listener,true);
     }
+
+    @Override
+    public CompletableFuture<T> asCompletableFuture() {
+        return result;
+    }
+
 
     protected class GoalResult extends CompletableFuture<T> {
 

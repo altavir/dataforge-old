@@ -17,6 +17,9 @@
 package hep.dataforge.kodex
 
 import hep.dataforge.context.Global
+import hep.dataforge.goals.generate
+import hep.dataforge.goals.join
+import hep.dataforge.goals.pipe
 import kotlinx.coroutines.experimental.DefaultDispatcher
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

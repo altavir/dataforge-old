@@ -112,7 +112,7 @@ class CachePlugin(meta: Meta) : BasicPlugin(meta) {
 
                 private fun evalData() {
                     data.goal.run()
-                    data.goal.result().whenComplete { res, err ->
+                    data.goal.onComplete { res, err ->
                         if (err != null) {
                             result.completeExceptionally(err)
                         } else {
@@ -127,7 +127,7 @@ class CachePlugin(meta: Meta) : BasicPlugin(meta) {
                     }
                 }
 
-                override fun result(): CompletableFuture<V> {
+                override fun asCompletableFuture(): CompletableFuture<V> {
                     return result
                 }
 

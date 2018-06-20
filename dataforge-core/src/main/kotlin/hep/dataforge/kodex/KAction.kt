@@ -9,6 +9,8 @@ import hep.dataforge.data.DataSet
 import hep.dataforge.data.NamedData
 import hep.dataforge.exceptions.AnonymousNotAlowedException
 import hep.dataforge.goals.Goal
+import hep.dataforge.goals.join
+import hep.dataforge.goals.pipe
 import hep.dataforge.io.history.Chronicle
 import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta

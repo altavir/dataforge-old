@@ -46,8 +46,8 @@ class WorkspaceTest {
     fun testCaching() {
         counter.set(0)
         wsp.context[CachePlugin::class.java].invalidate()
-        val res1 = wsp.runTask("test2", Meta.empty()).computeAll()
-        val res2 = wsp.runTask("test2", Meta.empty()).computeAll()
+        val res1 = wsp.runTask("test2", Meta.empty()).apply { computeAll() }
+        val res2 = wsp.runTask("test2", Meta.empty()).apply { computeAll() }
         assertEquals(6, counter.get().toLong())
         val res3 = wsp.runTask("test2", MetaBuilder().putValue("a", 1))
                 .getCheckedData("data_2", Number::class.java).get().toLong()
@@ -61,11 +61,10 @@ class WorkspaceTest {
 
         @BeforeClass
         @JvmStatic
-        fun setup(){
+        fun setup() {
             val context = Global.getContext("TEST").apply {
                 load(CachePlugin::class.java, MetaBuilder().setValue("fileCache.enabled", false))
             }
-
 
 
             val task1 = object : PipeTask<Number, Number>("test1", Number::class.java, Number::class.java) {
@@ -103,7 +102,7 @@ class WorkspaceTest {
             }
 
             wsp = BasicWorkspace.Builder()
-                    .apply { this.context = context}
+                    .apply { this.context = context }
                     .staticData("data_1", 1)
                     .staticData("data_2", 2)
                     .staticData("data_3", 3)

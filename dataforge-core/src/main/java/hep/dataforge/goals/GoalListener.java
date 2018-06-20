@@ -9,12 +9,16 @@ import org.jetbrains.annotations.Nullable;
 public interface GoalListener<T> {
 
     /**
-     * Do something when the goal actually starts
+     * Do something when the goal actually starts. Notification is done after each reset and subsequent start
      */
     default void onGoalStart() {
 
     }
 
+    /**
+     * Notify that goal is completed with result
+     * @param result
+     */
     default void onGoalComplete(T result){
 
     }
@@ -22,5 +26,4 @@ public interface GoalListener<T> {
     default void onGoalFailed(@Nullable Throwable ex){
 
     }
-
 }

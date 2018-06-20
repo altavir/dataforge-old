@@ -6,8 +6,10 @@ import hep.dataforge.context.Global
 import hep.dataforge.context.Plugin
 import hep.dataforge.data.Data
 import hep.dataforge.data.NamedData
+import hep.dataforge.goals.Coal
 import hep.dataforge.goals.Goal
 import hep.dataforge.goals.StaticGoal
+import hep.dataforge.goals.pipe
 import hep.dataforge.meta.*
 import hep.dataforge.names.Names
 import hep.dataforge.values.NamedValue
@@ -200,7 +202,7 @@ suspend fun <R> Goal<R>.await(): R {
     return when {
         this is Coal<R> -> this.await()//A special case for Coal
         this is StaticGoal<R> -> this.get()//optimization for static goals
-        else -> this.result().await()
+        else -> this.asCompletableFuture().await()
     }
 }
 

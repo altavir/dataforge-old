@@ -45,7 +45,7 @@ open class Data<T>(val type: Class<T>,
      * @return
      */
     val future: CompletableFuture<out T>
-        get() = goal.result()
+        get() = goal.asCompletableFuture()
 
     /**
      * @return false if goal is canceled or completed exceptionally

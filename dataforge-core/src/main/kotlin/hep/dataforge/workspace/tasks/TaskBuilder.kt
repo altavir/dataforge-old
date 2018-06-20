@@ -196,7 +196,7 @@ class TaskBuilder(var name: String) {
                 val action: Action<in Any, out Any> = ta.buildAction(model)
                 if (action is GenericAction<*, *>) {
                     data = data.getCheckedNode("", action.inputType)
-                    model.logger.debug("Action {} uses type checked node reduction. Working on {} nodes", action.name, data.getSize(true))
+                    model.logger.debug("Action {} uses type checked node reduction. Working on {} nodes", action.name, data.count(true))
                 }
                 data = action.run(model.context, data, ta.buildMeta(model))
                 if (action.name != ActionUtils.DEFAULT_ACTION_NAME) {
