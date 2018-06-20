@@ -21,27 +21,15 @@
  */
 package hep.dataforge.storage.filestorage
 
-import hep.dataforge.exceptions.NotDefinedException
 import hep.dataforge.exceptions.StorageException
-import hep.dataforge.exceptions.WrongTargetException
 import hep.dataforge.io.IOUtils
 import hep.dataforge.io.LineIterator
-import hep.dataforge.io.envelopes.Envelope
-import hep.dataforge.io.messages.ACTION_KEY
-import hep.dataforge.io.messages.PULL_ACTION
-import hep.dataforge.io.messages.PUSH_ACTION
-import hep.dataforge.io.messages.okResponseBase
 import hep.dataforge.isAnonymous
-import hep.dataforge.kodex.toList
 import hep.dataforge.meta.Meta
-import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.storage.api.Storage
 import hep.dataforge.storage.api.TableLoader
 import hep.dataforge.storage.api.ValueIndex
 import hep.dataforge.storage.commons.DefaultIndex
-import hep.dataforge.storage.commons.StorageMessageUtils
-import hep.dataforge.storage.commons.StorageMessageUtils.QUERY_ELEMENT
-import hep.dataforge.storage.commons.StorageMessageUtils.confirmationResponse
 import hep.dataforge.tables.*
 import hep.dataforge.values.Value
 import hep.dataforge.values.Values
@@ -135,72 +123,72 @@ class FileTableLoader(storage: Storage, name: String, meta: Meta, file: FileEnve
         }
     }
 
-    override fun respond(message: Envelope): Envelope {
-        try {
-            if (!validator.isValid(message)) {
-                return StorageMessageUtils.exceptionResponse(message, WrongTargetException())
-            }
-            val messageMeta = message.meta
-            val operation = messageMeta.getString(ACTION_KEY)
-            when (operation) {
-                PUSH_ACTION -> {
-                    if (!messageMeta.hasMeta("data")) {
-                        //TODO реализовать бинарную передачу данных
-                        throw StorageException("No data in the push data command")
-                    }
-
-                    val data = messageMeta.getMeta("data")
-                    for (dp in ListOfPoints.buildFromMeta(data)) {
-                        this.push(dp)
-                    }
-
-                    return confirmationResponse(message)
-                }
-
-                PULL_ACTION -> {
-                    var points: List<Values> = ArrayList()
-                    when {
-                        messageMeta.hasMeta(QUERY_ELEMENT) -> points = index.query(messageMeta.getMeta(QUERY_ELEMENT)).toList()
-                        messageMeta.hasValue("value") -> {
-                            val valueName = messageMeta.getString("valueName", "")
-                            points = messageMeta.getValue("value").list.stream()
-                                    .map { `val` -> getIndex(valueName).pullOne(`val`) }
-                                    .filter { it.isPresent }.map<Values> { it.get() }
-                                    .toList()
-                        }
-                        messageMeta.hasMeta("range") -> {
-                            val valueName = messageMeta.getString("valueName", "")
-                            for (rangeAn in messageMeta.getMetaList("range")) {
-                                val from = rangeAn.getValue("from", Value.NULL)
-                                val to = rangeAn.getValue("to", Value.NULL)
-                                //                            int maxItems = rangeAn.getInt("maxItems", Integer.MAX_VALUE);
-                                points = this.getIndex(valueName).pull(from, to).toList()
-                            }
-                        }
-                    }
-
-                    val dataAn = MetaBuilder("data")
-                    for (dp in points) {
-                        dataAn.putNode(dp.toMeta())
-                    }
-                    return okResponseBase(message, true, false)
-                            .putMetaNode(dataAn)
-                            .setMetaValue("data.size", points.size)
-                            .build()
-                }
-
-                else -> throw NotDefinedException(operation)
-            }
-
-        } catch (ex: StorageException) {
-            return StorageMessageUtils.exceptionResponse(message, ex)
-        } catch (ex: UnsupportedOperationException) {
-            return StorageMessageUtils.exceptionResponse(message, ex)
-        } catch (ex: NotDefinedException) {
-            return StorageMessageUtils.exceptionResponse(message, ex)
-        }
-
-    }
+//    override fun respond(message: Envelope): Envelope {
+//        try {
+//            if (!validator.isValid(message)) {
+//                return StorageMessageUtils.exceptionResponse(message, WrongTargetException())
+//            }
+//            val messageMeta = message.meta
+//            val operation = messageMeta.getString(ACTION_KEY)
+//            when (operation) {
+//                PUSH_ACTION -> {
+//                    if (!messageMeta.hasMeta("data")) {
+//                        //TODO реализовать бинарную передачу данных
+//                        throw StorageException("No data in the push data command")
+//                    }
+//
+//                    val data = messageMeta.getMeta("data")
+//                    for (dp in ListOfPoints.buildFromMeta(data)) {
+//                        this.push(dp)
+//                    }
+//
+//                    return confirmationResponse(message)
+//                }
+//
+//                PULL_ACTION -> {
+//                    var points: List<Values> = ArrayList()
+//                    when {
+//                        messageMeta.hasMeta(QUERY_ELEMENT) -> points = index.query(messageMeta.getMeta(QUERY_ELEMENT)).toList()
+//                        messageMeta.hasValue("value") -> {
+//                            val valueName = messageMeta.getString("valueName", "")
+//                            points = messageMeta.getValue("value").list.stream()
+//                                    .map { `val` -> getIndex(valueName).pullOne(`val`) }
+//                                    .filter { it.isPresent }.map<Values> { it.get() }
+//                                    .toList()
+//                        }
+//                        messageMeta.hasMeta("range") -> {
+//                            val valueName = messageMeta.getString("valueName", "")
+//                            for (rangeAn in messageMeta.getMetaList("range")) {
+//                                val from = rangeAn.getValue("from", Value.NULL)
+//                                val to = rangeAn.getValue("to", Value.NULL)
+//                                //                            int maxItems = rangeAn.getInt("maxItems", Integer.MAX_VALUE);
+//                                points = this.getIndex(valueName).pull(from, to).toList()
+//                            }
+//                        }
+//                    }
+//
+//                    val dataAn = MetaBuilder("data")
+//                    for (dp in points) {
+//                        dataAn.putNode(dp.toMeta())
+//                    }
+//                    return okResponseBase(message, true, false)
+//                            .putMetaNode(dataAn)
+//                            .setMetaValue("data.size", points.size)
+//                            .build()
+//                }
+//
+//                else -> throw NotDefinedException(operation)
+//            }
+//
+//        } catch (ex: StorageException) {
+//            return StorageMessageUtils.exceptionResponse(message, ex)
+//        } catch (ex: UnsupportedOperationException) {
+//            return StorageMessageUtils.exceptionResponse(message, ex)
+//        } catch (ex: NotDefinedException) {
+//            return StorageMessageUtils.exceptionResponse(message, ex)
+//        }
+//
+//    }
 
 
     private inner class FilePointIndex(private val valueName: String) : FileMapIndex<Values>(context, file) {

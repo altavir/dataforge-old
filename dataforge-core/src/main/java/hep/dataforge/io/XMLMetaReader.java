@@ -10,6 +10,7 @@ import hep.dataforge.values.LateParseValue;
 import hep.dataforge.values.NamedValue;
 import hep.dataforge.values.ValueFactory;
 import kotlin.text.Charsets;
+import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -37,7 +38,7 @@ import static javax.xml.parsers.DocumentBuilderFactory.newInstance;
  */
 public class XMLMetaReader implements MetaStreamReader {
     @Override
-    public MetaBuilder read(InputStream stream, long length) throws IOException, ParseException {
+    public MetaBuilder read(@NotNull InputStream stream, long length) throws IOException, ParseException {
         try {
             DocumentBuilderFactory factory = newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();

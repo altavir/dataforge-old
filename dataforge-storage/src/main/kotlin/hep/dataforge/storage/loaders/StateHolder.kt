@@ -18,18 +18,11 @@ package hep.dataforge.storage.loaders
 
 import hep.dataforge.connections.ConnectionHelper
 import hep.dataforge.events.EventHandler
-import hep.dataforge.exceptions.NotDefinedException
 import hep.dataforge.exceptions.StorageException
-import hep.dataforge.io.envelopes.Envelope
-import hep.dataforge.io.messages.*
-import hep.dataforge.kodex.buildMeta
-import hep.dataforge.kodex.useEachMeta
-import hep.dataforge.kodex.useValue
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.SimpleConfigurable
 import hep.dataforge.storage.api.MetaStateChangedEvent
 import hep.dataforge.storage.api.StateChangedEvent
-import hep.dataforge.storage.commons.StorageMessageUtils
 import hep.dataforge.values.Value
 import java.util.stream.Stream
 
@@ -37,64 +30,64 @@ import java.util.stream.Stream
  * A helper class to store states
  */
 class StateHolder(val connections: ConnectionHelper, val handler: MetaHandler) :
-        SimpleConfigurable(handler.pull() ?: Meta.empty()), Responder {
+        SimpleConfigurable(handler.pull() ?: Meta.empty()) {
 
 
-    override fun respond(message: Envelope): Envelope {
-        update()
-        try {
-            val envelopeMeta = message.meta
-            val res = responseBase(message)
-            when (envelopeMeta.getString(ACTION_KEY)) {
-                PUSH_ACTION -> {
-                    envelopeMeta.useEachMeta("state") {
-                        if (it.hasValue("value")) {
-                            push(it.getString("key"), it.getValue("value"))
-                        } else if (it.hasMeta("value")) {
-                            push(it.getString("key"), it.getMeta("value"))
-                        }
-                    }
-                    //TODO add expanded response?
-                    res.setMetaValue(MESSAGE_STATUS_KEY, MESSAGE_OK)
-                    return res.build()
-                }
-                PULL_ACTION -> {
-                    if (envelopeMeta.hasValue("state") || envelopeMeta.hasValue("metaState")) {
-                        envelopeMeta.useValue("state"){
-                            it.list.forEach {
-                                res.putMetaNode(buildMeta("state", "key" to it, "value" to config.getValue(it.string)))
-                            }
-                        }
-                        envelopeMeta.useValue("metaState"){
-                            it.list.forEach {
-                                res.putMetaNode(buildMeta("state", "key" to it){
-                                    putNode("value", config.getMeta(it.string))
-                                })
-                            }
-
-                        }
-                    } else {
-                        states.forEach {
-                            res.putMetaNode(buildMeta("state", "key" to it.first, "value" to it.second))
-                        }
-                        metaStates.forEach {
-                            res.putMetaNode(buildMeta("state", "key" to it.first) {
-                                putNode("value", it.second)
-                            })
-                        }
-                    }
-                    res.setMetaValue(MESSAGE_STATUS_KEY, MESSAGE_OK)
-                    return res.build()
-                }
-
-                else -> throw NotDefinedException("Unknown action")
-            }
-
-        } catch (ex: Exception) {
-            return StorageMessageUtils.exceptionResponse(message, ex)
-        }
-
-    }
+//    override fun respond(message: Envelope): Envelope {
+//        update()
+//        try {
+//            val envelopeMeta = message.meta
+//            val res = responseBase(message)
+//            when (envelopeMeta.getString(ACTION_KEY)) {
+//                PUSH_ACTION -> {
+//                    envelopeMeta.useEachMeta("state") {
+//                        if (it.hasValue("value")) {
+//                            push(it.getString("key"), it.getValue("value"))
+//                        } else if (it.hasMeta("value")) {
+//                            push(it.getString("key"), it.getMeta("value"))
+//                        }
+//                    }
+//                    //TODO add expanded response?
+//                    res.setMetaValue(MESSAGE_STATUS_KEY, MESSAGE_OK)
+//                    return res.build()
+//                }
+//                PULL_ACTION -> {
+//                    if (envelopeMeta.hasValue("state") || envelopeMeta.hasValue("metaState")) {
+//                        envelopeMeta.useValue("state"){
+//                            it.list.forEach {
+//                                res.putMetaNode(buildMeta("state", "key" to it, "value" to config.getValue(it.string)))
+//                            }
+//                        }
+//                        envelopeMeta.useValue("metaState"){
+//                            it.list.forEach {
+//                                res.putMetaNode(buildMeta("state", "key" to it){
+//                                    putNode("value", config.getMeta(it.string))
+//                                })
+//                            }
+//
+//                        }
+//                    } else {
+//                        states.forEach {
+//                            res.putMetaNode(buildMeta("state", "key" to it.first, "value" to it.second))
+//                        }
+//                        metaStates.forEach {
+//                            res.putMetaNode(buildMeta("state", "key" to it.first) {
+//                                putNode("value", it.second)
+//                            })
+//                        }
+//                    }
+//                    res.setMetaValue(MESSAGE_STATUS_KEY, MESSAGE_OK)
+//                    return res.build()
+//                }
+//
+//                else -> throw NotDefinedException("Unknown action")
+//            }
+//
+//        } catch (ex: Exception) {
+//            return StorageMessageUtils.exceptionResponse(message, ex)
+//        }
+//
+//    }
 
     val states: Stream<Pair<String, Value>>
         get() = config.valueNames.map { Pair(it, config.getValue(it)) }

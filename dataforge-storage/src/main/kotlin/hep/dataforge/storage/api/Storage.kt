@@ -24,9 +24,6 @@ import hep.dataforge.connections.RoleDefs
 import hep.dataforge.context.ContextAware
 import hep.dataforge.events.EventHandler
 import hep.dataforge.exceptions.StorageException
-import hep.dataforge.io.messages.Dispatcher
-import hep.dataforge.io.messages.Responder
-import hep.dataforge.io.messages.Validator
 import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.Metoid
@@ -53,7 +50,7 @@ import java.util.*
         RoleDef(name = EVENT_HANDLER_ROLE, objectType = EventHandler::class, info = "Handle events produced by this storage"),
         RoleDef(name = LOGGER_ROLE, objectType = Logger::class, unique = true, info = "The logger for this storage")
 )
-interface Storage : Metoid, Named, Provider, AutoCloseable, Responder, Dispatcher, ContextAware, AutoConnectible, Comparable<Named> {
+interface Storage : Metoid, Named, Provider, AutoCloseable, ContextAware, AutoConnectible, Comparable<Named> {
 
     val isOpen: Boolean
 
@@ -63,13 +60,6 @@ interface Storage : Metoid, Named, Provider, AutoCloseable, Responder, Dispatche
      * @return
      */
     val parent: Storage?
-
-    /**
-     * Get validator for
-     *
-     * @return
-     */
-    val validator: Validator
 
 
     /**

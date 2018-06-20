@@ -17,21 +17,12 @@ package hep.dataforge.storage.commons
 
 import hep.dataforge.connections.ConnectionHelper
 import hep.dataforge.context.Context
-import hep.dataforge.description.NodeDef
 import hep.dataforge.events.Event
 import hep.dataforge.events.EventHandler
-import hep.dataforge.exceptions.EnvelopeTargetNotFoundException
 import hep.dataforge.exceptions.StorageException
-import hep.dataforge.io.envelopes.Envelope
-import hep.dataforge.io.messages.Dispatcher.Companion.TARGET_NAME_KEY
-import hep.dataforge.io.messages.Dispatcher.Companion.TARGET_TYPE_KEY
-import hep.dataforge.io.messages.Responder
-import hep.dataforge.io.messages.Validator
-import hep.dataforge.io.messages.errorResponseBase
 import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaHolder
-import hep.dataforge.meta.MetaNode.DEFAULT_META_NAME
 import hep.dataforge.names.Name
 import hep.dataforge.providers.Provides
 import hep.dataforge.storage.api.Loader
@@ -67,8 +58,6 @@ abstract class AbstractStorage : MetaHolder, Storage {
     val isRoot: Boolean
         get() = parent == null
 
-    override val validator: Validator
-        get() = StorageUtils.defaultMessageValidator(Storage.STORAGE_TARGET, name)
 
     protected constructor(parent: Storage, name: String, meta: Meta) : super(Laminate(meta, parent.meta)) {
         this.name = name.replace(".", "_")
@@ -238,17 +227,17 @@ abstract class AbstractStorage : MetaHolder, Storage {
         return Collections.unmodifiableCollection(shelves.values)
     }
 
-    @NodeDef(key = "security", info = "Some information for  security manager")
-    override fun respond(message: Envelope): Envelope {
-        val responder = getResponder(message)
-        return if (responder == this) {
-            //TODO add security management here
-            //TODO implement
-            errorResponseBase("", UnsupportedOperationException("Not supported yet.")).build()
-        } else {
-            responder.respond(message)
-        }
-    }
+//    @NodeDef(key = "security", info = "Some information for  security manager")
+//    override fun respond(message: Envelope): Envelope {
+//        val responder = getResponder(message)
+//        return if (responder == this) {
+//            //TODO add security management here
+//            //TODO implement
+//            errorResponseBase("", UnsupportedOperationException("Not supported yet.")).build()
+//        } else {
+//            responder.respond(message)
+//        }
+//    }
 
     //    @Override
     //    public boolean acceptEnvelope(Envelope envelope) {
@@ -275,40 +264,40 @@ abstract class AbstractStorage : MetaHolder, Storage {
     //                .builder();
     //    }
 
-    @NodeDef(key = DEFAULT_META_NAME, info = "A meta for sotrage or loader creation. Only used if 'allowCreate' is true.")
-    override fun getResponder(targetInfo: Meta): Responder {
-        val targetType = targetInfo.getString(TARGET_TYPE_KEY, Storage.LOADER_TARGET)
-        val targetName = targetInfo.getString(TARGET_NAME_KEY, "")
-        val allowCreate = targetInfo.getBoolean("allowCreate", true)
-        val addMeta = targetInfo.getMeta(DEFAULT_META_NAME, Meta.empty())
-        try {
-            when (targetType) {
-                Storage.STORAGE_TARGET -> return if (targetName.isEmpty()) {
-                    this
-                } else {
-                    optShelf(targetName).orElseGet {
-                        if (allowCreate) {
-                            //TODO add some path parsing cutting first segment if it is the same as this storage name
-                            optShelf(targetName).orElseGet { buildShelf(targetName, addMeta) }
-                        } else {
-                            throw EnvelopeTargetNotFoundException(targetType, targetName, targetInfo)
-                        }
-                    }
-                }
-                Storage.LOADER_TARGET -> return optLoader(targetName).orElseGet {
-                    if (allowCreate) {
-                        optLoader(targetName).orElseGet { buildLoader(targetName, addMeta) }
-                    } else {
-                        throw EnvelopeTargetNotFoundException(targetType, targetName, targetInfo)
-                    }
-                }
-                else -> throw EnvelopeTargetNotFoundException(targetType, targetName, targetInfo)
-            }
-        } catch (ex: StorageException) {
-            throw EnvelopeTargetNotFoundException(targetType, targetName, targetInfo)
-        }
-
-    }
+//    @NodeDef(key = DEFAULT_META_NAME, info = "A meta for sotrage or loader creation. Only used if 'allowCreate' is true.")
+//    override fun getResponder(targetInfo: Meta): Responder {
+//        val targetType = targetInfo.getString(TARGET_TYPE_KEY, Storage.LOADER_TARGET)
+//        val targetName = targetInfo.getString(TARGET_NAME_KEY, "")
+//        val allowCreate = targetInfo.getBoolean("allowCreate", true)
+//        val addMeta = targetInfo.getMeta(DEFAULT_META_NAME, Meta.empty())
+//        try {
+//            when (targetType) {
+//                Storage.STORAGE_TARGET -> return if (targetName.isEmpty()) {
+//                    this
+//                } else {
+//                    optShelf(targetName).orElseGet {
+//                        if (allowCreate) {
+//                            //TODO add some path parsing cutting first segment if it is the same as this storage name
+//                            optShelf(targetName).orElseGet { buildShelf(targetName, addMeta) }
+//                        } else {
+//                            throw EnvelopeTargetNotFoundException(targetType, targetName, targetInfo)
+//                        }
+//                    }
+//                }
+//                Storage.LOADER_TARGET -> return optLoader(targetName).orElseGet {
+//                    if (allowCreate) {
+//                        optLoader(targetName).orElseGet { buildLoader(targetName, addMeta) }
+//                    } else {
+//                        throw EnvelopeTargetNotFoundException(targetType, targetName, targetInfo)
+//                    }
+//                }
+//                else -> throw EnvelopeTargetNotFoundException(targetType, targetName, targetInfo)
+//            }
+//        } catch (ex: StorageException) {
+//            throw EnvelopeTargetNotFoundException(targetType, targetName, targetInfo)
+//        }
+//
+//    }
 
     /**
      * Notify all connections which can handle events

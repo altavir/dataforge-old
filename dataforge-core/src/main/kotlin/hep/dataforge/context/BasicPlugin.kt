@@ -23,7 +23,7 @@ import hep.dataforge.meta.MetaHolder
  *
  * @author Alexander Nozik
  */
-abstract class BasicPlugin(meta: Meta = Meta.empty()) : MetaHolder(meta.sealed), Plugin {
+abstract class BasicPlugin(meta: Meta = Meta.empty(), tag: PluginTag? = null) : MetaHolder(meta.sealed), Plugin {
 
     private var _context: Context? = null
     override val context: Context
@@ -42,7 +42,7 @@ abstract class BasicPlugin(meta: Meta = Meta.empty()) : MetaHolder(meta.sealed),
      *
      * @return
      */
-    override val tag: PluginTag by lazy { PluginTag.resolve(javaClass) }
+    override val tag: PluginTag by lazy { tag ?: PluginTag.resolve(javaClass) }
 
     /**
      * Load this plugin to the Global without annotation

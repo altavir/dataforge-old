@@ -110,16 +110,16 @@ class JFreeChartFrame @JvmOverloads constructor(frameMeta: Meta = Meta.empty()) 
     }
 
 
-    private fun getNumberAxis(annotation: Meta): ValueAxis {
+    private fun getNumberAxis(meta: Meta): ValueAxis {
         val axis = NumberAxis()
-        axis.autoRangeIncludesZero = false
-        axis.autoRangeStickyZero = false
+        axis.autoRangeIncludesZero = meta.getBoolean("includeZero", false)
+        axis.autoRangeStickyZero = meta.getBoolean("stickyZero", false)
         return axis
     }
 
-    private fun getDateAxis(annotation: Meta): DateAxis {
+    private fun getDateAxis(meta: Meta): DateAxis {
         val axis = DateAxis()
-        axis.timeZone = TimeZone.getTimeZone("UTC")
+        axis.timeZone = TimeZone.getTimeZone(meta.getString("timeZone", "UTC"))
         return axis
     }
 

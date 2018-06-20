@@ -25,8 +25,6 @@ import hep.dataforge.connections.RoleDefs
 import hep.dataforge.context.Context
 import hep.dataforge.context.ContextAware
 import hep.dataforge.events.EventHandler
-import hep.dataforge.io.envelopes.Envelope
-import hep.dataforge.io.messages.Responder
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.Metoid
 import hep.dataforge.names.Name
@@ -47,7 +45,7 @@ import kotlin.reflect.KClass
         RoleDef(name = Connection.EVENT_HANDLER_ROLE, objectType = EventHandler::class, info = "Handle events produced by this storage"),
         RoleDef(name = Connection.LOGGER_ROLE, objectType = Logger::class, unique = true, info = "The logger for this storage")
 )
-interface StorageElement : Named, Metoid, Provider, Responder, ContextAware, AutoConnectible, AutoCloseable {
+interface StorageElement : Named, Metoid, Provider, ContextAware, AutoConnectible, AutoCloseable {
     /**
      * Parent of this storage element if present
      */
@@ -59,10 +57,6 @@ interface StorageElement : Named, Metoid, Provider, Responder, ContextAware, Aut
     @JvmDefault
     val fullName: Name
         get() = parent?.fullName?.append(name) ?: Name.ofSingle(name)
-
-    override fun respond(message: Envelope): Envelope {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
 
     companion object {
         const val STORAGE_TARGET = "storage"

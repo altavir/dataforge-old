@@ -44,7 +44,7 @@ interface DataNode<T : Any> : Iterable<NamedData<out T>>, Named, Metoid, Provide
     val isEmpty: Boolean
 
     val size: Long
-        get() = getSize(true)
+        get() = count(true)
 
     /**
      * Get Data with given Name or null if name not present
@@ -91,7 +91,7 @@ interface DataNode<T : Any> : Iterable<NamedData<out T>>, Named, Metoid, Provide
     fun optNode(nodeName: String): DataNode<out T>?
 
     fun getNode(nodeName: String): DataNode<out T> {
-        return optNode(nodeName)?: throw NameNotFoundException(nodeName)
+        return optNode(nodeName) ?: throw NameNotFoundException(nodeName)
     }
 
     /**
@@ -155,16 +155,15 @@ interface DataNode<T : Any> : Iterable<NamedData<out T>>, Named, Metoid, Provide
      *
      * @return
      */
-    fun getSize(recursive: Boolean): Long {
+    fun count(recursive: Boolean): Long {
         return dataStream(recursive).count()
     }
 
     /**
      * Force start data goals for all data and wait for completion
      */
-    fun computeAll(): DataNode<T> {
-        nodeGoal().get()
-        return this
+    fun computeAll(){
+        nodeGoal().run()
     }
 
     /**
@@ -219,7 +218,6 @@ interface DataNode<T : Any> : Iterable<NamedData<out T>>, Named, Metoid, Provide
         return dataStream().map { it -> it.cast(type) }.iterator()
     }
 
-
     /**
      * Create a deep copy of this node and edit it
      */
@@ -258,8 +256,12 @@ interface DataNode<T : Any> : Iterable<NamedData<out T>>, Named, Metoid, Provide
             return DataSet.edit(data.type).apply {
                 name = dataName
                 meta = nodeMeta
-                putData(dataName,data)
+                putData(dataName, data)
             }.build()
+        }
+
+        inline fun <reified T : Any> build(noinline transform: DataNodeEditor<T>.() -> Unit): DataNode<T> {
+            return DataTree.edit(T::class).apply(transform).build()
         }
     }
 
@@ -283,8 +285,8 @@ abstract class DataNodeEditor<T : Any>(val type: Class<T>) {
         return putData(key, Data.buildStatic(data, meta))
     }
 
-    operator fun set(key: String, node: DataNode<out T>){
-        putNode(key,node)
+    operator fun set(key: String, node: DataNode<out T>) {
+        putNode(key, node)
     }
 
     abstract fun putNode(key: String, node: DataNode<out T>)
@@ -312,8 +314,8 @@ abstract class DataNodeEditor<T : Any>(val type: Class<T>) {
     /**
      * Update this node mirroring the argument
      */
-    fun update(node: DataNode<out T>){
-        node.dataStream(true).forEach{this.add(it)}
+    fun update(node: DataNode<out T>) {
+        node.dataStream(true).forEach { this.add(it) }
     }
 
     fun putAll(dataCollection: Collection<NamedData<out T>>) {

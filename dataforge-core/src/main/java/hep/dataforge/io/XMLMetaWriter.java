@@ -9,6 +9,7 @@ import hep.dataforge.NamedKt;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaNode;
 import hep.dataforge.values.Value;
+import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -33,7 +34,7 @@ import java.util.stream.Collectors;
 public class XMLMetaWriter implements MetaStreamWriter {
 
     @Override
-    public void write(OutputStream stream, Meta meta) {
+    public void write(@NotNull OutputStream stream, @NotNull Meta meta) {
         try {
 
             Document doc = getXMLDocument(meta);

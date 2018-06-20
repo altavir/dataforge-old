@@ -1,8 +1,8 @@
 package hep.dataforge.fx
 
 import hep.dataforge.context.Global
+import hep.dataforge.goals.Coal
 import hep.dataforge.goals.Goal
-import hep.dataforge.kodex.Coal
 import javafx.application.Platform
 import javafx.beans.property.BooleanProperty
 import javafx.beans.property.SimpleDoubleProperty

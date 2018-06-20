@@ -62,24 +62,24 @@ open class MetaHolder(override val meta: Meta) : Metoid, Described, ValueProvide
      * If this object's meta provides given value, return it, otherwise, use
      * descriptor
      *
-     * @param name
+     * @param path
      * @return
      */
-    override fun optValue(name: String): Optional<Value> {
+    override fun optValue(path: String): Optional<Value> {
         return Optionals
-                .either(meta.optValue(name))
-                .or { getDescriptor().optValueDescriptor(name).map { it.defaultValue() } }
+                .either(meta.optValue(path))
+                .or { getDescriptor().optValueDescriptor(path).map { it.defaultValue() } }
                 .opt()
     }
 
     /**
      * true if this object's meta or description contains the value
      *
-     * @param name
+     * @param path
      * @return
      */
-    override fun hasValue(name: String): Boolean {
-        return meta.hasValue(name) || getDescriptor().hasDefaultForValue(name)
+    override fun hasValue(path: String): Boolean {
+        return meta.hasValue(path) || getDescriptor().hasDefaultForValue(path)
     }
 
 }

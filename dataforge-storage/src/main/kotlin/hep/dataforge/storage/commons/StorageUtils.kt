@@ -16,11 +16,6 @@
 package hep.dataforge.storage.commons
 
 import hep.dataforge.exceptions.StorageException
-import hep.dataforge.io.envelopes.Envelope
-import hep.dataforge.io.messages.Dispatcher.Companion.MESSAGE_TARGET_NODE
-import hep.dataforge.io.messages.Dispatcher.Companion.TARGET_NAME_KEY
-import hep.dataforge.io.messages.Dispatcher.Companion.TARGET_TYPE_KEY
-import hep.dataforge.io.messages.Validator
 import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name
 import hep.dataforge.storage.api.Loader
@@ -30,7 +25,6 @@ import hep.dataforge.storage.api.TableLoader
 import hep.dataforge.storage.api.ValueIndex
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueType
-import org.slf4j.LoggerFactory
 import java.util.stream.IntStream
 import java.util.stream.Stream
 
@@ -156,41 +150,41 @@ object StorageUtils {
         return `val`.type == ValueType.NUMBER || `val`.type == ValueType.TIME
     }
 
-    /**
-     * A simple validator that checks only name and type if present
-     *
-     * @param type
-     * @param name
-     * @return
-     */
-    fun defaultMessageValidator(type: String, name: String): Validator {
-        return object : Validator {
-            override fun isValid(message: Envelope): Boolean {
-                return validate(message).getBoolean(Validator.IS_VALID_KEY)
-            }
-
-            override fun validate(message: Envelope): Meta {
-                if (message.meta.hasMeta(MESSAGE_TARGET_NODE)) {
-                    val target = message.meta.getMeta(MESSAGE_TARGET_NODE)
-                    val targetName = target.getString(TARGET_NAME_KEY)
-                    return if (targetName == name) {
-                        if (!target.hasValue(TARGET_TYPE_KEY) || target.getString(TARGET_TYPE_KEY) == type) {
-                            Validator.valid()
-                        } else {
-                            Validator.invalid("Wrong message target type")
-
-                        }
-                    } else {
-                        Validator.invalid("Wrong message target name")
-                    }
-                } else {
-                    LoggerFactory.getLogger(javaClass).debug("Envelope does not have target. Accepting by default.")
-                    return Validator.valid()
-                }
-            }
-        }
-
-    }
+//    /**
+//     * A simple validator that checks only name and type if present
+//     *
+//     * @param type
+//     * @param name
+//     * @return
+//     */
+//    fun defaultMessageValidator(type: String, name: String): Validator {
+//        return object : Validator {
+//            override fun isValid(message: Envelope): Boolean {
+//                return validate(message).getBoolean(Validator.IS_VALID_KEY)
+//            }
+//
+//            override fun validate(message: Envelope): Meta {
+//                if (message.meta.hasMeta(MESSAGE_TARGET_NODE)) {
+//                    val target = message.meta.getMeta(MESSAGE_TARGET_NODE)
+//                    val targetName = target.getString(TARGET_NAME_KEY)
+//                    return if (targetName == name) {
+//                        if (!target.hasValue(TARGET_TYPE_KEY) || target.getString(TARGET_TYPE_KEY) == type) {
+//                            Validator.valid()
+//                        } else {
+//                            Validator.invalid("Wrong message target type")
+//
+//                        }
+//                    } else {
+//                        Validator.invalid("Wrong message target name")
+//                    }
+//                } else {
+//                    LoggerFactory.getLogger(javaClass).debug("Envelope does not have target. Accepting by default.")
+//                    return Validator.valid()
+//                }
+//            }
+//        }
+//
+//    }
 
 
     /**

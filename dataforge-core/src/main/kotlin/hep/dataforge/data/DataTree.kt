@@ -27,6 +27,7 @@ class DataTree<T: Any> constructor(
 
     override var name: String = name
         private set
+
     private var selfMeta: Meta = meta
     var parent: DataTree<in T>? = parent
         private set
@@ -260,22 +261,6 @@ class DataTree<T: Any> constructor(
             return this@DataTree
         }
 
-        //    override fun putData(key: String, data: Data<out T>, replace: Boolean): Builder<T> {
-//        this.tree.putData(Name.of(key), data, replace)
-//        return this
-//    }
-//
-//    override fun putNode(key: String?, node: DataNode<out T>): Builder<T> {
-//        if (key == null || key.isEmpty()) {
-//            if (!tree.isEmpty) {
-//                LoggerFactory.getLogger(javaClass).warn("Overriding non-empty data tree root")
-//            }
-//            tree = DataTree.cloneNode(node.checked(tree!!.type), node.name)
-//        } else {
-//            this.tree.putNode(Name.of(key), node)
-//        }
-//        return this
-
     }
 
 
@@ -299,46 +284,6 @@ class DataTree<T: Any> constructor(
             return edit(Any::class.java)
         }
 
-//        /**
-//         * Create an empty typed DataTree with given Name. If name is composite,
-//         * than the whole tree structure is created
-//         *
-//         * @param <T>
-//         * @param name
-//         * @return
-//         */
-//        fun <T> emptyTree(type: Class<T>, name: Name): DataTree<T> {
-//            if (name.length == 1) {
-//                val res = DataTree(type)
-//                res.name = name.toString()
-//                return res
-//            } else {
-//                val res = DataTree(type)
-//                res.name = name.first.toString()
-//                val tail = name.cutFirst()
-//                res.nodes[tail.first.toString()] = emptyTree(type, tail)
-//                return res
-//            }
-//        }
-
-//        /**
-//         * A conversion of node to DataTree including deep copy
-//         *
-//         * @param <T>
-//         * @param node
-//         * @return
-//         */
-//        fun <T> DataNode<T>.edit(): DataTree<T>.Editor {
-//            return if (this is DataTree<T>) {
-//                this.edit()
-//            } else {
-//                edit(this.type).also {
-//                    it.name = this.name
-//                    it.meta = this.meta
-//                    this.dataStream().forEach { d -> it.add(d) }
-//                }
-//            }
-//        }
     }
 }
 

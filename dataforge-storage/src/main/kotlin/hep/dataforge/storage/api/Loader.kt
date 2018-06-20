@@ -26,8 +26,6 @@ import hep.dataforge.context.ContextAware
 import hep.dataforge.description.ValueDef
 import hep.dataforge.events.EventHandler
 import hep.dataforge.io.envelopes.Envelope
-import hep.dataforge.io.messages.Responder
-import hep.dataforge.io.messages.Validator
 import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Metoid
 import hep.dataforge.names.AlphanumComparator
@@ -46,7 +44,7 @@ import org.slf4j.Logger
         RoleDef(name = LOGGER_ROLE, objectType = Logger::class, unique = true, info = "The logger for this loader")
 )
 @ValueDef(key = LOADER_TYPE_KEY, info = "The type of the loader")
-interface Loader : Metoid, AutoCloseable, Named, Responder, AutoConnectible, ContextAware, Comparable<Named> {
+interface Loader : Metoid, AutoCloseable, Named, AutoConnectible, ContextAware, Comparable<Named> {
 
     /**
      * The loader description
@@ -72,7 +70,7 @@ interface Loader : Metoid, AutoCloseable, Named, Responder, AutoConnectible, Con
 
     val isEmpty: Boolean
 
-    val validator: Validator
+//    val validator: Validator
 
     /**
      * Get full path to this loader relative to root storage

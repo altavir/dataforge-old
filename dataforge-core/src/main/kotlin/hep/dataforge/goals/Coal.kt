@@ -1,9 +1,8 @@
-package hep.dataforge.kodex
+package hep.dataforge.goals
 
 import hep.dataforge.context.Context
-import hep.dataforge.goals.Goal
-import hep.dataforge.goals.GoalGroup
-import hep.dataforge.goals.GoalListener
+import hep.dataforge.kodex.await
+import hep.dataforge.kodex.coroutineContext
 import hep.dataforge.utils.ReferenceRegistry
 import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.future.asCompletableFuture
@@ -37,15 +36,15 @@ class Coal<R>(
 
     private val listeners = ReferenceRegistry<GoalListener<R>>();
 
-    private val deferred: Deferred<R> = async(dispatcher, CoroutineStart.LAZY) {
+    private var deferred: Deferred<R> = async(dispatcher, CoroutineStart.LAZY) {
         try {
             notifyListeners { onGoalStart() }
             if (!id.isEmpty()) {
                 Thread.currentThread().name = "Goal:$id"
             }
-            val res = block.invoke()
-            notifyListeners { onGoalComplete(res) }
-            return@async res
+            block.invoke().also {
+                notifyListeners { onGoalComplete(it) }
+            }
         } catch (ex: Throwable) {
             notifyListeners { onGoalFailed(ex) }
             //rethrow exception
@@ -55,7 +54,7 @@ class Coal<R>(
 
     private fun notifyListeners(action: suspend GoalListener<R>.() -> Unit) {
         listeners.forEach {
-            async(context = dispatcher) {
+            launch(context = dispatcher) {
                 try {
                     action.invoke(it)
                 } catch (ex: Exception) {
@@ -102,7 +101,7 @@ class Coal<R>(
         return deferred.isActive
     }
 
-    override fun result(): CompletableFuture<R> {
+    override fun asCompletableFuture(): CompletableFuture<R> {
         return deferred.asCompletableFuture();
     }
 
@@ -111,7 +110,7 @@ class Coal<R>(
     }
 
     override fun dependencies(): Stream<Goal<*>> {
-        return deps.stream().map { it }
+        return deps.stream()
     }
 }
 

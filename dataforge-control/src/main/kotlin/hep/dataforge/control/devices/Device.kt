@@ -22,13 +22,10 @@ import hep.dataforge.connections.Connection.LOGGER_ROLE
 import hep.dataforge.connections.RoleDef
 import hep.dataforge.connections.RoleDefs
 import hep.dataforge.context.ContextAware
-import hep.dataforge.control.ControlUtils
 import hep.dataforge.control.connections.Roles.DEVICE_LISTENER_ROLE
 import hep.dataforge.control.connections.Roles.VIEW_ROLE
 import hep.dataforge.events.EventHandler
 import hep.dataforge.exceptions.ControlException
-import hep.dataforge.io.envelopes.Envelope
-import hep.dataforge.io.messages.Responder
 import hep.dataforge.meta.Metoid
 import hep.dataforge.states.Stateful
 import org.slf4j.Logger
@@ -69,7 +66,7 @@ import org.slf4j.Logger
         RoleDef(name = EVENT_HANDLER_ROLE, objectType = EventHandler::class, info = "The listener for device events"),
         RoleDef(name = VIEW_ROLE)
 )
-interface Device : AutoConnectible, Metoid, ContextAware, Named, Responder, Stateful {
+interface Device : AutoConnectible, Metoid, ContextAware, Named, Stateful {
 
     /**
      * Device type
@@ -102,9 +99,6 @@ interface Device : AutoConnectible, Metoid, ContextAware, Named, Responder, Stat
     @Throws(ControlException::class)
     fun shutdown()
 
-    override fun respond(message: Envelope): Envelope {
-        return ControlUtils.getDefaultDeviceResponse(this, message)
-    }
 
     companion object {
         const val INITIALIZED_STATE = "initialized"

@@ -37,6 +37,6 @@ include ':dataforge-storage2' // storage2 module
 
 include ':dataforge-markup'
 
-include ':dataforge-remote'
+include ':dataforge-messages'
 
 include ':site'//the site

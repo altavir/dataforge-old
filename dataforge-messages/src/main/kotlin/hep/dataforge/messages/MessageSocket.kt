@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package hep.dataforge.io.messages
+package hep.dataforge.messages
 
 import hep.dataforge.io.envelopes.*
 import kotlinx.coroutines.experimental.Job
@@ -66,7 +66,7 @@ class MessageSocket(val receiver: Receiver, private val socketFactory: () -> Soc
 
         relayJob = launch {
             while (true) {
-                receiver.receive(incoming.receive())
+                receiver.send(incoming.receive())
             }
         }
     }
@@ -81,9 +81,9 @@ class MessageSocket(val receiver: Receiver, private val socketFactory: () -> Soc
     /**
      * send message via socket
      */
-    override fun receive(message: Envelope) {
+    override fun send(message: Envelope) {
         async {
-            outgoing.send(message)
+            incoming.send(message)
         }
     }
 }

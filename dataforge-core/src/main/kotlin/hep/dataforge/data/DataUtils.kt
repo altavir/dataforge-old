@@ -130,7 +130,7 @@ object DataUtils {
      * @param data
      * @param <T>
      * @return
-    </T> */
+    */
     fun <T : Any> singletonNode(nodeName: String, data: Data<T>): DataNode<T> {
         return DataSet.edit(data.type)
                 .apply { putData(DataNode.DEFAULT_DATA_FRAGMENT_NAME, data) }
@@ -142,6 +142,14 @@ object DataUtils {
     }
 
     /**
+     * Reslove external meta for file if it is present
+     */
+    fun readExternalMeta(file: FileReference): Meta?{
+        val metaFileDirectory = file.absolutePath.resolveSibling(META_DIRECTORY)
+        return MetaFileReader.resolve(metaFileDirectory, file.absolutePath.fileName.toString()).orElse(null)
+    }
+
+    /**
      * Read an object from a file using given transformation. Capture a file meta from default directory. Override meta is placed above file meta.
      *
      * @param file
@@ -150,15 +158,14 @@ object DataUtils {
      * @param reader
      * @param <T>
      * @return
-    </T> */
+    */
     fun <T> readFile(file: FileReference, override: Meta, type: Class<T>, reader: (Binary) -> T): Data<T> {
         val filePath = file.absolutePath
         if (!Files.isRegularFile(filePath)) {
             throw IllegalArgumentException(filePath.toString() + " is not existing file")
         }
         val binary = file.binary
-        val metaFileDirectory = filePath.resolveSibling(META_DIRECTORY)
-        val fileMeta = MetaFileReader.resolve(metaFileDirectory, filePath.fileName.toString()).orElse(Meta.empty())
+        val fileMeta = readExternalMeta(file)
         val meta = Laminate(fileMeta, override)
         return Data.generate(type, meta) { reader(binary) }
     }
@@ -189,7 +196,7 @@ object DataUtils {
      * @param reader   a bifunction taking the binary itself and combined meta as arguments and returning
      * @param <T>
      * @return
-    </T> */
+    */
     fun <T> readEnvelope(filePath: Path, override: Meta, type: Class<T>, reader: BiFunction<Binary, Meta, T>): Data<T> {
         try {
             val envelope = EnvelopeReader.readFile(filePath)
