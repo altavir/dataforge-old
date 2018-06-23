@@ -17,11 +17,7 @@ package hep.dataforge.context
 
 import hep.dataforge.description.ValueDef
 import hep.dataforge.description.ValueDefs
-import hep.dataforge.kodex.buildMeta
-import hep.dataforge.kodex.stringValue
-import hep.dataforge.meta.Meta
-import hep.dataforge.meta.MetaBuilder
-import hep.dataforge.meta.SimpleMetaMorph
+import hep.dataforge.meta.*
 
 /**
  * The tag which contains information about name, group and version of some

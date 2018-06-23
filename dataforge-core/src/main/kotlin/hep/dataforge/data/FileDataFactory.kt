@@ -23,6 +23,7 @@ package hep.dataforge.data
 
 import hep.dataforge.context.Context
 import hep.dataforge.context.Context.Companion.DATA_DIRECTORY_CONTEXT_KEY
+import hep.dataforge.context.FileReference
 import hep.dataforge.data.FileDataFactory.Companion.DIRECTORY_NODE
 import hep.dataforge.data.FileDataFactory.Companion.FILE_NODE
 import hep.dataforge.data.binary.Binary
@@ -33,7 +34,6 @@ import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.utils.NamingUtils.wildcardMatch
-import hep.dataforge.workspace.FileReference
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path

@@ -162,7 +162,7 @@ val Meta.childNodes: List<Meta>
  * Configure a configurable using in-place build meta
  */
 fun <T : Configurable> T.configure(transform: KMetaBuilder.() -> Unit): T {
-    this.configure(hep.dataforge.kodex.buildMeta(this.config.name, transform));
+    this.configure(buildMeta(this.config.name, transform));
     return this;
 }
 

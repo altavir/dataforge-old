@@ -16,6 +16,7 @@
 
 package hep.dataforge.data
 
+import hep.dataforge.context.FileReference
 import hep.dataforge.data.binary.Binary
 import hep.dataforge.goals.AbstractGoal
 import hep.dataforge.goals.Goal
@@ -25,7 +26,6 @@ import hep.dataforge.io.envelopes.EnvelopeReader
 import hep.dataforge.kodex.toList
 import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta
-import hep.dataforge.workspace.FileReference
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path

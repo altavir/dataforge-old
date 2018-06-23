@@ -17,7 +17,7 @@ package hep.dataforge.plots.data
 
 import hep.dataforge.description.ValueDef
 import hep.dataforge.description.ValueDefs
-import hep.dataforge.kodex.KMetaBuilder
+import hep.dataforge.meta.KMetaBuilder
 import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name
 import hep.dataforge.tables.Adapters

@@ -14,12 +14,8 @@
  *  limitations under the License.
  */
 
-package hep.dataforge.kodex
+package hep.dataforge.tables
 
-import hep.dataforge.tables.Column
-import hep.dataforge.tables.ColumnFormat
-import hep.dataforge.tables.ColumnTable
-import hep.dataforge.tables.Table
 import hep.dataforge.values.ValueType
 import hep.dataforge.values.Values
 import java.util.stream.Stream

@@ -19,8 +19,8 @@ package hep.dataforge.grind.workspace
 import groovy.lang.Closure
 import hep.dataforge.actions.Action
 import hep.dataforge.kodex.ActionEnv
-import hep.dataforge.kodex.KTaskBuilder
 import hep.dataforge.meta.Meta
+import hep.dataforge.workspace.tasks.KTaskBuilder
 import hep.dataforge.workspace.tasks.Task
 import hep.dataforge.workspace.tasks.TaskModel
 

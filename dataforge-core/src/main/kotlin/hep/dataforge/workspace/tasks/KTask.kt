@@ -1,20 +1,38 @@
-package hep.dataforge.kodex
+/*
+ * Copyright  2018 Alexander Nozik.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
+package hep.dataforge.workspace.tasks
 
 import hep.dataforge.actions.Action
 import hep.dataforge.data.DataNode
 import hep.dataforge.data.DataNodeEditor
 import hep.dataforge.data.DataTree
+import hep.dataforge.kodex.*
 import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name
-import hep.dataforge.workspace.tasks.AbstractTask
-import hep.dataforge.workspace.tasks.TaskModel
+import kotlin.reflect.KClass
 
-class KTask(
+class  KTask<R: Any>(
         override val name: String,
+        type: KClass<R>,
         private val modelTransform: TaskModel.Builder.(Meta) -> Unit,
         private val dataTransform: TaskModel.(DataNode<*>) -> DataNode<Any>
 ) : AbstractTask<Any>() {
 
+    override val type: Class<out Any> = type.java
 
     override fun run(model: TaskModel, data: DataNode<*>): DataNode<Any> {
         model.context.logger.info("Starting task '$name' on data node ${data.name} with meta: \n${model.meta}")
@@ -148,7 +166,7 @@ class KTaskBuilder(val name: String) {
     }
 
 
-    fun build(): KTask {
+    fun build(): KTask<Any> {
         val transform: TaskModel.(DataNode<*>) -> DataNode<Any> = { data ->
             val model = this;
             if (dataTransforms.isEmpty()) {
@@ -168,10 +186,10 @@ class KTaskBuilder(val name: String) {
                 builder.build()
             }
         }
-        return KTask(name, modelTransform, transform);
+        return KTask(name, Any::class, modelTransform, transform);
     }
 }
 
-fun task(name: String, builder: KTaskBuilder.() -> Unit): KTask {
+fun task(name: String, builder: KTaskBuilder.() -> Unit): KTask<Any> {
     return KTaskBuilder(name).apply(builder).build();
 }

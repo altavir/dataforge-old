@@ -16,8 +16,8 @@
 
 package hep.dataforge.io
 
-import hep.dataforge.kodex.buildMeta
 import hep.dataforge.kodex.get
+import hep.dataforge.meta.buildMeta
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -43,7 +43,7 @@ class JSONMetaTypeTest {
         val meta = buildMeta {
             "a" to 22
             "b" to {
-                "c" to listOf(1,2, listOf(3.1, 3.2))
+                "c" to listOf(1, 2, listOf(3.1, 3.2))
                 "d" to "my string value"
             }
         }

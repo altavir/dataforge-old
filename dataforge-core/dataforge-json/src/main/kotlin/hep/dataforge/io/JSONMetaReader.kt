@@ -24,9 +24,9 @@ package hep.dataforge.io
 import com.github.cliftonlabs.json_simple.JsonArray
 import com.github.cliftonlabs.json_simple.JsonObject
 import com.github.cliftonlabs.json_simple.Jsoner
-import hep.dataforge.kodex.KMetaBuilder
-import hep.dataforge.kodex.buildMeta
+import hep.dataforge.meta.KMetaBuilder
 import hep.dataforge.meta.MetaBuilder
+import hep.dataforge.meta.buildMeta
 import hep.dataforge.values.LateParseValue
 import hep.dataforge.values.Value
 import java.io.ByteArrayInputStream

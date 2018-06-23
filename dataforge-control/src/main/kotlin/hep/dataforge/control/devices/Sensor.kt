@@ -30,9 +30,9 @@ import hep.dataforge.control.devices.Sensor.Companion.MEASUREMENT_STATUS_STATE
 import hep.dataforge.control.devices.Sensor.Companion.MEASURING_STATE
 import hep.dataforge.description.NodeDef
 import hep.dataforge.description.ValueDef
-import hep.dataforge.kodex.buildMeta
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaMorph
+import hep.dataforge.meta.buildMeta
 import hep.dataforge.states.*
 import hep.dataforge.values.ValueType
 import kotlinx.coroutines.experimental.Job

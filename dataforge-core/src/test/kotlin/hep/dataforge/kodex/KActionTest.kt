@@ -19,7 +19,9 @@ package hep.dataforge.kodex
 import hep.dataforge.context.Global
 import hep.dataforge.data.DataSet
 import hep.dataforge.meta.Meta
+import hep.dataforge.meta.buildMeta
 import hep.dataforge.workspace.BasicWorkspace
+import hep.dataforge.workspace.tasks.task
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.experimental.time.delay

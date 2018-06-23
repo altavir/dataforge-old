@@ -17,8 +17,8 @@
 package hep.dataforge.fx.test
 
 import hep.dataforge.fx.meta.MetaViewer
-import hep.dataforge.kodex.buildMeta
 import hep.dataforge.meta.MetaBuilder
+import hep.dataforge.meta.buildMeta
 import javafx.scene.Scene
 import javafx.stage.Stage
 import tornadofx.*

@@ -2,9 +2,9 @@ package hep.dataforge.server.storage
 
 
 import hep.dataforge.io.JSONMetaWriter
-import hep.dataforge.kodex.buildMeta
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
+import hep.dataforge.meta.buildMeta
 import hep.dataforge.storage.api.ValueIndex.Companion.LIMIT_KEY
 import hep.dataforge.tables.Table
 import hep.dataforge.tables.TableFormat

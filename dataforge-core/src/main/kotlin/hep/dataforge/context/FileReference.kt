@@ -14,14 +14,12 @@
  *  limitations under the License.
  */
 
-package hep.dataforge.workspace
+package hep.dataforge.context
 
-import hep.dataforge.context.Context
-import hep.dataforge.context.ContextAware
+import hep.dataforge.context.FileReference.FileReferenceScope.*
 import hep.dataforge.data.binary.Binary
 import hep.dataforge.data.binary.FileBinary
 import hep.dataforge.names.Name
-import hep.dataforge.workspace.FileReference.FileReferenceScope.*
 import java.io.File
 import java.io.OutputStream
 import java.nio.channels.SeekableByteChannel

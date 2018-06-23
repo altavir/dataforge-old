@@ -239,7 +239,7 @@ interface DataNode<T : Any> : Iterable<NamedData<out T>>, Named, Metoid, Provide
             return EmptyDataNode(name, type)
         }
 
-        fun empty(): DataNode<*> {
+        fun empty(): DataNode<Any> {
             return EmptyDataNode("", Any::class.java)
         }
 

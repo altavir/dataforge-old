@@ -18,8 +18,8 @@ package hep.dataforge.context
 import hep.dataforge.exceptions.ContextLockException
 import hep.dataforge.io.output.Output
 import hep.dataforge.io.output.StreamOutput
-import hep.dataforge.kodex.buildMeta
 import hep.dataforge.kodex.orElse
+import hep.dataforge.meta.buildMeta
 import hep.dataforge.utils.ReferenceRegistry
 import hep.dataforge.values.Value
 import java.io.File

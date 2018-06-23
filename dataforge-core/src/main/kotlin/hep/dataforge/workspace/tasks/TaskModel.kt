@@ -8,15 +8,13 @@ package hep.dataforge.workspace.tasks
 import hep.dataforge.Named
 import hep.dataforge.context.Context
 import hep.dataforge.context.ContextAware
+import hep.dataforge.data.DataNode
 import hep.dataforge.data.DataNodeEditor
 import hep.dataforge.data.NamedData
 import hep.dataforge.exceptions.AnonymousNotAlowedException
 import hep.dataforge.exceptions.NameNotFoundException
-import hep.dataforge.meta.Meta
-import hep.dataforge.meta.MetaBuilder
-import hep.dataforge.meta.MetaID
+import hep.dataforge.meta.*
 import hep.dataforge.meta.MetaNode.DEFAULT_META_NAME
-import hep.dataforge.meta.Metoid
 import hep.dataforge.utils.GenericBuilder
 import hep.dataforge.utils.NamingUtils
 import hep.dataforge.values.Value
@@ -112,6 +110,25 @@ class TaskModel private constructor(
     override fun hasValue(path: String): Boolean {
         return meta.hasValue(path)
     }
+
+
+    /**
+     * Generate an unique ID for output data for caching
+     */
+    fun getID(data: NamedData<*>): Meta{
+        //TODO calculate dependencies
+        return data.id
+    }
+
+//    /**
+//     * Find all data that is used to construct data with given name
+//     */
+//    fun resolveData(name: Name): List<NamedData<*>>{
+//        return dependencies.flatMap {
+//
+//        }
+//    }
+
 
     /**
      * A rule to add calculate dependency data from workspace
@@ -453,9 +470,31 @@ class TaskModel private constructor(
         fun builder(workspace: Workspace, taskName: String, taskMeta: Meta): TaskModel.Builder {
             return TaskModel.Builder(workspace, taskName, taskMeta)
         }
-    }
 
-    init {
-        this._dependencies.addAll(dependencies)
+        /**
+         * Generate id for NamedData
+         */
+        val NamedData<*>.id: Meta
+            get() = meta.builder.apply {
+                "name" to name
+                "type" to this@id.type
+            }
+
+        /**
+         * Generate id for the DataNode, describing its content
+         */
+        val DataNode<*>.id: Meta
+            get() = buildMeta {
+                if (!meta.isEmpty) {
+                    "name" to name
+                    "meta" to meta
+                }
+                nodeStream(false).forEach {
+                    "node" to it.id
+                }
+                dataStream(false).forEach {
+                    "data" to it.id
+                }
+            }
     }
 }

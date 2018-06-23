@@ -18,9 +18,9 @@ package hep.dataforge.plots.output
 
 import hep.dataforge.context.Context
 import hep.dataforge.io.output.Output
-import hep.dataforge.kodex.KMetaBuilder
-import hep.dataforge.kodex.buildMeta
 import hep.dataforge.meta.Configurable
+import hep.dataforge.meta.KMetaBuilder
+import hep.dataforge.meta.buildMeta
 import hep.dataforge.plots.PlotFrame
 import hep.dataforge.plots.Plottable
 

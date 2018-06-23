@@ -26,13 +26,8 @@ import hep.dataforge.workspace.Workspace
  *
  * @param <R>
  * @author Alexander Nozik
-*/
-interface Task<out R: Any> : Named, Described {
-
-    //    @Override
-    //    default NodeDescriptor getDescriptor() {
-    //        return Descriptors.buildDescriptor(getName(), getClass());
-    //    }
+ */
+interface Task<out R : Any> : Named, Described {
 
     /**
      * If true, the task is designated as terminal.
@@ -41,6 +36,17 @@ interface Task<out R: Any> : Named, Described {
      */
     val isTerminal: Boolean
         get() = false
+
+    /**
+     * The type of the node returned by the task
+     */
+    val type: Class<out R>
+
+    /**
+     * Text description of the task
+     */
+    val info: String
+        get() = ""
 
     /**
      * Build a model for this task
@@ -56,7 +62,10 @@ interface Task<out R: Any> : Named, Described {
      *
      * @param model
      */
-    fun validate(model: TaskModel)
+    @JvmDefault
+    fun validate(model: TaskModel) {
+        //do nothing
+    }
 
     /**
      * Run given task model. Type check expected to be performed before actual
@@ -66,17 +75,6 @@ interface Task<out R: Any> : Named, Described {
      * @return
      */
     fun run(model: TaskModel): DataNode<out R>
-
-    /**
-     * Equals builder + run
-     *
-     * @param workspace
-     * @param taskConfig
-     * @return
-     */
-    fun run(workspace: Workspace, taskConfig: Meta): DataNode<out R> {
-        return run(build(workspace, taskConfig))
-    }
 
     companion object {
         const val TASK_TARGET = "task"

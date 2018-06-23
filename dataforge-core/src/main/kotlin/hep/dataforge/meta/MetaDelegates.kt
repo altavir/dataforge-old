@@ -14,12 +14,11 @@
  *  limitations under the License.
  */
 
-package hep.dataforge.kodex
+package hep.dataforge.meta
 
 import hep.dataforge.description.Described
 import hep.dataforge.description.Descriptors
 import hep.dataforge.description.PropertyDef
-import hep.dataforge.meta.*
 import hep.dataforge.values.Value
 import hep.dataforge.values.parseValue
 import java.time.Instant

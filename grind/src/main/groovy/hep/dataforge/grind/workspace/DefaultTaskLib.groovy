@@ -67,7 +67,7 @@ class DefaultTaskLib {
     }
 
     /**
-     * A task with single join action delegated to {@link hep.dataforge.kodex.KTaskBuilder#pipe}
+     * A task with single join action delegated to {@link hep.dataforge.workspace.tasks.KTaskBuilder#pipe}
      * @param params
      * @param name
      * @param action
@@ -86,7 +86,7 @@ class DefaultTaskLib {
     }
 
     /**
-     * A task with single join action delegated to {@link hep.dataforge.kodex.KTaskBuilder#join}
+     * A task with single join action delegated to {@link hep.dataforge.workspace.tasks.KTaskBuilder#join}
      * @param params
      * @param name
      * @param action

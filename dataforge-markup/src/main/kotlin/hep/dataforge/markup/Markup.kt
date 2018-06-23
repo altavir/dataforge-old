@@ -16,9 +16,7 @@
 
 package hep.dataforge.markup.markup
 
-import hep.dataforge.kodex.buildMeta
 import hep.dataforge.kodex.childNodes
-import hep.dataforge.kodex.mutableStringValue
 import hep.dataforge.kodex.nullable
 import hep.dataforge.meta.*
 import kotlin.reflect.KClass

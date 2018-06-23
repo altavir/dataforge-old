@@ -22,15 +22,18 @@ import hep.dataforge.io.DefaultOutputManager
 import hep.dataforge.io.IOUtils
 import hep.dataforge.io.OutputManager
 import hep.dataforge.io.SplitOutputManager
-import hep.dataforge.kodex.*
+import hep.dataforge.kodex.nullable
+import hep.dataforge.kodex.optional
+import hep.dataforge.kodex.useMeta
+import hep.dataforge.meta.KMetaBuilder
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaID
+import hep.dataforge.meta.buildMeta
 import hep.dataforge.providers.Provider
 import hep.dataforge.providers.Provides
 import hep.dataforge.providers.ProvidesNames
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueProvider
-import hep.dataforge.workspace.FileReference
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -42,7 +45,15 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.stream.Stream
+import kotlin.collections.Collection
 import kotlin.collections.HashMap
+import kotlin.collections.Map
+import kotlin.collections.MutableMap
+import kotlin.collections.asSequence
+import kotlin.collections.forEach
+import kotlin.collections.getOrPut
+import kotlin.collections.map
+import kotlin.collections.set
 import kotlin.streams.asSequence
 import kotlin.streams.asStream
 

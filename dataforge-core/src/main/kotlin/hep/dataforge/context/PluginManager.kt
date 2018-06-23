@@ -16,9 +16,9 @@
 package hep.dataforge.context
 
 import hep.dataforge.exceptions.ContextLockException
-import hep.dataforge.kodex.KMetaBuilder
-import hep.dataforge.kodex.buildMeta
+import hep.dataforge.meta.KMetaBuilder
 import hep.dataforge.meta.Meta
+import hep.dataforge.meta.buildMeta
 import java.util.*
 import java.util.stream.Stream
 import kotlin.reflect.KClass

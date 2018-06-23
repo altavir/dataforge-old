@@ -5,6 +5,7 @@ import ch.qos.logback.classic.encoder.PatternLayoutEncoder
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.Appender
 import ch.qos.logback.core.FileAppender
+import hep.dataforge.context.FileReference
 import hep.dataforge.context.Plugin
 import hep.dataforge.context.PluginDef
 import hep.dataforge.context.PluginFactory
@@ -12,7 +13,6 @@ import hep.dataforge.io.output.FileOutput
 import hep.dataforge.io.output.Output
 import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name
-import hep.dataforge.workspace.FileReference
 import org.slf4j.LoggerFactory
 import java.io.File
 

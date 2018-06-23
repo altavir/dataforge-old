@@ -28,6 +28,7 @@ import hep.dataforge.context.PluginFactory
 import hep.dataforge.data.Data
 import hep.dataforge.data.DataNode
 import hep.dataforge.data.DataTree
+import hep.dataforge.data.NamedData
 import hep.dataforge.goals.Goal
 import hep.dataforge.goals.GoalListener
 import hep.dataforge.meta.Meta
@@ -47,7 +48,7 @@ import javax.cache.Caching
 class CachePlugin(meta: Meta) : BasicPlugin(meta) {
 
     /**
-     * Set immutable bypass condition for data
+     * Set cache bypass condition for data
      *
      * @param bypass
      */
@@ -70,7 +71,7 @@ class CachePlugin(meta: Meta) : BasicPlugin(meta) {
     }
 
 
-    fun <V> cache(cacheName: String, id: Meta, data: Data<V>): Data<V> {
+    fun <V> cache(cacheName: String, data: Data<V>, id: Meta): Data<V> {
         if (bypass(data) || !Serializable::class.java.isAssignableFrom(data.type)) {
             return data
         } else {
@@ -143,17 +144,30 @@ class CachePlugin(meta: Meta) : BasicPlugin(meta) {
         }
     }
 
-    fun <V: Any> cacheNode(cacheName: String, nodeId: Meta, node: DataNode<V>): DataNode<V> {
+    fun <V : Any> cacheNode(cacheName: String, node: DataNode<V>, nodeId: Meta): DataNode<V> {
         val builder = DataTree.edit(node.type).also {
             it.name = node.name
             it.meta = node.meta
             //recursively caching nodes
             node.nodeStream(false).forEach { child ->
-                it.add(cacheNode(Name.joinString(cacheName, child.name), nodeId, child))
+                it.add(cacheNode(Name.joinString(cacheName, child.name), child, nodeId))
             }
             //caching direct data children
             node.dataStream(false).forEach { datum ->
-                it.putData(datum.name, cache(cacheName, nodeId.builder.setValue("dataName", datum.name), datum))
+                it.putData(datum.name, cache(cacheName, datum, nodeId.builder.setValue("dataName", datum.name)))
+            }
+        }
+
+        return builder.build()
+    }
+
+    fun <V : Any> cacheNode(cacheName: String, node: DataNode<V>, idFactory: (NamedData<*>) -> Meta): DataNode<V> {
+        val builder = DataTree.edit(node.type).also {cached->
+            cached.name = node.name
+            cached.meta = node.meta
+            //recursively caching everything
+            node.dataStream(true).forEach { datum ->
+                cached.putData(datum.name, cache(cacheName, datum, idFactory.invoke(datum)))
             }
         }
 

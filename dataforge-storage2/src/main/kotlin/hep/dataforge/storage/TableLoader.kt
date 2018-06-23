@@ -18,8 +18,8 @@ package hep.dataforge.storage
 
 import hep.dataforge.context.Context
 import hep.dataforge.io.envelopes.*
-import hep.dataforge.kodex.buildMeta
 import hep.dataforge.meta.Meta
+import hep.dataforge.meta.buildMeta
 import hep.dataforge.storage.TableLoaderType.BINARY_DATA_TYPE
 import hep.dataforge.storage.TableLoaderType.TABLE_FORMAT_KEY
 import hep.dataforge.storage.TableLoaderType.TEXT_DATA_TYPE

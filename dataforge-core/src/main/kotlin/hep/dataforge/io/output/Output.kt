@@ -2,8 +2,8 @@ package hep.dataforge.io.output
 
 import hep.dataforge.context.Context
 import hep.dataforge.context.ContextAware
+import hep.dataforge.context.FileReference
 import hep.dataforge.meta.Meta
-import hep.dataforge.workspace.FileReference
 import java.io.OutputStream
 
 /**

@@ -17,9 +17,9 @@ package hep.dataforge.storage.api
 
 import hep.dataforge.events.Event
 import hep.dataforge.events.EventBuilder
-import hep.dataforge.kodex.stringValue
-import hep.dataforge.kodex.value
 import hep.dataforge.meta.Meta
+import hep.dataforge.meta.stringValue
+import hep.dataforge.meta.value
 import hep.dataforge.values.Value
 
 /**

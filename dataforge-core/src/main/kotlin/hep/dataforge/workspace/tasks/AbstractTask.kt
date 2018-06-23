@@ -26,14 +26,14 @@ import hep.dataforge.workspace.Workspace
 /**
  * Created by darksnake on 21-Aug-16.
  */
-abstract class AbstractTask<R: Any> : Task<R> {
+abstract class AbstractTask<R : Any> : Task<R> {
 
-    private fun gather(model: TaskModel): DataNodeEditor<*> {
-        val builder: DataNodeEditor<Any> = DataTree.edit().apply { name = "data" }
+    protected open fun gather(model: TaskModel): DataNode<*> {
+        val builder: DataNodeEditor<Any> = DataTree.edit()
         model.dependencies.forEach { dep ->
             dep.apply(builder, model.workspace)
         }
-        return builder
+        return builder.build()
     }
 
     override fun run(model: TaskModel): DataNode<out R> {
@@ -41,7 +41,7 @@ abstract class AbstractTask<R: Any> : Task<R> {
         validate(model)
 
         // gather data
-        val input = gather(model).build()
+        val input = gather(model)
 
         //execute
         val output = run(model, input)
@@ -52,17 +52,14 @@ abstract class AbstractTask<R: Any> : Task<R> {
         return output
     }
 
-    protected fun handle(output: DataNode<out R>) {
+    /**
+     * Result handler for the task
+     */
+    protected open fun handle(output: DataNode<out R>) {
         //do nothing
     }
 
     protected abstract fun run(model: TaskModel, data: DataNode<*>): DataNode<out R>
-
-
-    override fun validate(model: TaskModel) {
-        //TODO add basic validation here
-    }
-
 
     /**
      * Apply model transformation to include custom dependencies or change

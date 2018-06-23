@@ -23,6 +23,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.encoder.Encoder
 import ch.qos.logback.core.encoder.EncoderBase
 import hep.dataforge.context.Context
+import hep.dataforge.context.FileReference
 import hep.dataforge.description.NodeDescriptor
 import hep.dataforge.description.ValueDescriptor
 import hep.dataforge.io.IOUtils
@@ -36,7 +37,6 @@ import hep.dataforge.meta.Meta
 import hep.dataforge.meta.Metoid
 import hep.dataforge.tables.Table
 import hep.dataforge.values.ValueType
-import hep.dataforge.workspace.FileReference
 import javafx.scene.paint.Color
 import org.slf4j.LoggerFactory
 import java.io.OutputStream

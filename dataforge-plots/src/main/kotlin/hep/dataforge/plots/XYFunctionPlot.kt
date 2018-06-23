@@ -17,8 +17,8 @@ package hep.dataforge.plots
 
 import hep.dataforge.description.ValueDef
 import hep.dataforge.description.ValueDefs
-import hep.dataforge.kodex.*
-import hep.dataforge.meta.Meta
+import hep.dataforge.kodex.toList
+import hep.dataforge.meta.*
 import hep.dataforge.names.Name
 import hep.dataforge.plots.data.XYPlot
 import hep.dataforge.tables.Adapters
@@ -29,6 +29,8 @@ import hep.dataforge.values.ValueType.BOOLEAN
 import hep.dataforge.values.ValueType.NUMBER
 import hep.dataforge.values.Values
 import java.util.*
+import kotlin.collections.List
+import kotlin.collections.set
 
 /**
  * A class for dynamic function values calculation for plot

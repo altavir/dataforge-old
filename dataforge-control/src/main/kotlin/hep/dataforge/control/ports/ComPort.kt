@@ -16,8 +16,8 @@
 package hep.dataforge.control.ports
 
 import hep.dataforge.exceptions.PortException
-import hep.dataforge.kodex.buildMeta
 import hep.dataforge.meta.Meta
+import hep.dataforge.meta.buildMeta
 import jssc.SerialPort
 import jssc.SerialPort.*
 import jssc.SerialPortEventListener

@@ -193,7 +193,7 @@ public class ActionUtils {
                 res = action.run(context, res, actionMeta);
                 if (cache != null && actionMeta.getBoolean("cacheResult", false)) {
                     //FIXME add context identity here
-                    res = cache.cacheNode(action.getName(), id, res);
+                    res = cache.cacheNode(action.getName(), res, id);
                 }
             }
             return res;
