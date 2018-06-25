@@ -21,7 +21,6 @@ class TableDisplay(val table: Table, title: String? = null) : Fragment(title = t
         }
     }
 
-
     private val grid: Grid = GridBase(table.size(), table.format.count()).apply {
         val format = table.format;
 
@@ -41,7 +40,28 @@ class TableDisplay(val table: Table, title: String? = null) : Fragment(title = t
     }
 
     override val root = borderpane {
+        top = toolbar {
+            button("Export as text") {
+                action(::export)
+            }
+        }
         center = spreadsheet;
+    }
+
+    private fun export() {
+        chooseFile("Save table data to...", emptyArray(), mode = FileChooserMode.Save).firstOrNull()?.let {
+//            if(!it.exists()){
+//                it.createNewFile()
+//            }
+
+            it.printWriter().use {writer->
+                writer.println(table.format.names.joinToString(separator = "\t"))
+                table.forEach {values->
+                    writer.println(table.format.names.map { values[it] }.joinToString(separator = "\t"))
+                }
+                writer.flush()
+            }
+        }
     }
 
     class CustomSpreadSheetView(grid: Grid) : SpreadsheetView(grid) {

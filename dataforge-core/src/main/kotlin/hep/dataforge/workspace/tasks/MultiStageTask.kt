@@ -29,7 +29,7 @@ import java.util.*
  *
  * @author Alexander Nozik
  */
-abstract class MultiStageTask<R : Any>(override val type: Class<R>) : AbstractTask<R>() {
+abstract class MultiStageTask<R : Any>(type: Class<R>) : AbstractTask<R>(type) {
 
     override fun run(model: TaskModel, data: DataNode<*>): DataNode<R> {
         val state = MultiStageTaskState(data)

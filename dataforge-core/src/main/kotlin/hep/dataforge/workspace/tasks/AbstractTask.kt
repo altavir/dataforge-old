@@ -26,7 +26,7 @@ import hep.dataforge.workspace.Workspace
 /**
  * Created by darksnake on 21-Aug-16.
  */
-abstract class AbstractTask<R : Any> : Task<R> {
+abstract class AbstractTask<R : Any>(override val type: Class<R>) : Task<R> {
 
     protected open fun gather(model: TaskModel): DataNode<*> {
         val builder: DataNodeEditor<Any> = DataTree.edit()

@@ -21,6 +21,7 @@ import hep.dataforge.data.Data
 import hep.dataforge.data.DataNode
 import hep.dataforge.data.DataNodeEditor
 import hep.dataforge.data.DataSet
+import hep.dataforge.grind.workspace.DefaultTaskLib.CustomTaskSpec
 import hep.dataforge.kodex.ActionEnv
 import hep.dataforge.meta.Meta
 import hep.dataforge.workspace.tasks.AbstractTask
@@ -150,6 +151,12 @@ class DefaultTaskLib {
     static Task custom(Map parameters = [data: "*"], String name,
                        @DelegatesTo(value = CustomTaskSpec, strategy = Closure.DELEGATE_FIRST) Closure cl) {
         return new AbstractTask() {
+
+            @Override
+            Class getType() {
+                return Object
+            }
+
             @Override
             protected DataNode run(TaskModel model, DataNode dataNode) {
                 CustomTaskSpec spec = new CustomTaskSpec(model, dataNode);

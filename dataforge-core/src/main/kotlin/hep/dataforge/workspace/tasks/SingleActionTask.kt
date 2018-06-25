@@ -26,7 +26,7 @@ import org.jetbrains.annotations.Contract
  * A task wrapper for single action
  * Created by darksnake on 21-Aug-16.
  */
-abstract class SingleActionTask<T: Any, R: Any> : AbstractTask<R>() {
+abstract class SingleActionTask<T : Any, R : Any>(type: Class<R>) : AbstractTask<R>(type) {
 
     protected open fun gatherNode(data: DataNode<out Any>): DataNode<T> {
         return data as DataNode<T>
@@ -47,11 +47,9 @@ abstract class SingleActionTask<T: Any, R: Any> : AbstractTask<R>() {
     companion object {
 
         @Contract(pure = true)
-        fun <T: Any, R: Any> from(action: GenericAction<T, R>, dependencyBuilder: (TaskModel.Builder, Meta) -> Unit): Task<R> {
-            return object : SingleActionTask<T, R>() {
+        fun <T : Any, R : Any> from(action: GenericAction<T, R>, dependencyBuilder: (TaskModel.Builder, Meta) -> Unit): Task<R> {
+            return object : SingleActionTask<T, R>(action.outputType) {
                 override val name: String = action.name
-
-                override val type: Class<out R> = action.outputType
 
                 override fun buildModel(model: TaskModel.Builder, meta: Meta) {
                     dependencyBuilder(model, meta)
@@ -64,7 +62,7 @@ abstract class SingleActionTask<T: Any, R: Any> : AbstractTask<R>() {
         }
 
         @Contract(pure = true)
-        fun <T: Any, R: Any> from(action: GenericAction<T, R>): Task<R> {
+        fun <T : Any, R : Any> from(action: GenericAction<T, R>): Task<R> {
             return from(action) { model, meta -> model.allData() }
         }
     }

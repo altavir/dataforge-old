@@ -6,7 +6,7 @@ import hep.dataforge.data.DataNode
 import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta
 
-abstract class PipeTask<T : Any, R : Any> protected constructor(override val name: String, private val inputType: Class<T>, private val outputType: Class<R>) : AbstractTask<R>() {
+abstract class PipeTask<T : Any, R : Any> protected constructor(override val name: String, private val inputType: Class<T>, outputType: Class<R>) : AbstractTask<R>(outputType) {
 
     private val action = PipeAction()
 
@@ -28,7 +28,7 @@ abstract class PipeTask<T : Any, R : Any> protected constructor(override val nam
         }
 
         override fun getOutputType(): Class<R> {
-            return this@PipeTask.outputType
+            return this@PipeTask.type
         }
 
         override fun execute(context: Context, name: String, input: T, inputMeta: Laminate): R {

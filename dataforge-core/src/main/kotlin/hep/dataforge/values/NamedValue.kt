@@ -25,13 +25,7 @@ import java.time.Instant
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-class NamedValue(override val name: String,
-                 /**
-                  * Return underlying value without a name
-                  *
-                  * @return
-                  */
-                 val anonymous: Value) : Named, Value {
+class NamedValue(override val name: String, val anonymous: Value) : Named, Value {
 
     /**
      * {@inheritDoc}

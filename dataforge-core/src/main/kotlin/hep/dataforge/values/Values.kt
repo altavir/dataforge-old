@@ -24,7 +24,7 @@ import java.util.*
 /**
  * A named set of values with fixed name list.
  */
-interface Values : NameSetContainer, ValueProvider, MetaMorph {
+interface Values : NameSetContainer, ValueProvider, MetaMorph, Iterable<NamedValue> {
 
     /**
      * Faster search for existing values
@@ -64,6 +64,11 @@ interface Values : NameSetContainer, ValueProvider, MetaMorph {
             res[field] = getValue(field)
         }
         return res
+    }
+
+    @JvmDefault
+    override fun iterator(): Iterator<NamedValue> {
+        return names.map { NamedValue(it, get(it)) }.iterator()
     }
 
     /**

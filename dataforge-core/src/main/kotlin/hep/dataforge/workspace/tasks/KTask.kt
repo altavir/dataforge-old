@@ -29,12 +29,10 @@ class  KTask<R: Any>(
         override val name: String,
         type: KClass<R>,
         private val modelTransform: TaskModel.Builder.(Meta) -> Unit,
-        private val dataTransform: TaskModel.(DataNode<*>) -> DataNode<Any>
-) : AbstractTask<Any>() {
+        private val dataTransform: TaskModel.(DataNode<*>) -> DataNode<R>
+) : AbstractTask<R>(type.java) {
 
-    override val type: Class<out Any> = type.java
-
-    override fun run(model: TaskModel, data: DataNode<*>): DataNode<Any> {
+    override fun run(model: TaskModel, data: DataNode<*>): DataNode<R> {
         model.context.logger.info("Starting task '$name' on data node ${data.name} with meta: \n${model.meta}")
         return dataTransform.invoke(model, data);
     }
