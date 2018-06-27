@@ -146,7 +146,7 @@ class FXOutputManager(meta: Meta = Meta.empty(), viewConsumer: Context.(OutputCo
     override fun attach(context: Context) {
         super.attach(context)
         //Check if FX toolkit is started
-        context.get<FXPlugin>().startApp()
+        context.load<FXPlugin>()
     }
 
     private val container: OutputContainer by lazy {

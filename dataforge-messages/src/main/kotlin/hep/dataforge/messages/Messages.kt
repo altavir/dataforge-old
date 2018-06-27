@@ -183,10 +183,10 @@ fun requestBase(type: String?): MessageBuilder {
  * @return
  */
 fun okResponse(type: String): Message {
-    return okResponseBase(type, false, false).build()
+    return okResponseBase(type, false).build()
 }
 
-fun okResponseBase(request: Message, hasMeta: Boolean, hasData: Boolean): MessageBuilder {
+fun okResponseBase(request: Message, hasMeta: Boolean = true): MessageBuilder {
     val res = EnvelopeBuilder().setMetaValue(MESSAGE_STATUS_KEY, MESSAGE_OK)
     var type: String? = request.meta.getString(MESSAGE_TYPE_KEY, "")
     if (type != null && !type.isEmpty()) {
@@ -210,7 +210,7 @@ fun okResponseBase(request: Message, hasMeta: Boolean, hasData: Boolean): Messag
  * @param hasData
  * @return
  */
-fun okResponseBase(type: String?, hasMeta: Boolean, hasData: Boolean): MessageBuilder {
+fun okResponseBase(type: String?, hasMeta: Boolean = true): MessageBuilder {
     var aType = type
     val res = EnvelopeBuilder()
             .setMetaValue(MESSAGE_STATUS_KEY, MESSAGE_OK)

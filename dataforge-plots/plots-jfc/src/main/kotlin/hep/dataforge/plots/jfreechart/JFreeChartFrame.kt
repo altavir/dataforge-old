@@ -26,7 +26,6 @@ import hep.dataforge.plots.XYPlotFrame
 import hep.dataforge.utils.FXObject
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueFactory
-import javafx.application.Platform.runLater
 import javafx.scene.Node
 import javafx.scene.control.ContextMenu
 import javafx.scene.control.Menu
@@ -48,6 +47,7 @@ import org.jfree.data.Range
 import org.jfree.data.general.DatasetChangeEvent
 import org.jfree.data.xy.XYDataset
 import org.slf4j.LoggerFactory
+import tornadofx.*
 import java.awt.BasicStroke
 import java.awt.Color
 import java.awt.Shape
@@ -83,6 +83,14 @@ class JFreeChartFrame @JvmOverloads constructor(frameMeta: Meta = Meta.empty()) 
         xyPlot = XYPlot()
         chart = JFreeChart(xyPlot)
         configure(frameMeta)
+    }
+
+    private fun runLater(runnable: () -> Unit) {
+        if(FX.initialized.value){
+            runLater(runnable)
+        } else{
+            runnable.invoke()
+        }
     }
 
     override fun getFXNode(): Node {

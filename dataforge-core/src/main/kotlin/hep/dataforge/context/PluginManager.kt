@@ -153,7 +153,7 @@ class PluginManager(override val context: Context) : ContextAware, AutoCloseable
         val loaded = get(type, false)
         return when {
             loaded == null -> load(pluginLoader[type, meta])
-            loaded.meta == meta -> loaded // if meta is the same, return existing plugin
+            loaded.meta.equalsIgnoreName(meta) -> loaded // if meta is the same, return existing plugin
             else -> throw RuntimeException("Can't load plugin with type $type. Plugin with this type and different configuration already exists in context.")
         }
     }

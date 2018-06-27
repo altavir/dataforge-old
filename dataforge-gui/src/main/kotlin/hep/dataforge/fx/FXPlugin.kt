@@ -39,31 +39,29 @@ class FXPlugin(meta: Meta = Meta.empty()) : BasicPlugin(meta) {
             })
         }
     }
-
     /**
      * Wait for application and toolkit to start if needed
      */
-    fun startApp() {
-        synchronized(this) {
-            if (FX.getApplication(DefaultScope) == null) {
-                if (consoleMode) {
-                    Thread {
-                        context.logger.debug("Starting FX application surrogate")
-                        launch<ApplicationSurrogate>()
-                    }.apply {
-                        name = "${context.name} FX application thread"
-                        start()
-                    }
-
-                    while (!FX.initialized.get()) {
-                        if (Thread.interrupted()) {
-                            throw RuntimeException("Interrupted application start")
-                        }
-                    }
-                    Platform.setImplicitExit(false)
-                } else {
-                    throw RuntimeException("FX Application not defined")
+    override fun attach(context: Context) {
+        super.attach(context)
+        if (FX.getApplication(DefaultScope) == null) {
+            if (consoleMode) {
+                Thread {
+                    context.logger.debug("Starting FX application surrogate")
+                    launch<ApplicationSurrogate>()
+                }.apply {
+                    name = "${context.name} FX application thread"
+                    start()
                 }
+
+                while (!FX.initialized.get()) {
+                    if (Thread.interrupted()) {
+                        throw RuntimeException("Interrupted application start")
+                    }
+                }
+                Platform.setImplicitExit(false)
+            } else {
+                throw RuntimeException("FX Application not defined")
             }
         }
     }
@@ -73,11 +71,6 @@ class FXPlugin(meta: Meta = Meta.empty()) : BasicPlugin(meta) {
      */
     fun setApp(app: Application, stage: Stage) {
         FX.registerApplication(DefaultScope, app, stage)
-    }
-
-    fun getStage(): Stage {
-        startApp()
-        return FX.getPrimaryStage(DefaultScope)!!
     }
 
     /**
@@ -123,6 +116,6 @@ class ApplicationSurrogate : App() {
     }
 }
 
-fun Context.display(component: UIComponent, width: Double = 800.0, height: Double = 600.0) {
-    this.pluginManager.load<FXPlugin>().display(component, width, height)
+fun Context.display(width: Double = 800.0, height: Double = 600.0, component: () -> UIComponent) {
+    this.load<FXPlugin>().display(component(), width, height)
 }

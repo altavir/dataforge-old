@@ -29,6 +29,7 @@ class JFreeChartPlugin : BasicPlugin(), PlotFactory {
 
     override fun build(meta: Meta): PlotFrame = JFreeChartFrame().apply { configure(meta) }
 
+
     class Factory : PluginFactory() {
         override val type: Class<out Plugin> = JFreeChartPlugin::class.java
 

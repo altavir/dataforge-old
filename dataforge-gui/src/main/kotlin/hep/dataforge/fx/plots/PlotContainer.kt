@@ -303,6 +303,6 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
 
 }
 
-fun Context.display(frame: PlotFrame, width: Double = 800.0, height: Double = 600.0) {
-    display(PlotContainer(frame), width, height)
+fun Context.display(width: Double = 800.0, height: Double = 600.0, frame: () -> PlotFrame) {
+    display(width, height){PlotContainer(frame())}
 }

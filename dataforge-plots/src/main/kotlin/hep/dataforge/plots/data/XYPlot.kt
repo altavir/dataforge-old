@@ -17,6 +17,7 @@ package hep.dataforge.plots.data
 
 import hep.dataforge.description.NodeDef
 import hep.dataforge.description.ValueDef
+import hep.dataforge.description.ValueDefs
 import hep.dataforge.kodex.toList
 import hep.dataforge.meta.Configuration.FINAL_TAG
 import hep.dataforge.meta.Meta
@@ -26,6 +27,7 @@ import hep.dataforge.tables.Adapters
 import hep.dataforge.tables.ValuesAdapter
 import hep.dataforge.tables.ValuesAdapter.ADAPTER_KEY
 import hep.dataforge.values.Value
+import hep.dataforge.values.ValueType
 import hep.dataforge.values.Values
 import java.util.stream.Stream
 
@@ -37,7 +39,10 @@ import java.util.stream.Stream
 //@ValueDef(name = "symbolType", info = "The type of the symbols for scatterplot.")
 //@ValueDef(name = "symbolSize", type = "NUMBER", info = "The size of the symbols for scatterplot.")
 //@ValueDef(name = "lineType", info = "The type of the line fill.")
-@ValueDef(key = "color", info = "The color of line or symbol.", tags = arrayOf("color"))
+@ValueDefs(
+        ValueDef(key = "color", info = "The color of line or symbol.", tags = arrayOf("color")),
+        ValueDef(key = "thickness", type = [ValueType.NUMBER], def = "1", info = "Thickness of the line if it is present")
+)
 @NodeDef(key = ADAPTER_KEY, info = "An adapter to interpret the dataset", tags = arrayOf(FINAL_TAG))
 abstract class XYPlot(name: Name, meta: Meta, adapter: ValuesAdapter?) : AbstractPlot(name, meta, adapter) {
 

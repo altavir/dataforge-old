@@ -96,13 +96,13 @@ abstract class AbstractNode(override val name: String, override val parent: Node
     }
 }
 
-class LocalNode(name: String, parent: Node? = null) : AbstractNode(name, parent) {
+class LocalNode(name: String, parent: Node? = null, val action: suspend Node.(Message) -> Unit) : AbstractNode(name, parent) {
     override fun resolve(target: Target): Node? {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override suspend fun send(message: Message) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        action.invoke(this, message)
     }
 
     override suspend fun respond(message: Message): Message {
