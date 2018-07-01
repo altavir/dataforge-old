@@ -7,6 +7,7 @@ package hep.dataforge.meta;
 
 import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.io.IOUtils;
+import hep.dataforge.names.Name;
 import hep.dataforge.values.*;
 import kotlin.Pair;
 
@@ -202,14 +203,14 @@ public class MetaUtils {
      * @param prefix
      * @return
      */
-    private static Stream<Pair<String, Meta>> nodeStream(String prefix, Meta node, boolean includeRoot) {
-        Stream<Pair<String, Meta>> subNodeStream = node.getNodeNames().flatMap(nodeName -> {
+    private static Stream<Pair<Name, Meta>> nodeStream(Name prefix, Meta node, boolean includeRoot) {
+        Stream<Pair<Name, Meta>> subNodeStream = node.getNodeNames().flatMap(nodeName -> {
             List<? extends Meta> metaList = node.getMetaList(nodeName);
-            String nodePrefix;
+            Name nodePrefix;
             if (prefix == null || prefix.isEmpty()) {
-                nodePrefix = nodeName;
+                nodePrefix = Name.of(nodeName);
             } else {
-                nodePrefix = prefix + "." + nodeName;
+                nodePrefix = prefix.append(nodeName);
             }
             if (metaList.size() == 1) {
                 return nodeStream(nodePrefix, metaList.get(0), true);
@@ -218,7 +219,7 @@ public class MetaUtils {
                         .flatMap(i -> {
                             String subPrefix = String.format("%s[%d]", nodePrefix, i);
                             Meta subNode = metaList.get(i);
-                            return nodeStream(subPrefix, subNode, true);
+                            return nodeStream(Name.ofSingle(subPrefix), subNode, true);
                         });
             }
         });
@@ -229,22 +230,16 @@ public class MetaUtils {
         }
     }
 
-    public static Stream<Pair<String, Meta>> nodeStream(Meta node) {
-        return nodeStream("", node, false);
+    public static Stream<Pair<Name, Meta>> nodeStream(Meta node) {
+        return nodeStream(Name.empty(), node, false);
     }
 
-    public static Stream<Pair<String, Value>> valueStream(Meta node) {
-        return nodeStream("", node, true).flatMap((Pair<String, Meta> entry) -> {
-            String key = entry.getFirst();
+    public static Stream<Pair<Name, Value>> valueStream(Meta node) {
+        return nodeStream(Name.empty(), node, true).flatMap((Pair<Name, Meta> entry) -> {
+            Name key = entry.getFirst();
             Meta childMeta = entry.getSecond();
             return childMeta.getValueNames().map((String valueName) -> {
-                String prefix;
-                if (key.isEmpty()) {
-                    prefix = "";
-                } else {
-                    prefix = key + ".";
-                }
-                return new Pair<>(prefix + valueName, childMeta.getValue(valueName));
+                return new Pair<>(key.append(valueName), childMeta.getValue(valueName));
             });
         });
     }

@@ -37,11 +37,11 @@ import java.io.PrintWriter;
 @TypedActionDef(name = "fit", inputType = Table.class, outputType = FitResult.class, info = "Fit dataset with previously stored model.")
 @NodeDef(key = "model",
         required = true, info = "The model against which fit should be made",
-        from = "method::hep.dataforge.stat.models.ModelManager.getModel")
+        descriptor = "method::hep.dataforge.stat.models.ModelManager.getModel")
 @NodeDef(key = "params", required = true,
         info = "Initial fit parameter set. Both parameters from action annotation and parameters from data annotation are used. "
                 + "The merging of parameters is made supposing the annotation of data is main and annotation of action is secondary.",
-        from = "method::hep.dataforge.stat.fit.ParamSet.fromMeta")
+        descriptor = "method::hep.dataforge.stat.fit.ParamSet.fromMeta")
 @NodeDef(key = "stage", multiple = true, info = "Fit stages")
 public class FitAction extends OneToOneAction<Table, FitResult> {
 

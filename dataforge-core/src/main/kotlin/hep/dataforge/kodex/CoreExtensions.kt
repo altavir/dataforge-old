@@ -22,6 +22,7 @@ import java.time.Instant
 import java.util.*
 import java.util.stream.Collectors
 import kotlin.coroutines.experimental.CoroutineContext
+import kotlin.reflect.KClass
 
 /**
  * Core DataForge classes extensions
@@ -148,7 +149,7 @@ fun Meta.useMetaList(metaName: String, action: (List<Meta>) -> Unit) {
 }
 
 fun <T> Meta.asMap(transform: (Value) -> T): Map<String, T> {
-    return MetaUtils.valueStream(this).collect(Collectors.toMap({ it.first }, { transform(it.second) }))
+    return MetaUtils.valueStream(this).collect(Collectors.toMap({ it.first.toString() }, { transform(it.second) }))
 }
 
 val <T : MetaNode<*>> MetaNode<T>.childNodes: List<T>
@@ -156,7 +157,6 @@ val <T : MetaNode<*>> MetaNode<T>.childNodes: List<T>
 
 val Meta.childNodes: List<Meta>
     get() = this.nodeNames.map { this.getMeta(it) }.toList()
-
 
 /**
  * Configure a configurable using in-place build meta
@@ -168,25 +168,29 @@ fun <T : Configurable> T.configure(transform: KMetaBuilder.() -> Unit): T {
 
 //Annotations
 
-fun <T : Annotation> listAnnotations(source: AnnotatedElement, type: Class<T>, searchSuper: Boolean = true): List<T> {
-    if (source is Class<*>) {
+fun <T : Annotation> AnnotatedElement.listAnnotations(type: Class<T>, searchSuper: Boolean = true): List<T> {
+    if (this is Class<*>) {
         val res = ArrayList<T>()
-        val array = source.getAnnotationsByType(type)
+        val array = getAnnotationsByType(type)
         res.addAll(Arrays.asList(*array))
         if (searchSuper) {
-            val superClass = source.superclass
+            val superClass = this.superclass
             if (superClass != null) {
-                res.addAll(listAnnotations(superClass, type, true))
+                res.addAll(superClass.listAnnotations(type, true))
             }
-            for (cl in source.interfaces) {
-                res.addAll(listAnnotations(cl, type, true))
+            for (cl in this.interfaces) {
+                res.addAll(cl.listAnnotations(type, true))
             }
         }
         return res;
     } else {
-        val array = source.getAnnotationsByType(type)
+        val array = getAnnotationsByType(type)
         return Arrays.asList(*array)
     }
+}
+
+inline fun <reified T : Annotation> KClass<*>.listAnnotations(searchSuper: Boolean = true): List<T> {
+    return this.java.listAnnotations(T::class.java, searchSuper)
 }
 
 

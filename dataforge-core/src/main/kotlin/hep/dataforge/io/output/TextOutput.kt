@@ -114,12 +114,12 @@ open class StreamOutput(override val context: Context, val stream: OutputStream)
                 is CharSequence -> printer.println(obj)
                 is Record -> printer.println(obj)
                 is ValueDescriptor -> {
-                    if (obj.isRequired) renderText("(*) ", Color.CYAN)
+                    if (obj.required) renderText("(*) ", Color.CYAN)
                     renderText(obj.name, Color.RED)
-                    if (obj.isMultiple) renderText(" (mult)", Color.CYAN)
-                    renderText(" (${obj.type().first()})")
+                    if (obj.multiple) renderText(" (mult)", Color.CYAN)
+                    renderText(" (${obj.type.first()})")
                     if (obj.hasDefault()) {
-                        val def = obj.defaultValue()
+                        val def = obj.default
                         if (def.type == ValueType.STRING) {
                             renderText(" = \"")
                             renderText(def.string, Color.YELLOW)
@@ -140,11 +140,11 @@ open class StreamOutput(override val context: Context, val stream: OutputStream)
                                 .setValue("text.offset", meta.getInt("text.offset", 0) + 1)
                                 .setValue("text.bullet", "+")
                         renderText(key + "\n", Color.BLUE)
-                        if (value.isRequired) renderText("(*) ", Color.CYAN)
+                        if (value.required) renderText("(*) ", Color.CYAN)
 
                         renderText(value.name, Color.MAGENTA)
 
-                        if (value.isMultiple) renderText(" (mult)", Color.CYAN)
+                        if (value.multiple) renderText(" (mult)", Color.CYAN)
 
                         if (!value.info.isEmpty()) {
                             renderText(": ${value.info}")

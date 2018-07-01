@@ -49,7 +49,7 @@ import java.time.Duration
         //StateDef(value = ValueDef(name = PORT_STATE, info = "The name of the port to which this device is connected")),
         StateDef(value = ValueDef(key = DEBUG_STATE, type = [BOOLEAN], def = "false", info = "If true, then all received phrases would be shown in the log"), writable = true)
 )
-@MetaStateDef(value = NodeDef(key = "port", from = "method::hep.dataforge.control.ports.PortFactory.build", info = "Information about port"), writable = true)
+@MetaStateDef(value = NodeDef(key = "port", descriptor = "method::hep.dataforge.control.ports.PortFactory.build", info = "Information about port"), writable = true)
 @ValueDefs(
         ValueDef(key = "timeout", type = arrayOf(NUMBER), def = "400", info = "A timeout for port response in milliseconds")
 )

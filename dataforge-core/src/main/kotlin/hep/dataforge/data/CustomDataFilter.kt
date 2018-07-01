@@ -21,8 +21,8 @@ import java.util.function.BiPredicate
  * @author Alexander Nozik
  */
 @NodeDefs(
-        NodeDef(key = "include", info = "Define inclusion rule for data and/or dataNode. If not inclusion rule is present, everything is included by default.", from = "method::hep.dataforge.data.CustomDataFilter.applyMeta"),
-        NodeDef(key = "exclude", info = "Define exclusion rule for data and/or dataNode. Exclusion rules are allied only to included items.", from = "method::hep.dataforge.data.CustomDataFilter.applyMeta")
+        NodeDef(key = "include", info = "Define inclusion rule for data and/or dataNode. If not inclusion rule is present, everything is included by default.", descriptor = "method::hep.dataforge.data.CustomDataFilter.applyMeta"),
+        NodeDef(key = "exclude", info = "Define exclusion rule for data and/or dataNode. Exclusion rules are allied only to included items.", descriptor = "method::hep.dataforge.data.CustomDataFilter.applyMeta")
 )
 class CustomDataFilter(meta: Meta) : SimpleMetaMorph(meta), DataFilter {
 

@@ -33,8 +33,8 @@ import hep.dataforge.meta.MetaNode.DEFAULT_META_NAME
 @NodeDefs(
         NodeDef(key = NODE_META_KEY, info = "Node meta-data"),
         NodeDef(key = NODE_KEY, info = "Recursively add node to the builder"),
-        NodeDef(key = FILTER_KEY, from = "hep.dataforge.data.CustomDataFilter", info = "Filter definition to be applied after node construction is finished"),
-        NodeDef(key = ITEM_KEY, from = "method::hep.dataforge.data.DataFactory.buildData", info = "A fixed context-based node with or without actual static data")
+        NodeDef(key = FILTER_KEY, descriptor = "hep.dataforge.data.CustomDataFilter", info = "Filter definition to be applied after node construction is finished"),
+        NodeDef(key = ITEM_KEY, descriptor = "method::hep.dataforge.data.DataFactory.buildData", info = "A fixed context-based node with or without actual static data")
 )
 abstract class DataFactory<T: Any>(private val baseType: Class<T>) : DataLoader<T> {
 

@@ -34,7 +34,7 @@ import static hep.dataforge.tables.Filtering.buildConditionSet;
  * @version $Id: $Id
  */
 @TypedActionDef(name = "transformTable", inputType = Table.class, outputType = Table.class, info = "Filter dataset with given filtering rules")
-@NodeDef(key = "filters", required = true, info = "The filtering condition.", from = "method::hep.dataforge.tables.Filtering.buildConditionSet")
+@NodeDef(key = "filters", required = true, info = "The filtering condition.", descriptor = "method::hep.dataforge.tables.Filtering.buildConditionSet")
 public class TransformTableAction extends OneToOneAction<Table, Table> {
 
     /**

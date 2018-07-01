@@ -41,14 +41,7 @@ public @interface NodeDef {
      *
      * @return
      */
-    String from() default "";
-
-//    /**
-//     * The resource for the resource file with this node's descriptor
-//     *
-//     * @return
-//     */
-//    String resource() default "";
+    String descriptor() default "";
 
     boolean multiple() default false;
 

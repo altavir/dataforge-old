@@ -329,7 +329,7 @@ class ValueState(
 
     inline fun <reified T : Enum<T>> enumDelegate(): ReadWriteProperty<Any?, T> = object : ReadWriteProperty<Any?, T> {
         override fun getValue(thisRef: Any?, property: KProperty<*>): T {
-            return enumValueOf<T>(value.string)
+            return enumValueOf(value.string)
         }
 
         override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {

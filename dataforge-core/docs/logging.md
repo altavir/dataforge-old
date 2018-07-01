@@ -1,4 +1,6 @@
-# Logging and History
+---
+title: Logging and History 
+---
 
 DataForge supports two separate logging system:
 

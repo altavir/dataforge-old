@@ -34,7 +34,7 @@ import java.util.stream.Stream
  * @author Alexander Nozik
  */
 @NodeDefs(
-        NodeDef(key = "column", multiple = true, required = true, info = "A column format", from = "class::hep.dataforge.tables.ColumnFormat"),
+        NodeDef(key = "column", multiple = true, required = true, info = "A column format", descriptor = "class::hep.dataforge.tables.ColumnFormat"),
         NodeDef(key = "defaultColumn", info = "Default column format. Used when format for specific column is not given"),
         NodeDef(key = DEFAULT_META_NAME, info = "Custom table information")
 )

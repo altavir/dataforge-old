@@ -5,7 +5,6 @@ import hep.dataforge.description.ValueDescriptor
 import hep.dataforge.fx.values.ValueCallbackResponse
 import hep.dataforge.fx.values.ValueChooserFactory
 import hep.dataforge.kodex.isNull
-import hep.dataforge.kodex.nullable
 import hep.dataforge.meta.ConfigChangeListener
 import hep.dataforge.meta.Configuration
 import hep.dataforge.meta.Meta
@@ -56,7 +55,7 @@ open class ConfigFXNode(
         name: String,
         parent: ConfigFXNode? = null) : ConfigFX(name, parent) {
 
-    open val descriptor: NodeDescriptor? = parent?.descriptor?.optChildDescriptor(name).nullable;
+    open val descriptor: NodeDescriptor? = parent?.descriptor?.getNodeDescriptor(name).nullable;
 
     open val configProperty: ObjectBinding<Configuration?> = object : ObjectBinding<Configuration?>() {
         init {
@@ -229,7 +228,7 @@ class ConfigFXRoot(rootConfig: Configuration, rootDescriptor: NodeDescriptor? = 
  */
 class ConfigFXValue(name: String, parent: ConfigFXNode) : ConfigFX(name, parent) {
 
-    val descriptor: ValueDescriptor? = parent.descriptor?.optValueDescriptor(name).nullable;
+    val descriptor: ValueDescriptor? = parent.descriptor?.getValueDescriptor(name).nullable;
 
     override val descriptionProperty: ObservableStringValue = object : StringBinding() {
         override fun computeValue(): String {
@@ -243,7 +242,7 @@ class ConfigFXValue(name: String, parent: ConfigFXNode) : ConfigFX(name, parent)
         }
 
         override fun computeValue(): Value? {
-            return parent.configuration?.optValue(name)?.orElse(descriptor?.defaultValue())
+            return parent.configuration?.optValue(name)?.orElse(descriptor?.default())
         }
     }
 

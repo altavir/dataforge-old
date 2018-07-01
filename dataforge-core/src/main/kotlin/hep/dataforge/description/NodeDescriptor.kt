@@ -22,10 +22,7 @@
 package hep.dataforge.description
 
 import hep.dataforge.Named
-import hep.dataforge.isAnonymous
-import hep.dataforge.meta.Meta
-import hep.dataforge.meta.MetaMorph
-import hep.dataforge.meta.Metoid
+import hep.dataforge.meta.*
 import hep.dataforge.names.Name
 import java.util.*
 
@@ -35,52 +32,43 @@ import java.util.*
  *
  * @author Alexander Nozik
  */
-open class NodeDescriptor(override val meta: Meta) : Named, MetaMorph, Metoid {
+open class NodeDescriptor(meta: Meta) : SimpleMetaMorph(meta.sealed), Named {
 
     /**
-     * True if multiple children with this nodes name are allowed. Anonimous
+     * True if multiple children with this nodes name are allowed. Anonymous
      * nodes are always single
      *
      * @return
      */
-    val isMultiple: Boolean
-        get() = meta.getBoolean("multiple", true) || this.isAnonymous
+    val multiple: Boolean by booleanValue(def = false)
 
     /**
      * True if the node is required
      *
      * @return
      */
-    val isRequired: Boolean
-        get() = meta.getBoolean("required", false)
+    val required: Boolean by booleanValue(def = false)
 
     /**
      * The node description
      *
      * @return
      */
-    open val info: String
-        get() = meta.getString("info", "")
+    open val info: String by stringValue(def = "")
 
     /**
      * A list of tags for this node. Tags used to customize node usage
      *
      * @return
      */
-    val tags: List<String>
-        get() = if (meta.hasValue("tags")) {
-            Arrays.asList(*meta.getStringArray("tags"))
-        } else {
-            emptyList()
-        }
+    val tags: List<String> by customValue(def = emptyList()) { it.list.map { it.string } }
 
     /**
      * The name of this node
      *
      * @return
      */
-    override val name: String
-        get() = meta.getString("name", meta.name)
+    override val name: String by stringValue(def = meta.name)
 
     /**
      * The list of value descriptors
@@ -104,15 +92,15 @@ open class NodeDescriptor(override val meta: Meta) : Named, MetaMorph, Metoid {
      * @param name
      * @return
      */
-    fun optChildDescriptor(name: String): Optional<NodeDescriptor> {
-        return optChildDescriptor(Name.of(name))
+    fun getNodeDescriptor(name: String): NodeDescriptor? {
+        return getNodeDescriptor(Name.of(name))
     }
 
-    fun optChildDescriptor(name: Name): Optional<NodeDescriptor> {
+    fun getNodeDescriptor(name: Name): NodeDescriptor? {
         return if (name.length == 1) {
-            Optional.ofNullable(childrenDescriptors()[name.toUnescaped()])
+            childrenDescriptors()[name.toUnescaped()]
         } else {
-            optChildDescriptor(name.cutLast()).flatMap { it -> it.optChildDescriptor(name.last) }
+            getNodeDescriptor(name.cutLast())?.getNodeDescriptor(name.last)
         }
     }
 
@@ -122,15 +110,15 @@ open class NodeDescriptor(override val meta: Meta) : Named, MetaMorph, Metoid {
      * @param name
      * @return
      */
-    fun optValueDescriptor(name: String): Optional<ValueDescriptor> {
-        return optValueDescriptor(Name.of(name))
+    fun getValueDescriptor(name: String): ValueDescriptor? {
+        return getValueDescriptor(Name.of(name))
     }
 
-    fun optValueDescriptor(name: Name): Optional<ValueDescriptor> {
+    fun getValueDescriptor(name: Name): ValueDescriptor? {
         return if (name.length == 1) {
-            Optional.ofNullable(valueDescriptors()[name.toUnescaped()])
+            valueDescriptors()[name.toUnescaped()]
         } else {
-            optChildDescriptor(name.cutLast()).flatMap { it -> it.optValueDescriptor(name.last) }
+            getNodeDescriptor(name.cutLast())?.getValueDescriptor(name.last)
         }
     }
 
@@ -164,13 +152,7 @@ open class NodeDescriptor(override val meta: Meta) : Named, MetaMorph, Metoid {
      *
      * @return
      */
-    fun defaultNode(): List<Meta>? {
-        return if (meta.hasMeta("default")) {
-            meta.getMetaList("default")
-        } else {
-            null
-        }
-    }
+    val default: List<Meta> by nodeList(def = emptyList())
 
     /**
      * Identify if this descriptor has child value descriptor with default
@@ -179,7 +161,7 @@ open class NodeDescriptor(override val meta: Meta) : Named, MetaMorph, Metoid {
      * @return
      */
     fun hasDefaultForValue(name: String): Boolean {
-        return optValueDescriptor(name).map<Boolean> { it.hasDefault() }.orElse(false)
+        return getValueDescriptor(name)?.hasDefault() ?: false
     }
 
     /**
@@ -189,9 +171,7 @@ open class NodeDescriptor(override val meta: Meta) : Named, MetaMorph, Metoid {
      *
      * @return
      */
-    fun titleKey(): String {
-        return meta.getString("titleKey", "")
-    }
+    val key: String by stringValue(def = "")
 
     override fun toMeta(): Meta {
         return meta
@@ -199,9 +179,15 @@ open class NodeDescriptor(override val meta: Meta) : Named, MetaMorph, Metoid {
 
     companion object {
 
-        fun build(nodeDef: NodeDef): NodeDescriptor {
-            return NodeDescriptor(Descriptors.buildDescriptorMeta(nodeDef))
-        }
+//        fun build(nodeDef: NodeDef): NodeDescriptor {
+//            return DescriptorBuilder().apply {
+//                name = nodeDef.key
+//                info = nodeDef.info
+//                required = nodeDef.required
+//                multiple = nodeDef.multiple
+//                tags = nodeDef.tags.asList()
+//            }.build()
+//        }
 
         fun empty(nodeName: String): NodeDescriptor {
             return NodeDescriptor(Meta.buildEmpty(nodeName))

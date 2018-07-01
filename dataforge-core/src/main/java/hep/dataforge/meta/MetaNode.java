@@ -88,7 +88,11 @@ public abstract class MetaNode<T extends MetaNode> extends Meta implements MetaM
     @Provides(META_TARGET)
     @Override
     public Optional<Meta> optMeta(String path) {
-        return getMetaList(path).stream().findFirst().map(it->it);
+        if(path.isEmpty()){
+            return Optional.of(this);
+        } else {
+            return getMetaList(path).stream().findFirst().map(it -> it);
+        }
     }
 
     /**

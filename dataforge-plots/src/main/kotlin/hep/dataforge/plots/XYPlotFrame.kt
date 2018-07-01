@@ -20,6 +20,7 @@ import hep.dataforge.description.NodeDefs
 import hep.dataforge.description.ValueDef
 import hep.dataforge.description.ValueDefs
 import hep.dataforge.meta.Meta
+import hep.dataforge.meta.node
 import hep.dataforge.names.Name
 import hep.dataforge.tables.Adapters.X_AXIS
 import hep.dataforge.tables.Adapters.Y_AXIS
@@ -33,11 +34,14 @@ import java.util.*
  * @author Alexander Nozik
  */
 @NodeDefs(
-        NodeDef(key = "xAxis", info = "The description of X axis", from = "method::hep.dataforge.plots.XYPlotFrame.updateAxis"),
-        NodeDef(key = "yAxis", info = "The description of Y axis", from = "method::hep.dataforge.plots.XYPlotFrame.updateAxis"),
-        NodeDef(key = "legend", info = "The configuration for plot legend", from = "method::hep.dataforge.plots.XYPlotFrame.updateLegend")
+        NodeDef(key = "xAxis", info = "The description of X axis", descriptor = "method::hep.dataforge.plots.XYPlotFrame.updateAxis"),
+        NodeDef(key = "yAxis", info = "The description of Y axis", descriptor = "method::hep.dataforge.plots.XYPlotFrame.updateAxis"),
+        NodeDef(key = "legend", info = "The configuration for plot legend", descriptor = "method::hep.dataforge.plots.XYPlotFrame.updateLegend")
 )
 abstract class XYPlotFrame : AbstractPlotFrame() {
+
+    var xAxis by node()
+    var yAxis by node()
 
     private val xAxisConfig: Meta
         get() = config.getMetaOrEmpty("xAxis")

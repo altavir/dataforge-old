@@ -39,7 +39,7 @@ import java.util.*
  */
 @TypedActionDef(name = "plotData", info = "Scatter plot of given DataSet", inputType = Table::class, outputType = Table::class)
 @NodeDefs(
-        NodeDef(key = "plotFrame", multiple = true, info = "The description of plot frame", from = "class::hep.dataforge.plots.XYPlotFrame"),
+        NodeDef(key = "plotFrame", multiple = true, info = "The description of plot frame", descriptor = "class::hep.dataforge.plots.XYPlotFrame"),
         NodeDef(key = "adapter", info = "Adapter for data")
 )
 //@NodeDef(name = "snapshot", info = "Save plot shapshots to file",

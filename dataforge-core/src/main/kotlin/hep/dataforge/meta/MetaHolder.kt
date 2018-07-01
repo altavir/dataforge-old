@@ -68,7 +68,7 @@ open class MetaHolder(override val meta: Meta) : Metoid, Described, ValueProvide
     override fun optValue(path: String): Optional<Value> {
         return Optionals
                 .either(meta.optValue(path))
-                .or { getDescriptor().optValueDescriptor(path).map { it.defaultValue() } }
+                .or { getDescriptor().getValueDescriptor(path).map { it.default() } }
                 .opt()
     }
 

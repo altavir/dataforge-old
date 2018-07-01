@@ -22,15 +22,11 @@
 package hep.dataforge.description
 
 import hep.dataforge.Named
-import hep.dataforge.kodex.toList
-import hep.dataforge.meta.Meta
-import hep.dataforge.meta.MetaBuilder
-import hep.dataforge.meta.SimpleMetaMorph
+import hep.dataforge.meta.*
 import hep.dataforge.names.AnonymousNotAlowed
+import hep.dataforge.values.BooleanValue
 import hep.dataforge.values.Value
-import hep.dataforge.values.ValueFactory
 import hep.dataforge.values.ValueType
-import java.util.*
 import java.util.stream.Stream
 
 /**
@@ -39,64 +35,47 @@ import java.util.stream.Stream
  * @author Alexander Nozik
  */
 @AnonymousNotAlowed
-class ValueDescriptor(meta: Meta) : SimpleMetaMorph(meta), Named {
+class ValueDescriptor(meta: Meta) : SimpleMetaMorph(meta.sealed), Named {
 
     /**
      * True if multiple values with this name are allowed.
      *
      * @return
      */
-    val isMultiple: Boolean
-        get() = meta.getBoolean("multiple", true)
+    val multiple: Boolean by booleanValue(def = true)
 
     /**
      * True if the value is required
      *
      * @return
      */
-    val isRequired: Boolean
-        get() = meta.getBoolean("required", false)
+    val required: Boolean by booleanValue(def = false)
 
     /**
      * Value name
      *
      * @return
      */
-    override val name: String
-        get() = meta.getString("name", "")
+    override val name: String by stringValue(def = "")
 
     /**
      * The value info
      *
      * @return
      */
-    val info: String
-        get() {
-            return meta.getString("info", "")
-        }
+    val info: String by stringValue(def = "")
 
     /**
      * A list of allowed ValueTypes. Empty if any value type allowed
      *
      * @return
      */
-    fun type(): List<ValueType> {
-        return if (meta.hasValue("type")) {
-            meta.getValue("type").list
-                    .stream()
-                    .map { v -> ValueType.valueOf(v.string) }
-                    .toList()
-        } else {
-            emptyList()
-        }
+    val type: List<ValueType> by customValue(def = emptyList()) {
+        it.list.map { v -> ValueType.valueOf(v.string) }
     }
 
-    fun tags(): List<String> {
-        return if (meta.hasValue("tags")) {
-            Arrays.asList(*meta.getStringArray("tags"))
-        } else {
-            emptyList()
-        }
+    val tags: List<String> by customValue(def = emptyList()) {
+        meta.getStringArray("tags").toList()
     }
 
     /**
@@ -107,7 +86,7 @@ class ValueDescriptor(meta: Meta) : SimpleMetaMorph(meta), Named {
      * @return
      */
     fun isValueAllowed(value: Value): Boolean {
-        return (type().isEmpty() || type().contains(ValueType.STRING) || type().contains(value.type)) && (allowedValues().isEmpty() || allowedValues().containsKey(value))
+        return (type.isEmpty() || type.contains(ValueType.STRING) || type.contains(value.type)) && (allowedValues.isEmpty() || allowedValues.contains(value))
     }
 
     /**
@@ -124,9 +103,7 @@ class ValueDescriptor(meta: Meta) : SimpleMetaMorph(meta), Named {
      *
      * @return
      */
-    fun defaultValue(): Value {
-        return meta.getValue("default", ValueFactory.NULL)
-    }
+    val default: Value by value(def = Value.NULL)
 
     /**
      * A list of allowed values with descriptions. If empty than any value is
@@ -134,26 +111,19 @@ class ValueDescriptor(meta: Meta) : SimpleMetaMorph(meta), Named {
      *
      * @return
      */
-    fun allowedValues(): Map<Value, String> {
-        val map = HashMap<Value, String>()
-        if (meta.hasMeta("allowedValue")) {
-            for (allowed in meta.getMetaList("allowedValue")) {
-                map[allowed.getValue("value")] = allowed.getString("description", "")
-            }
-        } else if (meta.hasValue("allowedValues")) {
-            for (`val` in meta.getValue("allowedValues").list) {
-                map[`val`] = ""
-            }
-        } else if (type().size == 1 && type()[0] === ValueType.BOOLEAN) {
-            map[ValueFactory.of(true)] = ""
-            map[ValueFactory.of(false)] = ""
+    val allowedValues: List<Value> by customValue(def = emptyList()) {
+        return@customValue if (type.size == 1 && type[0] === ValueType.BOOLEAN) {
+            listOf(BooleanValue.TRUE, BooleanValue.FALSE)
+        } else {
+            it.list
         }
-
-        return map
     }
 
     companion object {
 
+        /**
+         * Build a value descriptor from annotation
+         */
         fun build(def: ValueDef): ValueDescriptor {
             val builder = MetaBuilder("value")
                     .setValue("name", def.key)
@@ -190,10 +160,44 @@ class ValueDescriptor(meta: Meta) : SimpleMetaMorph(meta), Named {
             return ValueDescriptor(builder)
         }
 
+        /**
+         * Build a value descriptor from its fields
+         */
+        fun build(
+                name: String,
+                info: String = "",
+                defaultValue: Any? = null,
+                required: Boolean = false,
+                multiple: Boolean = false,
+                types: List<ValueType> = emptyList(),
+                allowedValues: List<Any> = emptyList()
+        ): ValueDescriptor {
+            val valueBuilder = buildMeta("value") {
+                "name" to name
+                if (!types.isEmpty()) "type" to types
+                if (required) "required" to required
+                if (multiple) "multiple" to multiple
+                if (!info.isEmpty()) "info" to info
+                if (defaultValue != null) "default" to defaultValue
+                if (!allowedValues.isEmpty()) "allowedValues" to allowedValues
+            }.build()
+            return ValueDescriptor(valueBuilder)
+        }
+
+        /**
+         * Build empty value descriptor
+         */
         fun empty(valueName: String): ValueDescriptor {
             val builder = MetaBuilder("value")
                     .setValue("name", valueName)
             return ValueDescriptor(builder)
+        }
+
+        /**
+         * Merge two separate value descriptors
+         */
+        fun merge(primary: ValueDescriptor, secondary: ValueDescriptor): ValueDescriptor {
+            return ValueDescriptor(Laminate(primary.meta, secondary.meta))
         }
     }
 }
