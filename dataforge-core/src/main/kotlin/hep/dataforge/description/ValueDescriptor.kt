@@ -32,6 +32,8 @@ import java.util.stream.Stream
 /**
  * A descriptor for meta value
  *
+ * Descriptor can have non-atomic path. It is resolved when descriptor is added to the node
+ *
  * @author Alexander Nozik
  */
 @AnonymousNotAlowed

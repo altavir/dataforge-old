@@ -21,6 +21,7 @@
  */
 package hep.dataforge.description
 
+import hep.dataforge.kodex.set
 import hep.dataforge.meta.*
 import hep.dataforge.names.Name
 import hep.dataforge.values.Value
@@ -31,19 +32,29 @@ import org.slf4j.LoggerFactory
  * Helper class to builder descriptors
  * @author Alexander Nozik
  */
-class DescriptorBuilder(override val meta: MetaBuilder = MetaBuilder("node")) : Metoid {
-    var name by meta.mutableStringValue()
+class DescriptorBuilder(name: String, override val meta: MetaBuilder = MetaBuilder("node")) : Metoid {
+    //var name by meta.mutableStringValue()
     var required by meta.mutableBooleanValue()
     var multiple by meta.mutableBooleanValue()
     var default by meta.mutableNode()
     var info by meta.mutableStringValue()
     var tags: List<String> by meta.mutableCustomValue(read = { it.list.map { it.string } }, write = { Value.of(it) })
 
+    init {
+        meta["name"] = name
+    }
+
     //TODO add caching for node names?
+    /**
+     * Check if this node condtains descriptor node with given name
+     */
     private fun hasNodeDescriptor(name: String): Boolean {
         return meta.getMetaList("node").find { it.getString("name") == name } != null
     }
 
+    /**
+     * Check if this node contains value with given name
+     */
     private fun hasValueDescriptor(name: String): Boolean {
         return meta.getMetaList("value").find { it.getString("name") == name } != null
     }
@@ -64,15 +75,18 @@ class DescriptorBuilder(override val meta: MetaBuilder = MetaBuilder("node")) : 
      * Append node to this descriptor respecting the path
      */
     fun node(name: Name, childBuilder: DescriptorBuilder.() -> Unit): DescriptorBuilder {
-        val root = if (name.length == 1) {
+        val parent = if (name.length == 1) {
             this
         } else {
             buildChild(name.cutLast())
         }
-        root.node(DescriptorBuilder().apply(childBuilder).apply { this.name = name.last.toString() }.build())
+        parent.node(DescriptorBuilder(name.last.toString()).apply(childBuilder).build())
         return this
     }
 
+    /**
+     * Add a node using DSL builder. Name could be non-atomic
+     */
     fun node(name: String, childBuilder: DescriptorBuilder.() -> Unit): DescriptorBuilder {
         return node(Name.of(name), childBuilder)
     }
@@ -84,16 +98,9 @@ class DescriptorBuilder(override val meta: MetaBuilder = MetaBuilder("node")) : 
         return when (name.length) {
             0 -> this
             1 -> {
-                DescriptorBuilder(
-                        meta.getMetaList("node")
-                                .find {
-                                    it.getString("name") == name.first.toString()
-                                }
-                                ?: MetaBuilder("node").apply {
-                                    setValue("name", name)
-                                    meta.attachNode(this)
-                                }
-                )
+                val node = meta.getMetaList("node").find { it.getString("name") == name.first.toUnescaped() }
+                        ?: MetaBuilder("node").also { this.meta.attachNode(it) }
+                DescriptorBuilder(name.first.toUnescaped(), node)
             }
             else -> {
                 buildChild(name.first).buildChild(name.cutFirst())
@@ -101,20 +108,9 @@ class DescriptorBuilder(override val meta: MetaBuilder = MetaBuilder("node")) : 
         }
     }
 
-
-//    fun node(path: String, descriptor: NodeDescriptor): DescriptorBuilder {
-//        meta.putNode(Name.joinString(path, descriptor.name), descriptor.meta)
-//        return this
-//    }
-//
-//    infix fun String.to(builder: DescriptorBuilder.() -> Unit) {
-//        node(this, DescriptorBuilder().also { it.name = this }.apply(builder).build())
-//    }
-
-//    fun node(childType: AnnotatedElement): DescriptorBuilder {
-//        return node(Descriptors.buildDescriptor(childType))
-//    }
-
+    /**
+     * Add node from annotation
+     */
     fun node(nodeDef: NodeDef): DescriptorBuilder {
         return node(nodeDef.key) {
             info = nodeDef.info
@@ -124,24 +120,28 @@ class DescriptorBuilder(override val meta: MetaBuilder = MetaBuilder("node")) : 
         }
     }
 
-//    fun node(path: String, childType: AnnotatedElement): DescriptorBuilder {
-//        return node(path, Descriptors.buildDescriptor(childType))
-//    }
-
+    /**
+     * Add a value respecting its path inside descriptor
+     */
     fun value(descriptor: ValueDescriptor): DescriptorBuilder {
-        if (!hasValueDescriptor(descriptor.name)) {
-            meta.putNode(descriptor.toMeta())
+        val name = Name.of(descriptor.name)
+        val parent = if (name.length == 1) {
+            this
+        } else {
+            buildChild(name.cutLast())
+        }
+
+        if (!parent.hasValueDescriptor(name.last.toUnescaped())) {
+            parent.meta.putNode(descriptor.toMeta().builder.apply { this["name"] = name.last.toUnescaped() })
         } else {
             LoggerFactory.getLogger(javaClass).warn("Trying to replace existing value descriptor")
         }
         return this
     }
 
-//    fun value(path: String, descriptor: ValueDescriptor): DescriptorBuilder {
-//        meta.putNode(Name.joinString(path, descriptor.name), descriptor.toMeta())
-//        return this
-//    }
-
+    /**
+     * Create value descriptor from its fields. Name could be non-atomic
+     */
     fun value(
             name: String,
             info: String = "",
@@ -151,62 +151,11 @@ class DescriptorBuilder(override val meta: MetaBuilder = MetaBuilder("node")) : 
             types: List<ValueType> = emptyList(),
             allowedValues: List<Any>? = null
     ): DescriptorBuilder {
-        val valueBuilder = MetaBuilder("value")
-                .setValue("name", name)
-                .setValue("type", types)
-                .setValue("required", required)
-                .setValue("multiple", multiple)
-                .setValue("info", info)
-                .setValue("default", defaultValue)
-                .setValue("allowedValues", allowedValues)
-        meta.putNode(valueBuilder)
-        return this
-    }
-
-    /**
-     * Update this builder from external descriptor. Elements of this descriptor take precedence
-     */
-    fun update(descriptor: NodeDescriptor) {
-
+        return value(ValueDescriptor.Companion.build(name, info, defaultValue, required, multiple, types))
     }
 
     fun build(): NodeDescriptor {
         return NodeDescriptor(meta.build())
     }
-
-//    /**
-//     * Put a node or value description inside existing meta builder creating intermediate nodes
-//     *
-//     * @param builder
-//     * @param meta
-//     */
-//    private fun putDescription(builder: MetaBuilder, meta: Meta) {
-//        var nodeName = Name.of(meta.getString("name"))
-//        var currentNode = builder
-//        while (nodeName.length > 1) {
-//            val childName = nodeName.first.toString()
-//            val finalCurrentNode = currentNode
-//            currentNode = finalCurrentNode.getMetaList("node").stream()
-//                    .filter { node -> node.getString("name") == childName }
-//                    .findFirst()
-//                    .orElseGet {
-//                        val newChild = MetaBuilder("node").setValue("name", childName)
-//                        finalCurrentNode.attachNode(newChild)
-//                        newChild
-//                    }
-//            nodeName = nodeName.cutFirst()
-//        }
-//
-//        val childName = nodeName.toString()
-//        val finalCurrentNode = currentNode
-//        currentNode.getMetaList(meta.name).stream()
-//                .filter { node -> node.getString("name") == childName }
-//                .findFirst()
-//                .orElseGet {
-//                    val newChild = MetaBuilder(meta.name).setValue("name", childName)
-//                    finalCurrentNode.attachNode(newChild)
-//                    newChild
-//                }.update(meta).setValue("name", childName)
-//    }
 
 }

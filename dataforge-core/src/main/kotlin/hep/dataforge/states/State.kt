@@ -356,6 +356,7 @@ class MetaState(
         getter: (suspend () -> Meta)? = null,
         setter: (suspend State<Meta>.(Meta?, Meta) -> Unit)? = null
 ) : State<Meta>(name, def, owner, getter, setter) {
+
     constructor(
             def: NodeDef,
             owner: Stateful? = null,

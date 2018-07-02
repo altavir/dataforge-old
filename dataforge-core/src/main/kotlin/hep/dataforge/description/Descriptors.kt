@@ -188,13 +188,13 @@ object Descriptors {
 
     private fun builder(element: AnnotatedElement): DescriptorBuilder {
         //TODO use [Descriptor] annotation
-        val builder = DescriptorBuilder()
+        val builder = DescriptorBuilder("meta")
 
         element.listAnnotations(NodeDef::class.java, true)
                 .stream()
                 .filter { it -> !it.key.startsWith("@") }
                 .forEach { nodeDef ->
-                    builder.node(NodeDescriptor.build(nodeDef))
+                    builder.node(nodeDef)
                 }
 
         //Filtering hidden values
@@ -260,17 +260,14 @@ object Descriptors {
      * 2. Annotation description
      * 3. External descriptor
      */
-    private fun buildNodeDescriptor(property: KProperty1<*, *>, delegate: NodeDelegate<*>): NodeDescriptor {
-        val builder = DescriptorBuilder().apply {
-            name = delegate.name ?: property.name
+    private fun buildNodeDescriptor(property: KProperty1<*, *>, delegate: MetaDelegate): NodeDescriptor {
+        val builder = DescriptorBuilder(delegate.name ?: property.name).apply {
             info = property.description
 
             //Use property annotation to describe node
             property.annotations.filterIsInstance<NodeDef>()
                     .filter { it -> !it.key.startsWith("@") }
-                    .forEach { nodeDef ->
-                        node(NodeDescriptor.build(nodeDef))
-                    }
+                    .forEach { nodeDef -> node(nodeDef) }
 
             //Filtering hidden values
             property.annotations.filterIsInstance<ValueDef>()
@@ -307,6 +304,7 @@ object Descriptors {
                     builder.node(buildNodeDescriptor(property, delegate))
                 }
                 is NodeListDelegate<*> -> {
+                    builder.node(buildNodeDescriptor(property, delegate))
                 }
             }
         }
