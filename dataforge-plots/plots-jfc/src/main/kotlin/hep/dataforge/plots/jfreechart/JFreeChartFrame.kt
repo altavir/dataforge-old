@@ -26,6 +26,7 @@ import hep.dataforge.plots.XYPlotFrame
 import hep.dataforge.utils.FXObject
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueFactory
+import javafx.application.Platform
 import javafx.scene.Node
 import javafx.scene.control.ContextMenu
 import javafx.scene.control.Menu
@@ -87,7 +88,7 @@ class JFreeChartFrame @JvmOverloads constructor(frameMeta: Meta = Meta.empty()) 
 
     private fun runLater(runnable: () -> Unit) {
         if(FX.initialized.value){
-            runLater(runnable)
+            Platform.runLater(runnable)
         } else{
             runnable.invoke()
         }

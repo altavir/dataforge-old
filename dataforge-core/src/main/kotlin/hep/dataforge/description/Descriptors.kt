@@ -41,7 +41,7 @@ import kotlin.reflect.jvm.jvmErasure
 
 object Descriptors {
 
-    private val descriptorCache = Misc.getLRUCache<AnnotatedElement, NodeDescriptor>(500)
+    private val descriptorCache = Misc.getLRUCache<String, NodeDescriptor>(500)
 
     /**
      * Build Meta that contains all the default nodes and values from given node
@@ -90,15 +90,7 @@ object Descriptors {
     fun buildMetaFromFile(name: String, file: java.nio.file.Path): MetaBuilder {
         return MetaFileReader.read(file).builder.rename(name)
     }
-//
-//    @JvmStatic
-//    fun buildDescriptor(obj: Any): NodeDescriptor {
-//        return if (obj is Described) {
-//            obj.descriptor
-//        } else {
-//            buildDescriptor(obj.javaClass)
-//        }
-//    }
+
 
     /**
      * Build a descriptor for given Class or Method using Java annotations or restore it from cache if it was already used recently
@@ -108,27 +100,28 @@ object Descriptors {
      */
     @JvmStatic
     fun buildDescriptor(element: AnnotatedElement): NodeDescriptor {
-        return descriptorCache.getOrPut(element) {
-            builder(element).build()
-        }
+        return builder(element).build()
     }
 
     @JvmStatic
     fun getDescriptor(string: String): NodeDescriptor {
-        try {
-            val path = Path.of(string)
-            return when (path.target) {
-                "", "class", "method", "property" -> {
-                    val target = findAnnotatedElement(path) ?: throw RuntimeException("Target element $path not found")
-                    buildDescriptor(target)
+        return descriptorCache.getOrPut(string) {
+            try {
+                val path = Path.of(string)
+                when (path.target) {
+                    "", "class", "method", "property" -> {
+                        val target = findAnnotatedElement(path)
+                                ?: throw RuntimeException("Target element $path not found")
+                        buildDescriptor(target)
+                    }
+                    "file" -> return NodeDescriptor(MetaFileReader.read(Global.getFile(path.name.toString()).absolutePath))
+                    "resource" -> NodeDescriptor(buildMetaFromResource("node", path.name.toString()))
+                    else -> throw NameNotFoundException("Cant create descriptor from given target", string)
                 }
-                "file" -> return NodeDescriptor(MetaFileReader.read(Global.getFile(path.name.toString()).absolutePath))
-                "resource" -> NodeDescriptor(buildMetaFromResource("node", path.name.toString()))
-                else -> throw NameNotFoundException("Cant create descriptor from given target", string)
+            } catch (ex: Exception) {
+                LoggerFactory.getLogger(Descriptors::class.java).error("Failed to build descriptor", ex)
+                NodeDescriptor(Meta.empty());
             }
-        } catch (ex: Exception) {
-            LoggerFactory.getLogger(Descriptors::class.java).error("Failed to build descriptor", ex)
-            return NodeDescriptor(Meta.empty());
         }
     }
 
@@ -186,7 +179,7 @@ object Descriptors {
 
     /*--------------------*/
 
-    private fun builder(element: AnnotatedElement): DescriptorBuilder {
+    fun builder(element: AnnotatedElement): DescriptorBuilder {
         //TODO use [Descriptor] annotation
         val builder = DescriptorBuilder("meta")
 
@@ -278,7 +271,9 @@ object Descriptors {
 
             //default = delegate.def
         }
-        val external = property.findAnnotation<Descriptor>()?.let { builder. }
+        property.findAnnotation<Descriptor>()?.let { builder.update(getDescriptor(it.value)) }
+
+        return builder.build()
     }
 
     /**

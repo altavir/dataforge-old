@@ -17,10 +17,12 @@
 package hep.dataforge.fx.output
 
 import hep.dataforge.context.Context
+import hep.dataforge.description.Descriptors
 import hep.dataforge.fx.dfIconView
 import hep.dataforge.fx.plots.PlotContainer
 import hep.dataforge.fx.table.TableDisplay
 import hep.dataforge.io.output.Output
+import hep.dataforge.kodex.useValue
 import hep.dataforge.meta.Configurable
 import hep.dataforge.meta.Configuration
 import hep.dataforge.meta.Meta
@@ -65,6 +67,10 @@ class FXPlotOutput(context: Context) : FXOutput(context), PlotOutput, Configurab
                 logger.warn("Overriding non-empty frame configuration")
             }
             frame.configure(meta)
+            // Use descriptor hidden field to update root plot container description
+            meta.useValue("@descriptor"){
+                frame.plots.descriptor = Descriptors.getDescriptor(it.string)
+            }
         }
         when (obj) {
             is Plottable -> {

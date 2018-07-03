@@ -26,7 +26,7 @@ public class BasicAdapter extends MetaHolder implements ValuesAdapter {
 
     private void updateMapping() {
         MetaUtils.valueStream(getMeta()).forEach(pair -> {
-            mappings.put(pair.getFirst(), pair.getSecond().getString());
+            mappings.put(pair.getFirst().toString(), pair.getSecond().getString());
 //
 //            if(pair.getKey().endsWith(".value")){
 //                mappings.put(pair.getKey().replace(".value",""),pair.getValue().getString());

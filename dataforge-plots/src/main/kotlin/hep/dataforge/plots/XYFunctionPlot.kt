@@ -29,7 +29,6 @@ import hep.dataforge.values.ValueType.BOOLEAN
 import hep.dataforge.values.ValueType.NUMBER
 import hep.dataforge.values.Values
 import java.util.*
-import kotlin.collections.List
 import kotlin.collections.set
 
 /**
@@ -71,10 +70,14 @@ class XYFunctionPlot(name: String, meta: Meta = Meta.empty(), val function: (Dou
         }
     }
 
-    var range by config.mutableCustomNode("range", read = { Pair(it.getDouble("from"), it.getDouble("to")) }) {
-        invalidateCache()
-        buildMeta("range", "from" to it.first, "to" to it.second)
-    }
+    var range by config.mutableCustomNode(
+            "range",
+            read = { Pair(it.getDouble("from"), it.getDouble("to")) },
+            write = {
+                invalidateCache()
+                buildMeta("range", "from" to it.first, "to" to it.second)
+            }
+    )
 
     override fun applyValueChange(name: String, oldValue: Value?, newValue: Value?) {
         super.applyValueChange(name, oldValue, newValue)

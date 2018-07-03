@@ -18,7 +18,7 @@ class ComboBoxValueChooser : ValueChooserBase<ComboBox<Value>>() {
     //    }
 
     protected fun allowedValues(): Collection<Value> {
-        return descriptor?.allowedValues()?.keys ?: Collections.emptyList();
+        return descriptor?.allowedValues ?: Collections.emptyList();
     }
 
     override fun buildNode(): ComboBox<Value> {

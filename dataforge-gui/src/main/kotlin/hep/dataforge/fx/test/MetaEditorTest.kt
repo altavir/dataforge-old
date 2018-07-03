@@ -13,6 +13,7 @@ import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.names.Name
 import hep.dataforge.values.Value
+import hep.dataforge.values.ValueType
 import javafx.application.Application
 import javafx.scene.Scene
 import javafx.stage.Stage
@@ -37,23 +38,25 @@ class MetaEditorTest : App() {
                         .setValue("childValue", true)
                         .setValue("anotherChildValue", 18)
                 ).putNode(MetaBuilder("childNode")
-                .setValue("childValue", true)
-                .putNode(MetaBuilder("grandChildNode")
-                        .putValue("grandChildValue", "grandChild")
+                        .setValue("childValue", true)
+                        .putNode(MetaBuilder("grandChildNode")
+                                .putValue("grandChildValue", "grandChild")
+                        )
                 )
-        )
 
-        val descriptor = DescriptorBuilder()
-                .setInfo("Configuration editor test node")
-                .addValue("testValue", "STRING", "a test value")
-                .addValue("defaultValue", "NUMBER", "A value with default", 82.5)
-                .addNode(DescriptorBuilder("childNode")
-                        .setInfo("A child Node")
-                        .addValue("childValue", "BOOLEAN", "A child boolean node"))
-                .addNode(DescriptorBuilder("descriptedNode")
-                        .setInfo("A descripted node")
-                        .addValue("descriptedValue", "BOOLEAN", "described value in described node"))
-                .build()
+        val descriptor = DescriptorBuilder().apply {
+            info = "Configuration editor test node"
+            value(name = "testValue", types = listOf(ValueType.STRING), info = "a test value")
+            value(name = "defaultValue", types = listOf(ValueType.NUMBER), defaultValue = 82.5, info = "A value with default")
+            node("childNode") {
+                info = "A child Node"
+                value("childValue", types = listOf(ValueType.BOOLEAN), info = "A child boolean node")
+            }
+            node("descriptedNode") {
+                info = "A descripted node"
+                value("descriptedValue", types = listOf(ValueType.BOOLEAN), info = "described value in described node")
+            }
+        }.build()
 
         config.addObserver(object : ConfigChangeListener {
             override fun notifyValueChanged(name: Name, oldItem: Value?, newItem: Value?) {

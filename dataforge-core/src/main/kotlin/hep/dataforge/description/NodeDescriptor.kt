@@ -177,17 +177,21 @@ open class NodeDescriptor(meta: Meta) : SimpleMetaMorph(meta.sealed), Named {
         return meta
     }
 
+    override fun getDescriptor(): NodeDescriptor {
+        //TODO add descriptor for descriptor
+        return empty("descriptor")
+    }
+
     companion object {
 
-//        fun build(nodeDef: NodeDef): NodeDescriptor {
-//            return DescriptorBuilder().apply {
-//                name = nodeDef.key
-//                info = nodeDef.info
-//                required = nodeDef.required
-//                multiple = nodeDef.multiple
-//                tags = nodeDef.tags.asList()
-//            }.build()
-//        }
+        fun build(nodeDef: NodeDef): NodeDescriptor {
+            return DescriptorBuilder(nodeDef.key).apply {
+                info = nodeDef.info
+                required = nodeDef.required
+                multiple = nodeDef.multiple
+                tags = nodeDef.tags.asList()
+            }.build()
+        }
 
         fun empty(nodeName: String): NodeDescriptor {
             return NodeDescriptor(Meta.buildEmpty(nodeName))

@@ -23,6 +23,7 @@ package hep.dataforge.meta
 
 import hep.dataforge.description.Described
 import hep.dataforge.description.NodeDescriptor
+import hep.dataforge.kodex.optional
 import hep.dataforge.utils.Optionals
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueProvider
@@ -36,8 +37,9 @@ import java.util.*
  */
 open class MetaHolder(override val meta: Meta) : Metoid, Described, ValueProvider {
 
-    @Transient
-    private var descriptor: NodeDescriptor = super.getDescriptor()
+    private val _descriptor: NodeDescriptor by lazy {
+        super.getDescriptor()
+    }
 
 
     /**
@@ -46,16 +48,7 @@ open class MetaHolder(override val meta: Meta) : Metoid, Described, ValueProvide
      * @return
      */
     override fun getDescriptor(): NodeDescriptor {
-        return descriptor
-    }
-
-    /**
-     * Reserved method to set override descriptor later
-     *
-     * @param descriptor
-     */
-    protected fun setDescriptor(descriptor: NodeDescriptor) {
-        this.descriptor = descriptor
+        return _descriptor
     }
 
     /**
@@ -68,7 +61,7 @@ open class MetaHolder(override val meta: Meta) : Metoid, Described, ValueProvide
     override fun optValue(path: String): Optional<Value> {
         return Optionals
                 .either(meta.optValue(path))
-                .or { getDescriptor().getValueDescriptor(path).map { it.default() } }
+                .or { getDescriptor().getValueDescriptor(path)?.default.optional }
                 .opt()
     }
 

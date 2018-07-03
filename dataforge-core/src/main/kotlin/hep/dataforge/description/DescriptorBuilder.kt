@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory
  * Helper class to builder descriptors
  * @author Alexander Nozik
  */
-class DescriptorBuilder(name: String, override val meta: MetaBuilder = MetaBuilder("node")) : Metoid {
+class DescriptorBuilder(name: String = "node", override val meta: MetaBuilder = MetaBuilder("node")) : Metoid {
     //var name by meta.mutableStringValue()
     var required by meta.mutableBooleanValue()
     var multiple by meta.mutableBooleanValue()
@@ -152,6 +152,10 @@ class DescriptorBuilder(name: String, override val meta: MetaBuilder = MetaBuild
             allowedValues: List<Any>? = null
     ): DescriptorBuilder {
         return value(ValueDescriptor.Companion.build(name, info, defaultValue, required, multiple, types))
+    }
+
+    fun update(descriptor: NodeDescriptor):DescriptorBuilder{
+        TODO()
     }
 
     fun build(): NodeDescriptor {

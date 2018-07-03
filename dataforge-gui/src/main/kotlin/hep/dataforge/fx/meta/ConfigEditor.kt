@@ -26,7 +26,7 @@ class ConfigEditor(val configuration: Configuration, title: String = "Configurat
     val filter: (ConfigFX) -> Boolean = { cfg ->
         when (cfg) {
             is ConfigFXNode -> !(cfg.descriptor?.tags?.contains(NO_CONFIGURATOR_TAG) ?: false)
-            is ConfigFXValue -> !(cfg.descriptor?.tags()?.contains(NO_CONFIGURATOR_TAG) ?: false)
+            is ConfigFXValue -> !(cfg.descriptor?.tags?.contains(NO_CONFIGURATOR_TAG) ?: false)
         }
     }
 

@@ -96,10 +96,10 @@ abstract class AbstractDevice(override val context: Context = Global, meta: Meta
 
     init {
         //initialize states
-        listAnnotations(javaClass, StateDef::class.java, true).forEach {
+        javaClass.listAnnotations(StateDef::class.java, true).forEach {
             states.init(ValueState(it))
         }
-        listAnnotations(javaClass, MetaStateDef::class.java, true).forEach {
+        javaClass.listAnnotations( MetaStateDef::class.java, true).forEach {
             states.init(MetaState(it))
         }
     }

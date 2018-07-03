@@ -153,7 +153,7 @@ public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable, Se
      */
     @Override
     public ActionDescriptor getDescriptor() {
-        return ActionDescriptor.build(this);
+        return ActionDescriptor.Companion.build(this);
     }
 
     @Override
