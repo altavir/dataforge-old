@@ -64,7 +64,7 @@ class ActionDescriptor(meta: Meta) : NodeDescriptor(meta), SelfRendered {
     companion object {
 
         fun build(action: Action<*, *>): ActionDescriptor {
-            val builder = Descriptors.builder(action.javaClass).meta
+            val builder = Descriptors.forElement(action::class).meta.builder
 
             val actionDef = MetaBuilder("actionDef").putValue("name", action.name)
             if (action is GenericAction<*, *>) {
@@ -86,7 +86,7 @@ class ActionDescriptor(meta: Meta) : NodeDescriptor(meta), SelfRendered {
         }
 
         fun build(actionClass: Class<out Action<*, *>>): ActionDescriptor {
-            val builder = Descriptors.builder(actionClass).meta
+            val builder = Descriptors.forElement(actionClass.kotlin).meta.builder
 
             val def = actionClass.getAnnotation(TypedActionDef::class.java)
             if (def != null) {

@@ -135,7 +135,7 @@ class NodeListDelegate<out T>(
 }
 
 open class MutableValueDelegate<T : Any>(
-        override val target: MutableMetaNode<*>,
+        override val target: Configuration,
         name: String? = null,
         def: T? = null,
         write: (T) -> Any = { it },
@@ -149,14 +149,14 @@ open class MutableValueDelegate<T : Any>(
 }
 
 class MutableEnumValueDelegate<T : Enum<T>>(
-        target: MutableMetaNode<*>,
+        target: Configuration,
         type: KClass<T>,
         name: String? = null,
         def: T? = null
 ) : MutableValueDelegate<T>(target, name, def, write = { it.name }, read = { java.lang.Enum.valueOf(type.java, it.string) })
 
 class MutableNodeDelegate<T>(
-        override val target: MutableMetaNode<*>,
+        override val target: Configuration,
         name: String?,
         def: T? = null,
         val write: (T) -> Meta,
@@ -164,7 +164,20 @@ class MutableNodeDelegate<T>(
 ) : ReadWriteProperty<Any, T>, NodeDelegate<T>(target, name, def, read) {
 
     override operator fun setValue(thisRef: Any, property: KProperty<*>, value: T) {
-        target.setNode(name ?: property.name, write(value))
+        val nodeName = name ?: property.name
+        val node = write(value)
+        // if node exists, update it
+        if (target.hasMeta(nodeName)) {
+            target.getMeta(nodeName).update(write(value))
+        } else {
+            // if it is configuration, use it as is
+            if (node is Configuration) {
+                target.attachNode(name ?: property.name, node)
+            } else {
+                // otherwise transform it to configuration
+                target.setNode(nodeName, node)
+            }
+        }
     }
 }
 
@@ -208,14 +221,14 @@ fun Meta.nodeList(nodeName: String? = null, def: List<Meta>? = null): ReadOnlyPr
 fun <T> Meta.customNode(nodeName: String? = null, def: T? = null, conv: (Meta) -> T): ReadOnlyProperty<Any, T> =
         NodeDelegate(this, nodeName, def, conv)
 
-fun <T : MetaMorph> Meta.morph(type: KClass<T>, nodeName: String? = null, def: T? = null): ReadOnlyProperty<Any, T> =
+fun <T : MetaMorph> Meta.morphNode(type: KClass<T>, nodeName: String? = null, def: T? = null): ReadOnlyProperty<Any, T> =
         NodeDelegate(this, nodeName, def) { MetaMorph.morph(type, it) }
 
 fun <T : MetaMorph> Meta.morphList(type: KClass<T>, nodeName: String? = null, def: List<T>? = null): ReadOnlyProperty<Any, List<T>> =
         NodeListDelegate(this, nodeName, def) { MetaMorph.morph(type, it) }
 
-inline fun <reified T : MetaMorph> Meta.morph(nodeName: String? = null, def: T? = null): ReadOnlyProperty<Any, T> =
-        this.morph(T::class, nodeName, def)
+inline fun <reified T : MetaMorph> Meta.morphNode(nodeName: String? = null, def: T? = null): ReadOnlyProperty<Any, T> =
+        this.morphNode(T::class, nodeName, def)
 
 inline fun <reified T : MetaMorph> Meta.morphList(nodeName: String? = null, def: List<T>? = null): ReadOnlyProperty<Any, List<T>> =
         NodeListDelegate(this, nodeName, def) { MetaMorph.morph(T::class, it) }
@@ -234,42 +247,45 @@ inline fun <reified T : Enum<T>> Metoid.enumValue(valueName: String? = null, def
 fun Metoid.node(nodeName: String? = null, def: Meta? = null) = meta.node(nodeName, def)
 fun Metoid.nodeList(nodeName: String? = null, def: List<Meta>? = null) = meta.nodeList(nodeName, def)
 fun <T> Metoid.customNode(nodeName: String? = null, def: T? = null, conv: (Meta) -> T) = meta.customNode(nodeName, def, conv)
-fun <T : MetaMorph> Metoid.morph(type: KClass<T>, nodeName: String? = null, def: T? = null) = meta.morph(type, nodeName, def)
-inline fun <reified T : MetaMorph> Metoid.morph(nodeName: String? = null, def: T? = null) = meta.morph<T>(nodeName, def)
+fun <T : MetaMorph> Metoid.morphNode(type: KClass<T>, nodeName: String? = null, def: T? = null) = meta.morphNode(type, nodeName, def)
+inline fun <reified T : MetaMorph> Metoid.morphNode(nodeName: String? = null, def: T? = null) = meta.morphNode<T>(nodeName, def)
 inline fun <reified T : MetaMorph> Metoid.morphList(nodeName: String? = null, def: List<T>? = null) = meta.morphList<T>(nodeName, def)
 
 //Configuration extension
 
-/* [MutableMetaNode] extensions */
+/** [Configuration] extensions */
 
-fun MutableMetaNode<*>.mutableValue(valueName: String? = null, def: Value? = null): ReadWriteProperty<Any?, Value> =
+fun Configuration.mutableValue(valueName: String? = null, def: Value? = null): ReadWriteProperty<Any?, Value> =
         MutableValueDelegate(this, valueName, def, { it }, { it })
 
-fun MutableMetaNode<*>.mutableStringValue(valueName: String? = null, def: String? = null): ReadWriteProperty<Any?, String> =
+fun Configuration.mutableStringValue(valueName: String? = null, def: String? = null): ReadWriteProperty<Any?, String> =
         MutableValueDelegate(this, valueName, def, { it.parseValue() }, Value::string)
 
-fun MutableMetaNode<*>.mutableBooleanValue(valueName: String? = null, def: Boolean? = null): ReadWriteProperty<Any, Boolean> =
+fun Configuration.mutableBooleanValue(valueName: String? = null, def: Boolean? = null): ReadWriteProperty<Any, Boolean> =
         MutableValueDelegate(this, valueName, def) { it.boolean }
 
-fun MutableMetaNode<*>.mutableTimeValue(valueName: String? = null, def: Instant? = null): ReadWriteProperty<Any, Instant> =
+fun Configuration.mutableTimeValue(valueName: String? = null, def: Instant? = null): ReadWriteProperty<Any, Instant> =
         MutableValueDelegate(this, valueName, def) { it.time }
 
-fun MutableMetaNode<*>.mutableNumberValue(valueName: String? = null, def: Number? = null): ReadWriteProperty<Any, Number> =
+fun Configuration.mutableNumberValue(valueName: String? = null, def: Number? = null): ReadWriteProperty<Any, Number> =
         MutableValueDelegate(this, valueName, def) { it.number }
 
-fun MutableMetaNode<*>.mutableDoubleValue(valueName: String? = null, def: Double? = null): ReadWriteProperty<Any, Double> =
+fun Configuration.mutableDoubleValue(valueName: String? = null, def: Double? = null): ReadWriteProperty<Any, Double> =
         MutableValueDelegate(this, valueName, def) { it.double }
 
-fun MutableMetaNode<*>.mutableIntValue(valueName: String? = null, def: Int? = null): ReadWriteProperty<Any, Int> =
+fun Configuration.mutableIntValue(valueName: String? = null, def: Int? = null): ReadWriteProperty<Any, Int> =
         MutableValueDelegate(this, valueName, def) { it.int }
 
-fun <T : Any> MutableMetaNode<*>.mutableCustomValue(valueName: String? = null, def: T? = null, read: (Value) -> T, write: (T) -> Any): ReadWriteProperty<Any, T> =
+fun <T : Any> Configuration.customMutableValue(valueName: String? = null, def: T? = null, read: (Value) -> T, write: (T) -> Any): ReadWriteProperty<Any, T> =
         MutableValueDelegate(this, valueName, def, write, read)
+
+inline fun <reified T : Enum<T>> Configuration.mutableEnumValue(valueName: String? = null, def: T? = null): ReadWriteProperty<Any, T> =
+        MutableEnumValueDelegate(this, T::class, valueName, def)
 
 /**
  * Returns a child node of given meta that could be edited in-place
  */
-fun MutableMetaNode<*>.mutableNode(metaName: String? = null, def: Meta? = null): ReadWriteProperty<Any, MetaBuilder> =
+fun Configuration.mutableNode(metaName: String? = null, def: Meta? = null): ReadWriteProperty<Any, MetaBuilder> =
         MutableNodeDelegate(this, metaName, MetaBuilder(def ?: Meta.empty()),
                 read = {
                     it as? MetaBuilder ?: it.builder
@@ -277,38 +293,41 @@ fun MutableMetaNode<*>.mutableNode(metaName: String? = null, def: Meta? = null):
                 write = { it }
         )
 
-fun <T> MutableMetaNode<*>.mutableCustomNode(metaName: String? = null, def: T? = null, write: (T) -> Meta, read: (Meta) -> T): ReadWriteProperty<Any, T> =
+fun <T> Configuration.mutableCustomNode(metaName: String? = null, def: T? = null, write: (T) -> Meta, read: (Meta) -> T): ReadWriteProperty<Any, T> =
         MutableNodeDelegate(this, metaName, def, write, read)
 
 /**
  * Create a property that is delegate for configurable
  */
-fun <T : MetaMorph> MutableMetaNode<*>.mutableMorph(type: KClass<T>, metaName: String? = null, def: T? = null): ReadWriteProperty<Any, T> {
+fun <T : MetaMorph> Configuration.mutableMorph(type: KClass<T>, metaName: String? = null, def: T? = null): ReadWriteProperty<Any, T> {
     return MutableNodeDelegate(this, metaName, def, { it.toMeta() }, { MetaMorph.morph(type, it) })
 }
 
-inline fun <reified T : MetaMorph> MutableMetaNode<*>.mutableMorph(metaName: String? = null, def: T? = null): ReadWriteProperty<Any, T> =
+inline fun <reified T : MetaMorph> Configuration.mutableMorph(metaName: String? = null, def: T? = null): ReadWriteProperty<Any, T> =
         mutableMorph(T::class, metaName, def)
 
 
-/* [Configurable] extensions */
+/** [Configurable] extensions */
 
-fun Configurable.value(valueName: String? = null, def: Value? = null) = config.mutableValue(valueName, def)
-fun Configurable.stringValue(valueName: String? = null, def: String? = null) = config.mutableStringValue(valueName, def)
-fun Configurable.booleanValue(valueName: String? = null, def: Boolean? = null) = config.mutableBooleanValue(valueName, def)
-fun Configurable.timeValue(valueName: String? = null, def: Instant? = null) = config.mutableTimeValue(valueName, def)
-fun Configurable.numberValue(valueName: String? = null, def: Number? = null) = config.mutableNumberValue(valueName, def)
-fun Configurable.doubleValue(valueName: String? = null, def: Double? = null) = config.mutableDoubleValue(valueName, def)
-fun Configurable.intValue(valueName: String? = null, def: Int? = null) = config.mutableIntValue(valueName, def)
-fun <T : Any> Configurable.customValue(valueName: String? = null, def: T? = null, read: (Value) -> T, write: (T) -> Any) =
-        config.mutableCustomValue(valueName, def, read, write)
+fun Configurable.configValue(valueName: String? = null, def: Value? = null) = config.mutableValue(valueName, def)
 
-fun Configurable.node(nodeName: String? = null, def: Meta? = null) = config.mutableNode(nodeName, def)
-fun <T> Configurable.customNode(nodeName: String? = null, def: T? = null, write: (T) -> Meta, read: (Meta) -> T) =
+fun Configurable.configString(valueName: String? = null, def: String? = null) = config.mutableStringValue(valueName, def)
+fun Configurable.configBoolean(valueName: String? = null, def: Boolean? = null) = config.mutableBooleanValue(valueName, def)
+fun Configurable.configTime(valueName: String? = null, def: Instant? = null) = config.mutableTimeValue(valueName, def)
+fun Configurable.configNumber(valueName: String? = null, def: Number? = null) = config.mutableNumberValue(valueName, def)
+fun Configurable.configDouble(valueName: String? = null, def: Double? = null) = config.mutableDoubleValue(valueName, def)
+fun Configurable.configInt(valueName: String? = null, def: Int? = null) = config.mutableIntValue(valueName, def)
+fun <T : Any> Configurable.customConfigValue(valueName: String? = null, def: T? = null, read: (Value) -> T, write: (T) -> Any) =
+        config.customMutableValue(valueName, def, read, write)
+
+inline fun <reified T : Enum<T>> Configurable.configEnum(valueName: String? = null, def: T? = null) = config.mutableEnumValue(valueName, def)
+
+fun Configurable.configNode(nodeName: String? = null, def: Meta? = null) = config.mutableNode(nodeName, def)
+fun <T> Configurable.customConfigNode(nodeName: String? = null, def: T? = null, write: (T) -> Meta, read: (Meta) -> T) =
         config.mutableCustomNode(nodeName, def, write, read)
 
-fun <T : MetaMorph> Configurable.morph(type: KClass<T>, nodeName: String? = null, def: T? = null) = config.mutableMorph(type, nodeName, def)
-inline fun <reified T : MetaMorph> Configurable.morph(nodeName: String? = null, def: T? = null) = config.mutableMorph(nodeName, def)
+fun <T : MetaMorph> Configurable.morphConfigNode(type: KClass<T>, nodeName: String? = null, def: T? = null) = config.mutableMorph(type, nodeName, def)
+inline fun <reified T : MetaMorph> Configurable.morphConfigNode(nodeName: String? = null, def: T? = null) = config.mutableMorph(nodeName, def)
 
 
 //ValueProvider delegates

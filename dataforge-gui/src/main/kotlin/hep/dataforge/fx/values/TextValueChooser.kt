@@ -16,10 +16,20 @@ import tornadofx.*
 
 class TextValueChooser : ValueChooserBase<TextField>() {
 
+    private val displayText: String
+        get() = currentValue().let {
+            if (it.isNull) {
+                ""
+            } else {
+                it.string
+            }
+        }
+
+
     override fun buildNode(): TextField {
         val node = TextField()
         val defaultValue = currentValue()
-        node.text = currentValue().string
+        node.text = displayText
         node.style = String.format("-fx-text-fill: %s;", textColor(defaultValue))
 
         // commit on enter
@@ -31,7 +41,7 @@ class TextValueChooser : ValueChooserBase<TextField>() {
         // restoring value on click outside
         node.focusedProperty().addListener { _: ObservableValue<out Boolean>, oldValue: Boolean, newValue: Boolean ->
             if (oldValue && !newValue) {
-                node.text = currentValue().string
+                node.text = displayText
             }
         }
 
@@ -81,8 +91,8 @@ class TextValueChooser : ValueChooserBase<TextField>() {
     //    }
 
     override fun setDisplayValue(value: Value) {
-        node.text =if(value.isNull){
-             ""
+        node.text = if (value.isNull) {
+            ""
         } else {
             value.string
         }

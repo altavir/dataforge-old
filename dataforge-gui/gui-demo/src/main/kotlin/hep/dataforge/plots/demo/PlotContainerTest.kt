@@ -15,9 +15,14 @@
  */
 package hep.dataforge.plots.demo
 
-import hep.dataforge.meta.MetaBuilder
+import hep.dataforge.fx.output.FXOutputManager
+import hep.dataforge.fx.plots.group
+import hep.dataforge.kodex.buildContext
+import hep.dataforge.kodex.configure
 import hep.dataforge.plots.XYFunctionPlot
 import hep.dataforge.plots.data.DataPlot
+import hep.dataforge.plots.jfreechart.JFreeChartPlugin
+import hep.dataforge.plots.output.plot
 import hep.dataforge.tables.Adapters
 import hep.dataforge.tables.ListTable
 import hep.dataforge.values.ValueMap
@@ -30,6 +35,10 @@ import java.util.*
  */
 
 fun main(args: Array<String>) {
+
+    val context = buildContext("TEST", JFreeChartPlugin::class.java) {
+        output = FXOutputManager()
+    }
 
     val func = { x: Double -> Math.pow(x, 2.0) }
 
@@ -46,23 +55,22 @@ fun main(args: Array<String>) {
 
     val dataPlot = DataPlot.plot("data.Plot", Adapters.buildXYAdapter("myX", "myXErr", "myY", "myYErr"), ds)
 
-
-    val manager = FXPlotManager();
-    manager.startGlobal();
-
-    manager.display("test", "testLog") {
-        plot(funcPlot)
-        config.setNode(MetaBuilder("yAxis").putValue("type", "log"))
-        plot(dataPlot)
-    }
-    manager.display("test", "test") {
-        group("sub") {
-            plot(funcPlot)
-            plot(dataPlot)
+    context.plot("test"){
+        configure {
+            "yAxis" to {
+                "type" to "log"
+            }
+        }
+        +funcPlot
+        +dataPlot
+        group("sub"){
+            +funcPlot
+            +dataPlot
         }
     }
-    manager.display("test1") {
-        plot(funcPlot)
+
+    context.plot("test1"){
+        +funcPlot
     }
 
 }

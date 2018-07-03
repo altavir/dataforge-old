@@ -32,13 +32,13 @@ import org.slf4j.LoggerFactory
  * Helper class to builder descriptors
  * @author Alexander Nozik
  */
-class DescriptorBuilder(name: String = "node", override val meta: MetaBuilder = MetaBuilder("node")) : Metoid {
+class DescriptorBuilder(name: String = "node", override val meta: Configuration = Configuration("node")) : Metoid {
     //var name by meta.mutableStringValue()
     var required by meta.mutableBooleanValue()
     var multiple by meta.mutableBooleanValue()
     var default by meta.mutableNode()
     var info by meta.mutableStringValue()
-    var tags: List<String> by meta.mutableCustomValue(read = { it.list.map { it.string } }, write = { Value.of(it) })
+    var tags: List<String> by meta.customMutableValue(read = { it.list.map { it.string } }, write = { Value.of(it) })
 
     init {
         meta["name"] = name
@@ -66,7 +66,7 @@ class DescriptorBuilder(name: String = "node", override val meta: MetaBuilder = 
         if (!hasNodeDescriptor(childDescriptor.name)) {
             meta.putNode(childDescriptor.meta)
         } else {
-            LoggerFactory.getLogger(javaClass).warn("Trying to replace existing node descriptor")
+            LoggerFactory.getLogger(javaClass).warn("Trying to replace existing node descriptor ${childDescriptor.name}")
         }
         return this
     }
@@ -99,7 +99,7 @@ class DescriptorBuilder(name: String = "node", override val meta: MetaBuilder = 
             0 -> this
             1 -> {
                 val node = meta.getMetaList("node").find { it.getString("name") == name.first.toUnescaped() }
-                        ?: MetaBuilder("node").also { this.meta.attachNode(it) }
+                        ?: Configuration("node").also { this.meta.attachNode(it) }
                 DescriptorBuilder(name.first.toUnescaped(), node)
             }
             else -> {
@@ -117,6 +117,9 @@ class DescriptorBuilder(name: String = "node", override val meta: MetaBuilder = 
             required = nodeDef.required
             multiple = nodeDef.multiple
             tags = nodeDef.tags.asList()
+            if(!nodeDef.descriptor.isEmpty()){
+                update(Descriptors.forName(nodeDef.descriptor))
+            }
         }
     }
 
@@ -134,7 +137,7 @@ class DescriptorBuilder(name: String = "node", override val meta: MetaBuilder = 
         if (!parent.hasValueDescriptor(name.last.toUnescaped())) {
             parent.meta.putNode(descriptor.toMeta().builder.apply { this["name"] = name.last.toUnescaped() })
         } else {
-            LoggerFactory.getLogger(javaClass).warn("Trying to replace existing value descriptor")
+            LoggerFactory.getLogger(javaClass).warn("Trying to replace existing value descriptor ${descriptor.name}")
         }
         return this
     }
@@ -149,17 +152,24 @@ class DescriptorBuilder(name: String = "node", override val meta: MetaBuilder = 
             required: Boolean = false,
             multiple: Boolean = false,
             types: List<ValueType> = emptyList(),
-            allowedValues: List<Any>? = null
+            allowedValues: List<Any> = emptyList()
     ): DescriptorBuilder {
-        return value(ValueDescriptor.Companion.build(name, info, defaultValue, required, multiple, types))
+        return value(ValueDescriptor.build(name, info, defaultValue, required, multiple, types, allowedValues))
     }
 
-    fun update(descriptor: NodeDescriptor):DescriptorBuilder{
-        TODO()
+    fun update(descriptor: NodeDescriptor): DescriptorBuilder {
+        //TODO update primary fields
+        descriptor.valueDescriptors().forEach{
+            this.value(it.value)
+        }
+        descriptor.childrenDescriptors().forEach{
+            this.node(it.value)
+        }
+        return this
     }
 
     fun build(): NodeDescriptor {
-        return NodeDescriptor(meta.build())
+        return NodeDescriptor(meta)
     }
 
 }

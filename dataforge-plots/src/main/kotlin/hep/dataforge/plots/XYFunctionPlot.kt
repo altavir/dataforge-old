@@ -53,7 +53,7 @@ class XYFunctionPlot(name: String, meta: Meta = Meta.empty(), val function: (Dou
      * The minimal number of points per range
      */
 
-    var density by config.mutableIntValue()
+    var density by config.mutableIntValue(def = 200)
     var from by config.mutableDoubleValue("range.from")
     var to by config.mutableDoubleValue("range.to")
 
@@ -62,7 +62,7 @@ class XYFunctionPlot(name: String, meta: Meta = Meta.empty(), val function: (Dou
      *
      * @param smoothing
      */
-    var smoothing by config.mutableCustomValue("connectionType", read = { it.string == "spline" }) {
+    var smoothing by config.customMutableValue("connectionType", read = { it.string == "spline" }) {
         if (it) {
             "spline"
         } else {

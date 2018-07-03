@@ -13,7 +13,7 @@ class NamedVectorTest extends Specification {
         def vector = new NamedVector(Names.of(["a", "b", "c"]), new ArrayRealVector([1d, 2d, 3d] as double[]));
         when:
         def meta = vector.toMeta();
-        def newVector = MetaMorph.morphNode(NamedVector,meta);
+        def newVector = MetaMorph.morph(NamedVector,meta);
         then:
         newVector.getDouble("b") == 2
     }

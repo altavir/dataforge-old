@@ -1,8 +1,11 @@
 package hep.dataforge.plots.demo
 
-import hep.dataforge.plots.PlotFrame
+import hep.dataforge.fx.output.FXOutputManager
+import hep.dataforge.kodex.buildContext
 import hep.dataforge.plots.XYFunctionPlot
 import hep.dataforge.plots.data.DataPlot
+import hep.dataforge.plots.jfreechart.JFreeChartPlugin
+import hep.dataforge.plots.output.plot
 import hep.dataforge.tables.Adapters
 import hep.dataforge.tables.ListTable
 import hep.dataforge.values.ValueMap
@@ -18,6 +21,10 @@ import java.util.*
  */
 
 fun main(args: Array<String>) {
+
+    val context = buildContext("TEST", JFreeChartPlugin::class.java) {
+        output = FXOutputManager()
+    }
 
     val func = { x: Double -> Math.pow(x, 2.0) }
 
@@ -35,24 +42,21 @@ fun main(args: Array<String>) {
     val dataPlot = DataPlot.plot("dataPlot", Adapters.buildXYAdapter("myX", "myXErr", "myY", "myYErr"), ds)
 
 
-    val manager = FXPlotManager();
-    manager.startGlobal();
-
-
-    val frame = manager.display("test", "before") {
-        add(dataPlot)
-        //add(DataPlot.plot("dataPlot2", XYAdapter("myX", "myXErr", "myY", "myYErr"), ds))
-        add(funcPlot)
+    context.plot("before"){
+        +dataPlot
     }
 
     val baos = ByteArrayOutputStream();
 
     ObjectOutputStream(baos).use {
-        it.writeObject(frame)
+        it.writeObject(dataPlot)
     }
 
     val bais = ByteArrayInputStream(baos.toByteArray());
-    val restored: PlotFrame = ObjectInputStream(bais).readObject() as PlotFrame
-    manager.display("test", "after", restored)
+    val restored: DataPlot = ObjectInputStream(bais).readObject() as DataPlot
+
+    context.plot("after"){
+        +restored
+    }
 
 }

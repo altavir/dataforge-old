@@ -38,7 +38,6 @@ import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.util.*
 import java.util.stream.Stream
-import kotlin.reflect.KClass
 
 /**
  * A group of plottables. It could store Plots as well as other plot groups.
@@ -86,7 +85,7 @@ class PlotGroup(name: String, private var descriptor: NodeDescriptor = NodeDescr
      */
     private fun notifyPlotAdded(plot: Plottable) {
         plotAdded(plot.name, plot)
-        metaChanged(plot.name, plot, Laminate(plot.config).withDescriptor(Descriptors.buildDescriptor(plot)))
+        metaChanged(plot.name, plot, Laminate(plot.config).withDescriptor(Descriptors.forElement(plot::class)))
         if (plot is PlotGroup) {
             plot.children.forEach { plot.notifyPlotAdded(it) }
         }
@@ -100,10 +99,14 @@ class PlotGroup(name: String, private var descriptor: NodeDescriptor = NodeDescr
         notifyPlotAdded(plot)
     }
 
+    operator fun Plottable.unaryPlus(){
+        this@PlotGroup.add(this)
+    }
+
     /**
      * Recursively create plot groups using given name
      */
-    fun createGroup(name: Name): PlotGroup {
+    private fun createGroup(name: Name): PlotGroup {
         return if (name.isEmpty) {
             this
         } else {
@@ -230,8 +233,13 @@ class PlotGroup(name: String, private var descriptor: NodeDescriptor = NodeDescr
         notifyConfigChanged()
     }
 
-    fun setType(type: KClass<out Plottable>) {
-        setDescriptor(Descriptors.buildDescriptor(type.java))
+    fun setType(type: Class<out Plottable>) {
+        setDescriptor(Descriptors.forElement(type.kotlin))
+        configureValue("@descriptor", "class::${type.name}")
+    }
+
+    inline fun <reified T: Plottable> setType() {
+        setType(T::class.java)
     }
 
     /**
@@ -320,7 +328,7 @@ class PlotGroup(name: String, private var descriptor: NodeDescriptor = NodeDescr
         const val PLOT_TARGET = "plot"
 
         inline fun <reified T : Plottable> typed(name: String): PlotGroup {
-            return PlotGroup(name, Descriptors.buildDescriptor(T::class.java))
+            return PlotGroup(name, Descriptors.forElement(T::class))
         }
 
         val WRAPPER = Wrapper()

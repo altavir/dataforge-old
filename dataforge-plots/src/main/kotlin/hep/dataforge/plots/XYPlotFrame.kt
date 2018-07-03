@@ -15,12 +15,10 @@
  */
 package hep.dataforge.plots
 
-import hep.dataforge.description.NodeDef
-import hep.dataforge.description.NodeDefs
-import hep.dataforge.description.ValueDef
-import hep.dataforge.description.ValueDefs
+import hep.dataforge.description.*
 import hep.dataforge.meta.Meta
-import hep.dataforge.meta.node
+import hep.dataforge.meta.configNode
+import hep.dataforge.meta.morphConfigNode
 import hep.dataforge.names.Name
 import hep.dataforge.tables.Adapters.X_AXIS
 import hep.dataforge.tables.Adapters.Y_AXIS
@@ -40,17 +38,13 @@ import java.util.*
 )
 abstract class XYPlotFrame : AbstractPlotFrame() {
 
-    var xAxis by node()
-    var yAxis by node()
+    @Description("The description of X axis")
+    var xAxis: Axis by morphConfigNode(def = Axis(Meta.empty()))
 
-    private val xAxisConfig: Meta
-        get() = config.getMetaOrEmpty("xAxis")
+    @Description("The description of Y axis")
+    var yAxis: Axis by morphConfigNode(def = Axis(Meta.empty()))
 
-    private val yAxisConfig: Meta
-        get() = config.getMetaOrEmpty("yAxis")
-
-    private val legendConfig: Meta
-        get() = config.getMetaOrEmpty("legend")
+    private val legend by configNode()
 
 
     override fun applyConfig(config: Meta?) {
@@ -60,17 +54,15 @@ abstract class XYPlotFrame : AbstractPlotFrame() {
 
         updateFrame(config)
         //Вызываем эти методы, чтобы не делать двойного обновления аннотаций
-        updateAxis(X_AXIS, xAxisConfig, getConfig())
+        updateAxis(X_AXIS, xAxis.meta, getConfig())
 
-        updateAxis(Y_AXIS, yAxisConfig, getConfig())
+        updateAxis(Y_AXIS, yAxis.meta, getConfig())
 
-        updateLegend(legendConfig)
+        updateLegend(legend)
 
     }
 
     protected abstract fun updateFrame(annotation: Meta)
-
-    //TODO replace axis type by enumeration
 
     /**
      * Configure axis
@@ -84,12 +76,12 @@ abstract class XYPlotFrame : AbstractPlotFrame() {
             ValueDef(key = "units", def = "", info = "The units of the axis."),
             ValueDef(key = "range.from", type = arrayOf(ValueType.NUMBER), info = "Lower boundary for fixed range"),
             ValueDef(key = "range.to", type = arrayOf(ValueType.NUMBER), info = "Upper boundary for fixed range"),
-            ValueDef(key = "crosshair", def = "data", allowed = ["none", "free", "data"], info = "Appearance and type of the crosshair")
+            ValueDef(key = "crosshair", def = "none", allowed = ["none", "free", "data"], info = "Appearance and type of the crosshair")
     )
     @NodeDef(key = "range", info = "The definition of range for given axis")
     protected abstract fun updateAxis(axisName: String, axisMeta: Meta, plotMeta: Meta)
 
-    @ValueDef(key = "show", type = arrayOf(ValueType.BOOLEAN), def = "true", info = "Display or hide the legend")
+    @ValueDef(key = "show", type = [ValueType.BOOLEAN], def = "true", info = "Display or hide the legend")
     protected abstract fun updateLegend(legendMeta: Meta)
 
     /**

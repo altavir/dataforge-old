@@ -16,6 +16,7 @@
 package hep.dataforge.plots.jfreechart
 
 import hep.dataforge.exceptions.NameNotFoundException
+import hep.dataforge.kodex.useValue
 import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name
@@ -64,8 +65,8 @@ import java.util.stream.Collectors
  */
 class JFreeChartFrame @JvmOverloads constructor(frameMeta: Meta = Meta.empty()) : XYPlotFrame(), FXObject, Serializable {
 
-    val chart: JFreeChart
-    private val xyPlot: XYPlot
+    private val xyPlot: XYPlot = XYPlot()
+    val chart: JFreeChart = JFreeChart(xyPlot)
 
     /**
      * Index mapping names to datasets
@@ -81,8 +82,6 @@ class JFreeChartFrame @JvmOverloads constructor(frameMeta: Meta = Meta.empty()) 
     private val shapeCache = HashMap<Name, Shape>()
 
     init {
-        xyPlot = XYPlot()
-        chart = JFreeChart(xyPlot)
         configure(frameMeta)
     }
 
@@ -239,6 +238,7 @@ class JFreeChartFrame @JvmOverloads constructor(frameMeta: Meta = Meta.empty()) 
             } else {
                 chart.removeLegend()
             }
+            this.xyPlot.legendItems
         }
     }
 
@@ -275,9 +275,9 @@ class JFreeChartFrame @JvmOverloads constructor(frameMeta: Meta = Meta.empty()) 
         val render: XYLineAndShapeRenderer = if (config.getBoolean("showErrors", true)) {
             XYErrorRenderer()
         } else {
-            when (config.getString("connectionType", "default")) {
-                "step" -> XYStepRenderer()
-                "spline" -> XYSplineRenderer()
+            when (config.getString("connectionType", "DEFAULT").toUpperCase()) {
+                "STEP" -> XYStepRenderer()
+                "SPLINE" -> XYSplineRenderer()
                 else -> XYLineAndShapeRenderer()
             }
         }
@@ -310,6 +310,9 @@ class JFreeChartFrame @JvmOverloads constructor(frameMeta: Meta = Meta.empty()) 
                 .boolean
 
         render.setSeriesVisible(0, visible)
+        config.useValue("title") {
+            render.setLegendItemLabelGenerator { dataset, series -> it.string }
+        }
 
         runLater {
             xyPlot.setRenderer(index[name]!!.index, render)
@@ -319,7 +322,7 @@ class JFreeChartFrame @JvmOverloads constructor(frameMeta: Meta = Meta.empty()) 
             if (paint is Color) {
                 colorCache[name] = paint
             }
-            shapeCache.put(name, render.lookupSeriesShape(0))
+            shapeCache[name] = render.lookupSeriesShape(0)
         }
     }
 

@@ -22,7 +22,10 @@ import java.time.Instant
 import java.util.*
 import java.util.stream.Collectors
 import kotlin.coroutines.experimental.CoroutineContext
+import kotlin.reflect.KAnnotatedElement
 import kotlin.reflect.KClass
+import kotlin.reflect.KFunction
+import kotlin.reflect.jvm.javaMethod
 
 /**
  * Core DataForge classes extensions
@@ -171,7 +174,7 @@ fun <T : Configurable> T.configure(transform: KMetaBuilder.() -> Unit): T {
 fun <T : Annotation> AnnotatedElement.listAnnotations(type: Class<T>, searchSuper: Boolean = true): List<T> {
     if (this is Class<*>) {
         val res = ArrayList<T>()
-        val array = getAnnotationsByType(type)
+        val array = getDeclaredAnnotationsByType(type)
         res.addAll(Arrays.asList(*array))
         if (searchSuper) {
             val superClass = this.superclass
@@ -189,8 +192,19 @@ fun <T : Annotation> AnnotatedElement.listAnnotations(type: Class<T>, searchSupe
     }
 }
 
-inline fun <reified T : Annotation> KClass<*>.listAnnotations(searchSuper: Boolean = true): List<T> {
-    return this.java.listAnnotations(T::class.java, searchSuper)
+fun <T : Annotation> KAnnotatedElement.listAnnotations(type: KClass<T>, searchSuper: Boolean = true): List<T> {
+    return if (this is KClass<*>) {
+        return this.java.listAnnotations(type.java, searchSuper)
+    } else if (this is KFunction<*>) {
+        return this.javaMethod?.listAnnotations(type.java, searchSuper) ?: emptyList()
+    } else {
+        //TODO this does not work properly, annotation containers do not work
+        this.annotations.filterIsInstance(type.java)
+    }
+}
+
+inline fun <reified T : Annotation> KAnnotatedElement.listAnnotations(searchSuper: Boolean = true): List<T> {
+    return listAnnotations(T::class, searchSuper)
 }
 
 

@@ -15,6 +15,7 @@
  */
 package hep.dataforge.plots
 
+import hep.dataforge.description.ValueDef
 import hep.dataforge.io.envelopes.Envelope
 import hep.dataforge.io.envelopes.EnvelopeBuilder
 import hep.dataforge.io.envelopes.JavaObjectWrapper.JAVA_SERIAL_DATA
@@ -40,6 +41,7 @@ import java.io.ObjectOutputStream
 //@ValueDef(name = "preferedPlotter", def = "jFreeChart",
 //        info = "A prefered plotting library. It is used if supported by destination PlotFrame.", tags = {NO_CONFIGURATOR_TAG})
 @AnonymousNotAlowed
+@ValueDef(key = "connectionType", def = "default", allowed = ["default", "step", "spline"], info = "Connection line type")
 interface Plot : Plottable {
 
     /**

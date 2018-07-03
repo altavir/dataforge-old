@@ -113,13 +113,13 @@ class ValueDescriptor(meta: Meta) : SimpleMetaMorph(meta.sealed), Named {
      *
      * @return
      */
-    val allowedValues: List<Value> by customValue(def = emptyList()) {
-        return@customValue if (type.size == 1 && type[0] === ValueType.BOOLEAN) {
-            listOf(BooleanValue.TRUE, BooleanValue.FALSE)
-        } else {
-            it.list
-        }
-    }
+    val allowedValues: List<Value> by customValue(
+            def = if (type.size == 1 && type[0] === ValueType.BOOLEAN) {
+                listOf(BooleanValue.TRUE, BooleanValue.FALSE)
+            } else {
+                emptyList()
+            }
+    ) { it.list }
 
     companion object {
 

@@ -294,8 +294,6 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
      * @param elements
      */
     public T setNode(String name, Meta... elements) {
-        List<Meta> res = new ArrayList<>();
-        res.addAll(Arrays.asList(elements));
         return setNode(name, Arrays.asList(elements));
     }
 
@@ -562,12 +560,12 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
      *
      * @param node
      */
-    public void attachNode(T node) {
+    public void attachNode(String nodeName, T node) {
         if (node == null) {
             throw new IllegalArgumentException("Can't attach null node");
         }
-        String nodeName = node.getName();
         node.parent = this;
+        node.name = nodeName;
         List<T> list;
         if (nodes.containsKey(nodeName)) {
             list = nodes.get(nodeName);
@@ -578,5 +576,9 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
         List<T> oldList = new ArrayList<>(list);
         list.add(node);
         notifyNodeChanged(Name.ofSingle(nodeName), oldList, list);
+    }
+
+    public void attachNode(T node) {
+        attachNode(node.getName(), node);
     }
 }

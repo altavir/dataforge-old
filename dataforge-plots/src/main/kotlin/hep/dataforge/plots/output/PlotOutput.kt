@@ -34,16 +34,16 @@ interface PlotOutput : Output, Configurable {
 }
 
 fun Context.plot(stage: String, name: String, plottable: Plottable, transform: KMetaBuilder.() -> Unit = {}) {
-    output.get(stage, name, PlotOutput.PLOT_TYPE).render(plottable, buildMeta("frame", transform))
+    output[stage, name, PlotOutput.PLOT_TYPE].render(plottable, buildMeta("frame", transform))
 }
 
 fun Context.plot(stage: String = "", name: String, plottables: Iterable<Plottable>, transform: KMetaBuilder.() -> Unit = {}) {
-    output.get(stage, name, PlotOutput.PLOT_TYPE).render(plottables, buildMeta("frame", transform))
+    output[stage, name, PlotOutput.PLOT_TYPE].render(plottables, buildMeta("frame", transform))
 }
 
 fun Context.plot(name: String, stage: String = "", action: PlotFrame.() -> Unit) {
     val frame = FakePlotFrame().apply(action)
-    output.get(stage, name, PlotOutput.PLOT_TYPE).render(frame.plots, frame.config)
+    output[stage, name, PlotOutput.PLOT_TYPE].render(frame.plots, frame.config)
 }
 
 //@JvmOverloads

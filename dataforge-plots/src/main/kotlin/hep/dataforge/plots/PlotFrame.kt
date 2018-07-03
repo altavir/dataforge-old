@@ -16,13 +16,13 @@
 package hep.dataforge.plots
 
 import hep.dataforge.context.Plugin
+import hep.dataforge.description.Description
 import hep.dataforge.description.ValueDef
 import hep.dataforge.io.envelopes.Envelope
 import hep.dataforge.io.envelopes.EnvelopeBuilder
 import hep.dataforge.io.envelopes.JavaObjectWrapper.JAVA_SERIAL_DATA
 import hep.dataforge.io.envelopes.SimpleEnvelope
-import hep.dataforge.meta.Configurable
-import hep.dataforge.meta.Meta
+import hep.dataforge.meta.*
 import hep.dataforge.utils.MetaFactory
 import java.io.ObjectStreamException
 import java.io.OutputStream
@@ -50,6 +50,11 @@ interface PlotFrame : Configurable, Serializable {
      */
     fun add(plotable: Plottable) {
         plots.add(plotable)
+    }
+
+
+    operator fun Plottable.unaryPlus(){
+        this@PlotFrame.add(this)
     }
 
     /**
@@ -108,10 +113,6 @@ interface PlotFrame : Configurable, Serializable {
     fun asImage(stream: OutputStream, config: Meta) {
         throw UnsupportedOperationException()
     }
-
-    //    default Object writeReplace() throws ObjectStreamException {
-    //        return new PlotFrameEnvelope(wrapper.wrap(this));
-    //    }
 
     /**
      * Use exclusively for plot frame serialization
@@ -180,3 +181,48 @@ interface PlotFrame : Configurable, Serializable {
 }
 
 interface PlotFactory : Plugin, MetaFactory<PlotFrame>
+
+/**
+ * Range for single numberic axis
+ */
+class Range(meta:Meta): ConfigMorph(meta){
+
+    @Description("Lower boundary for fixed range")
+    val from: Number by configDouble()
+
+    @Description("Upper boundary for fixed range")
+    val to: Number by configDouble()
+}
+
+/**
+ * Axis definition
+ */
+class Axis(meta:Meta): ConfigMorph(meta){
+
+    enum class Type{
+        NUMBER,
+        LOG,
+        TIME
+    }
+
+    enum class Crosshair{
+        NONE,
+        FREE,
+        DATA
+    }
+
+    @Description("The type of axis. By default number axis is used")
+    val type: Type by configEnum(def = Type.NUMBER)
+
+    @Description("The title of the axis")
+    val title: String by configString()
+
+    @Description("The units of the axis")
+    val units: String by configString(def = "")
+
+    @Description("Appearance and type of the crosshair")
+    val crosshair: Crosshair by configEnum(def = Crosshair.NONE)
+
+    @Description("The definition of range for given axis")
+    val range: Range by morphConfigNode()
+}

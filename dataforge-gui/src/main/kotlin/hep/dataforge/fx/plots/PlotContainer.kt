@@ -102,7 +102,7 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
                         minWidth = 0.0
                         maxWidth = Double.MAX_VALUE
                         action {
-                            displayConfigurator("Plot frame configuration", frame, Descriptors.buildDescriptor(frame))
+                            displayConfigurator("Plot frame configuration", frame, Descriptors.forElement(frame::class))
                         }
                     }
                     treeview<Plottable> {
@@ -183,7 +183,7 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
                                 button("...") {
                                     minWidth = 0.0
                                     action {
-                                        displayConfigurator(item.title + " configuration", item, Descriptors.buildDescriptor(item))
+                                        displayConfigurator(item.title + " configuration", item, Descriptors.forElement(item::class))
                                     }
                                 }
 

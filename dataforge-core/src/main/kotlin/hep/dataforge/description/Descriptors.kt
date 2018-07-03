@@ -23,7 +23,6 @@ import hep.dataforge.kodex.listAnnotations
 import hep.dataforge.meta.*
 import hep.dataforge.providers.Path
 import hep.dataforge.utils.Misc
-import hep.dataforge.values.Value
 import hep.dataforge.values.ValueType
 import org.slf4j.LoggerFactory
 import java.io.IOException
@@ -37,11 +36,12 @@ import kotlin.reflect.KAnnotatedElement
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.*
+import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.jvm.jvmErasure
 
 object Descriptors {
 
-    private val descriptorCache = Misc.getLRUCache<String, NodeDescriptor>(500)
+    private val descriptorCache = Misc.getLRUCache<String, NodeDescriptor>(1000)
 
     /**
      * Build Meta that contains all the default nodes and values from given node
@@ -87,54 +87,22 @@ object Descriptors {
     }
 
     @Throws(IOException::class, ParseException::class)
-    fun buildMetaFromFile(name: String, file: java.nio.file.Path): MetaBuilder {
+    private fun buildMetaFromFile(name: String, file: java.nio.file.Path): MetaBuilder {
         return MetaFileReader.read(file).builder.rename(name)
     }
 
 
-    /**
-     * Build a descriptor for given Class or Method using Java annotations or restore it from cache if it was already used recently
-     *
-     * @param element
-     * @return
-     */
-    @JvmStatic
-    fun buildDescriptor(element: AnnotatedElement): NodeDescriptor {
-        return builder(element).build()
-    }
 
-    @JvmStatic
-    fun getDescriptor(string: String): NodeDescriptor {
-        return descriptorCache.getOrPut(string) {
-            try {
-                val path = Path.of(string)
-                when (path.target) {
-                    "", "class", "method", "property" -> {
-                        val target = findAnnotatedElement(path)
-                                ?: throw RuntimeException("Target element $path not found")
-                        buildDescriptor(target)
-                    }
-                    "file" -> return NodeDescriptor(MetaFileReader.read(Global.getFile(path.name.toString()).absolutePath))
-                    "resource" -> NodeDescriptor(buildMetaFromResource("node", path.name.toString()))
-                    else -> throw NameNotFoundException("Cant create descriptor from given target", string)
-                }
-            } catch (ex: Exception) {
-                LoggerFactory.getLogger(Descriptors::class.java).error("Failed to build descriptor", ex)
-                NodeDescriptor(Meta.empty());
-            }
-        }
-    }
-
-    /**
-     * Get the value using descriptor as a default
-     *
-     * @param provider
-     * @param descriptor
-     * @return
-     */
-    fun extractValue(name: String, descriptor: NodeDescriptor): Value {
-        return buildDefaultNode(descriptor).getValue(name)
-    }
+//    /**
+//     * Get the value using descriptor as a default
+//     *
+//     * @param provider
+//     * @param descriptor
+//     * @return
+//     */
+//    private fun extractValue(name: String, descriptor: NodeDescriptor): Value {
+//        return buildDefaultNode(descriptor).getValue(name)
+//    }
 
     /**
      * Find a class or method designated by NodeDef `target` value
@@ -177,13 +145,11 @@ object Descriptors {
         }
     }
 
-    /*--------------------*/
-
-    fun builder(element: AnnotatedElement): DescriptorBuilder {
+    private fun builder(element: KAnnotatedElement): DescriptorBuilder {
         //TODO use [Descriptor] annotation
         val builder = DescriptorBuilder("meta")
 
-        element.listAnnotations(NodeDef::class.java, true)
+        element.listAnnotations<NodeDef>(true)
                 .stream()
                 .filter { it -> !it.key.startsWith("@") }
                 .forEach { nodeDef ->
@@ -191,7 +157,56 @@ object Descriptors {
                 }
 
         //Filtering hidden values
-        element.listAnnotations(ValueDef::class.java, true)
+        element.listAnnotations<ValueDef>(true)
+                .stream()
+                .filter { it -> !it.key.startsWith("@") }
+                .forEach { valueDef ->
+                    builder.value(ValueDescriptor.build(valueDef))
+                }
+
+        element.findAnnotation<Description>()?.let {
+            builder.info = it.value
+        }
+
+        if(element is KClass<*>) {
+            @Suppress("UNCHECKED_CAST")
+            val type: KClass<*> = element
+
+            type.memberProperties.forEach { property ->
+                if (property.isAccessible) {
+                    val delegate = property.getDelegate(target)
+                    when (delegate) {
+                        is ValueDelegate<*> -> {
+                            builder.value(buildValueDescriptor(property, delegate))
+                        }
+                        is NodeDelegate<*> -> {
+                            builder.node(buildNodeDescriptor(property, delegate))
+                        }
+                        is NodeListDelegate<*> -> {
+                            builder.node(buildNodeDescriptor(property, delegate))
+                        }
+                    }
+                }
+            }
+        }
+
+
+        return builder
+    }
+
+    private fun builder(element: AnnotatedElement): DescriptorBuilder {
+        //TODO use [Descriptor] annotation
+        val builder = DescriptorBuilder("meta")
+
+        element.listAnnotations(NodeDef::class.java,true)
+                .stream()
+                .filter { it -> !it.key.startsWith("@") }
+                .forEach { nodeDef ->
+                    builder.node(nodeDef)
+                }
+
+        //Filtering hidden values
+        element.listAnnotations(ValueDef::class.java,true)
                 .stream()
                 .filter { it -> !it.key.startsWith("@") }
                 .forEach { valueDef ->
@@ -271,41 +286,82 @@ object Descriptors {
 
             //default = delegate.def
         }
-        property.findAnnotation<Descriptor>()?.let { builder.update(getDescriptor(it.value)) }
+        property.findAnnotation<Descriptor>()?.let { builder.update(forName(it.value)) }
 
         return builder.build()
     }
 
-    /**
-     * Build descriptor for
-     */
-    fun <T : Any> buildDescriptor(target: T): NodeDescriptor {
-        val builder = builder(target::class.java)
-
-        @Suppress("UNCHECKED_CAST")
-        val type: KClass<T> = target::class as KClass<T>
-
-        type.listAnnotations<Description>().firstOrNull()?.let {
-            builder.info = it.value
-        }
-
-        type.memberProperties.forEach { property ->
-            val delegate = property.getDelegate(target)
-            when (delegate) {
-                is ValueDelegate<*> -> {
-                    builder.value(buildValueDescriptor(property, delegate))
+    @JvmStatic
+    fun forName(string: String): NodeDescriptor {
+        return descriptorCache.getOrPut(string) {
+            try {
+                val path = Path.of(string)
+                when (path.target) {
+                    "", "class", "method", "property" -> {
+                        val target = findAnnotatedElement(path)
+                                ?: throw RuntimeException("Target element $path not found")
+                        forElement(target)
+                    }
+                    "file" -> return NodeDescriptor(MetaFileReader.read(Global.getFile(path.name.toString()).absolutePath))
+                    "resource" -> NodeDescriptor(buildMetaFromResource("node", path.name.toString()))
+                    else -> throw NameNotFoundException("Cant create descriptor from given target", string)
                 }
-                is NodeDelegate<*> -> {
-                    builder.node(buildNodeDescriptor(property, delegate))
-                }
-                is NodeListDelegate<*> -> {
-                    builder.node(buildNodeDescriptor(property, delegate))
-                }
+            } catch (ex: Exception) {
+                LoggerFactory.getLogger(Descriptors::class.java).error("Failed to build descriptor", ex)
+                NodeDescriptor(Meta.empty());
             }
         }
+    }
 
+//    /**
+//     * Build descriptor for given instance
+//     */
+//    @JvmStatic
+//    fun <T : Any> forObject(target: T): NodeDescriptor {
+//        val builder = builder(target::class)
+//
+//        @Suppress("UNCHECKED_CAST")
+//        val type: KClass<T> = target::class as KClass<T>
+//
+//        type.listAnnotations<Description>().firstOrNull()?.let {
+//            builder.info = it.value
+//        }
+//
+//        type.memberProperties.forEach { property ->
+//            if (property.isAccessible) {
+//                val delegate = property.getDelegate(target)
+//                when (delegate) {
+//                    is ValueDelegate<*> -> {
+//                        builder.value(buildValueDescriptor(property, delegate))
+//                    }
+//                    is NodeDelegate<*> -> {
+//                        builder.node(buildNodeDescriptor(property, delegate))
+//                    }
+//                    is NodeListDelegate<*> -> {
+//                        builder.node(buildNodeDescriptor(property, delegate))
+//                    }
+//                }
+//            }
+//        }
+//
+//
+//        return builder.build()
+//    }
 
-        return builder.build()
+    /**
+     * Build a descriptor for given Class or Method using Java annotations or restore it from cache if it was already used recently
+     *
+     * @param element
+     * @return
+     */
+    @JvmStatic
+    fun forElement(element: KAnnotatedElement): NodeDescriptor {
+        return descriptorCache.getOrPut(element.toString()) { builder(element).build() }
+    }
+
+    @JvmStatic
+    fun forElement(element: AnnotatedElement): NodeDescriptor {
+        return descriptorCache.getOrPut(element.toString()) { builder(element).build() }
     }
 
 }

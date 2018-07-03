@@ -42,11 +42,10 @@ interface MorphProvider<T> {
  * An exception to be thrown when automatic class cast is failed
  */
 class MorphException(val from: Class<*>, val to: Class<*>, message: String? = null, cause: Throwable? = null) : RuntimeException(message, cause) {
-    override val message: String = String.format("Meta morphNode from %s to %s failed", from, to) + super.message
+    override val message: String = String.format("Meta morph from %s to %s failed", from, to) + super.message
 }
 
 private class MetaMorphProxy(val type: Class<*>, val meta: Meta) : Serializable {
-
     private fun readResolve(): Any {
         return MetaMorph.morph(type, meta)
     }
@@ -116,7 +115,17 @@ open class SimpleMetaMorph(meta: Meta) : MetaHolder(meta), MetaMorph {
     override fun equals(other: Any?): Boolean {
         return javaClass == other?.javaClass && (other as Metoid).meta == meta
     }
+}
 
+/**
+ * A specific case of metamorph that could be mutated. If input meta is configuration, changes it on mutation.
+ * Otherwise creates new configuration from meta
+ * On deserialization converts to immutable [SimpleMetaMorph]
+ */
+open class ConfigMorph(meta: Meta) : SimpleMetaMorph(meta), Configurable {
+    private val _config = (meta as? Configuration)?: Configuration(meta)
+
+    override fun getConfig(): Configuration  = _config
 }
 
 /**
@@ -127,7 +136,7 @@ inline fun <reified T : Any> Meta.morph(): T {
 }
 
 
-fun <T:Any> MetaMorph.morph(type: KClass<T>): T{
+fun <T : Any> MetaMorph.morph(type: KClass<T>): T {
     return when {
         type.isSuperclassOf(this::class) -> type.cast(this)
         type.isSuperclassOf(Meta::class) -> type.cast(toMeta())

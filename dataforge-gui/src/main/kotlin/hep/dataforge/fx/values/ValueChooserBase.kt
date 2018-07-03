@@ -37,11 +37,7 @@ abstract class ValueChooserBase<out T : Node> : ValueChooser {
         val value = valueProperty.get()
         return if (value == null || value.type == ValueType.NULL) {
             val descriptor = descriptor
-            if (descriptor != null) {
-                descriptor.default
-            } else {
-                Value.NULL
-            }
+            descriptor?.default ?: Value.NULL
         } else {
             value
         }
