@@ -17,6 +17,7 @@
 package hep.dataforge.meta
 
 import hep.dataforge.description.Described
+import hep.dataforge.description.DescriptorName
 import hep.dataforge.values.Value
 import hep.dataforge.values.parseValue
 import java.time.Instant
@@ -24,12 +25,18 @@ import kotlin.properties.ReadOnlyProperty
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
+import kotlin.reflect.full.findAnnotation
 
 /* Meta delegate classes */
 
 interface MetaDelegate {
     val target: Meta
     val name: String?
+
+    fun targetName(property: KProperty<*>): String{
+        //TODO maybe it should be optimized
+        return name ?:property.findAnnotation<DescriptorName>()?.name ?: property.name
+    }
 }
 
 /**
@@ -48,7 +55,7 @@ open class ValueDelegate<T : Any>(
     private var cached: T? = null
 
     private fun getValueInternal(thisRef: Any?, property: KProperty<*>): T {
-        val key = name ?: property.name
+        val key = targetName(property)
         return when {
             target.hasValue(key) -> read(target.getValue(key))
             def != null -> def
@@ -86,7 +93,7 @@ open class NodeDelegate<T>(
     private var cached: T? = null
 
     private fun getNodeInternal(thisRef: Any, property: KProperty<*>): T {
-        val key = name ?: property.name
+        val key = targetName(property)
         return when {
             target.hasMeta(key) -> read(target.getMeta(key))
             def != null -> def
@@ -115,7 +122,7 @@ class NodeListDelegate<out T>(
     private var cached: List<T>? = null
 
     private fun getNodeInternal(thisRef: Any?, property: KProperty<*>): List<T> {
-        val key = name ?: property.name
+        val key = targetName(property)
         return when {
             target.hasMeta(key) -> target.getMetaList(key).map(read)
             def != null -> def
@@ -144,7 +151,7 @@ open class MutableValueDelegate<T : Any>(
 
     override operator fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
         //TODO set for allowed values
-        target.setValue(name ?: property.name, write(value))
+        target.setValue(targetName(property), write(value))
     }
 }
 
@@ -164,7 +171,7 @@ class MutableNodeDelegate<T>(
 ) : ReadWriteProperty<Any, T>, NodeDelegate<T>(target, name, def, read) {
 
     override operator fun setValue(thisRef: Any, property: KProperty<*>, value: T) {
-        val nodeName = name ?: property.name
+        val nodeName = targetName(property)
         val node = write(value)
         // if node exists, update it
         if (target.hasMeta(nodeName)) {
@@ -172,7 +179,7 @@ class MutableNodeDelegate<T>(
         } else {
             // if it is configuration, use it as is
             if (node is Configuration) {
-                target.attachNode(name ?: property.name, node)
+                target.attachNode(targetName(property), node)
             } else {
                 // otherwise transform it to configuration
                 target.setNode(nodeName, node)

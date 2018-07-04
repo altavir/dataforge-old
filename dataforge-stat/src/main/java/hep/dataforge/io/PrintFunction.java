@@ -135,10 +135,10 @@ public class PrintFunction {
             }
             
             double value = func.value(vector);
-            
-            for (int j = 0; j < vector.length; j++) {
-                out.printf("%g\t", vector[j]);
-                
+
+            for (double aVector : vector) {
+                out.printf("%g\t", aVector);
+
             }
             out.printf("%g%n", value);
             

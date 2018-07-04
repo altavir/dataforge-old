@@ -27,7 +27,6 @@ import hep.dataforge.names.AnonymousNotAlowed
 import hep.dataforge.values.BooleanValue
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueType
-import java.util.stream.Stream
 
 /**
  * A descriptor for meta value
@@ -149,7 +148,7 @@ class ValueDescriptor(meta: Meta) : SimpleMetaMorph(meta.sealed), Named {
             } else if (def.enumeration != Any::class) {
                 if (def.enumeration.java.isEnum) {
                     val values = def.enumeration.java.enumConstants
-                    builder.setValue("allowedValues", Stream.of<Any>(*values).map<String> { it.toString() })
+                    builder.setValue("allowedValues", values.map { it.toString() })
                 } else {
                     throw RuntimeException("Only enumeration classes are allowed in 'enumeration' annotation property")
                 }

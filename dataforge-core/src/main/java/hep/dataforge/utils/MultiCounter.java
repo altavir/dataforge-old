@@ -16,9 +16,10 @@
 package hep.dataforge.utils;
 
 import java.io.PrintWriter;
-import static java.lang.Integer.valueOf;
 import java.util.HashMap;
 import java.util.Map;
+
+import static java.lang.Integer.valueOf;
 
 /**
  * TODO есть объект MultiDimensionalCounter, исползовать его?
@@ -47,11 +48,7 @@ public class MultiCounter {
      * @return a int.
      */
     public int getCount(String name) {
-        if (counts.containsKey(name)) {
-            return counts.get(name);
-        } else {
-            return -1;
-        }
+        return counts.getOrDefault(name, -1);
     }
 
     /**
@@ -59,7 +56,7 @@ public class MultiCounter {
      *
      * @param name a {@link java.lang.String} object.
      */
-    public void increase(String name) {
+    synchronized public void increase(String name) {
         if (counts.containsKey(name)) {
             Integer count = counts.get(name);
             counts.remove(name);
@@ -67,7 +64,6 @@ public class MultiCounter {
         } else {
             counts.put(name, valueOf(1));
         }
-        
     }
 
     /**
@@ -91,9 +87,7 @@ public class MultiCounter {
      * @param name a {@link java.lang.String} object.
      */
     public void reset(String name) {
-        if (counts.containsKey(name)) {
-            counts.remove(name);
-        }
+        counts.remove(name);
     }
     /**
      * <p>resetAll.</p>

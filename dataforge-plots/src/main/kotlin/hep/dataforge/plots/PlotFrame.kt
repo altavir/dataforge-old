@@ -17,13 +17,16 @@ package hep.dataforge.plots
 
 import hep.dataforge.context.Plugin
 import hep.dataforge.description.Description
+import hep.dataforge.description.NodeProperty
 import hep.dataforge.description.ValueDef
+import hep.dataforge.description.ValueProperty
 import hep.dataforge.io.envelopes.Envelope
 import hep.dataforge.io.envelopes.EnvelopeBuilder
 import hep.dataforge.io.envelopes.JavaObjectWrapper.JAVA_SERIAL_DATA
 import hep.dataforge.io.envelopes.SimpleEnvelope
 import hep.dataforge.meta.*
 import hep.dataforge.utils.MetaFactory
+import hep.dataforge.values.ValueType
 import java.io.ObjectStreamException
 import java.io.OutputStream
 import java.io.Serializable
@@ -212,17 +215,22 @@ class Axis(meta:Meta): ConfigMorph(meta){
     }
 
     @Description("The type of axis. By default number axis is used")
+    @ValueProperty(enumeration = Type::class)
     val type: Type by configEnum(def = Type.NUMBER)
 
     @Description("The title of the axis")
+    @ValueProperty(type = [ValueType.STRING])
     val title: String by configString()
 
     @Description("The units of the axis")
+    @ValueProperty(type = [ValueType.STRING])
     val units: String by configString(def = "")
 
     @Description("Appearance and type of the crosshair")
+    @ValueProperty(enumeration = Crosshair::class)
     val crosshair: Crosshair by configEnum(def = Crosshair.NONE)
 
     @Description("The definition of range for given axis")
+    @NodeProperty
     val range: Range by morphConfigNode()
 }

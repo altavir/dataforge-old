@@ -117,9 +117,7 @@ class DescriptorBuilder(name: String = "node", override val meta: Configuration 
             required = nodeDef.required
             multiple = nodeDef.multiple
             tags = nodeDef.tags.asList()
-            if(!nodeDef.descriptor.isEmpty()){
-                update(Descriptors.forName(nodeDef.descriptor))
-            }
+            Descriptors.forDef(nodeDef)?.let { update(it) }
         }
     }
 
@@ -142,6 +140,10 @@ class DescriptorBuilder(name: String = "node", override val meta: Configuration 
         return this
     }
 
+    fun value(def: ValueDef): DescriptorBuilder {
+        return value(ValueDescriptor.build(def))
+    }
+
     /**
      * Create value descriptor from its fields. Name could be non-atomic
      */
@@ -159,10 +161,10 @@ class DescriptorBuilder(name: String = "node", override val meta: Configuration 
 
     fun update(descriptor: NodeDescriptor): DescriptorBuilder {
         //TODO update primary fields
-        descriptor.valueDescriptors().forEach{
+        descriptor.valueDescriptors().forEach {
             this.value(it.value)
         }
-        descriptor.childrenDescriptors().forEach{
+        descriptor.childrenDescriptors().forEach {
             this.node(it.value)
         }
         return this

@@ -159,7 +159,7 @@ class FXOutputManager(meta: Meta = Meta.empty(), viewConsumer: Context.(OutputCo
     override val outputModes: Collection<String> = listOf(Output.TEXT_MODE, PlotOutput.PLOT_TYPE, Table.TABLE_TYPE)
 
     override fun get(stage: Name, name: Name, mode: String): Output {
-        return container[name, stage, mode]
+        return container[stage, name, mode]
     }
 
     companion object {

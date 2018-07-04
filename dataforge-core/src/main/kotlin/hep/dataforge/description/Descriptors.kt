@@ -20,24 +20,24 @@ import hep.dataforge.context.Global
 import hep.dataforge.exceptions.NameNotFoundException
 import hep.dataforge.io.MetaFileReader
 import hep.dataforge.kodex.listAnnotations
-import hep.dataforge.meta.*
+import hep.dataforge.meta.Meta
+import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.providers.Path
 import hep.dataforge.utils.Misc
-import hep.dataforge.values.ValueType
+import hep.dataforge.values.ValueFactory
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.lang.reflect.AnnotatedElement
 import java.net.URISyntaxException
 import java.nio.file.Paths
 import java.text.ParseException
-import java.time.Instant
-import java.time.LocalDateTime
 import kotlin.reflect.KAnnotatedElement
 import kotlin.reflect.KClass
-import kotlin.reflect.KProperty1
-import kotlin.reflect.full.*
+import kotlin.reflect.KProperty
+import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.memberFunctions
+import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.isAccessible
-import kotlin.reflect.jvm.jvmErasure
 
 object Descriptors {
 
@@ -91,19 +91,6 @@ object Descriptors {
         return MetaFileReader.read(file).builder.rename(name)
     }
 
-
-
-//    /**
-//     * Get the value using descriptor as a default
-//     *
-//     * @param provider
-//     * @param descriptor
-//     * @return
-//     */
-//    private fun extractValue(name: String, descriptor: NodeDescriptor): Value {
-//        return buildDefaultNode(descriptor).getValue(name)
-//    }
-
     /**
      * Find a class or method designated by NodeDef `target` value
      *
@@ -112,32 +99,33 @@ object Descriptors {
      */
     private fun findAnnotatedElement(path: Path): KAnnotatedElement? {
         try {
-            if (path.target.isEmpty() || path.target == "class") {
-                return Class.forName(path.name.toString()).kotlin
+            when {
+                path.target.isEmpty() || path.target == "class" -> return Class.forName(path.name.toString()).kotlin
+                path.target == "method" -> {
+                    val className = path.name.cutLast().toString()
+                    val methodName = path.name.last.toString()
+                    val dClass = Class.forName(className).kotlin
+                    val res = dClass.memberFunctions.find { it.name == methodName }
+                    if (res == null) {
+                        LoggerFactory.getLogger(Descriptors::class.java).error("Annotated method not found by given path: $path")
+                    }
+                    return res
 
-            } else if (path.target == "method") {
-
-                val className = path.name.cutLast().toString()
-                val methodName = path.name.last.toString()
-                val dClass = Class.forName(className).kotlin
-                val res = dClass.memberFunctions.find { it.name == methodName }
-                if (res == null) {
-                    LoggerFactory.getLogger(Descriptors::class.java).error("Annotated method not found by given path: $path")
                 }
-                return res
-
-            } else if (path.target == "property") {
-                val className = path.name.cutLast().toString()
-                val methodName = path.name.last.toString()
-                val dClass = Class.forName(className).kotlin
-                val res = dClass.memberProperties.find { it.name == methodName }
-                if (res == null) {
-                    LoggerFactory.getLogger(Descriptors::class.java).error("Annotated property not found by given path: $path")
+                path.target == "property" -> {
+                    val className = path.name.cutLast().toString()
+                    val methodName = path.name.last.toString()
+                    val dClass = Class.forName(className).kotlin
+                    val res = dClass.memberProperties.find { it.name == methodName }
+                    if (res == null) {
+                        LoggerFactory.getLogger(Descriptors::class.java).error("Annotated property not found by given path: $path")
+                    }
+                    return res
                 }
-                return res
-            } else {
-                LoggerFactory.getLogger(Descriptors::class.java).error("Unknown target for descriptor finder: " + path.target)
-                return null
+                else -> {
+                    LoggerFactory.getLogger(Descriptors::class.java).error("Unknown target for descriptor finder: " + path.target)
+                    return null
+                }
             }
         } catch (ex: ClassNotFoundException) {
             LoggerFactory.getLogger(Descriptors::class.java).error("Class not fond by given path: $path", ex)
@@ -145,7 +133,16 @@ object Descriptors {
         }
     }
 
-    private fun builder(element: KAnnotatedElement): DescriptorBuilder {
+    fun forDef(def: NodeDef): NodeDescriptor? {
+        val element = if (def.type == Any::class) {
+            findAnnotatedElement(Path.of(def.descriptor))
+        } else {
+            def.type
+        }
+        return element?.let{describe(it)}
+    }
+
+    private fun describe(element: KAnnotatedElement): NodeDescriptor {
         //TODO use [Descriptor] annotation
         val builder = DescriptorBuilder("meta")
 
@@ -168,37 +165,46 @@ object Descriptors {
             builder.info = it.value
         }
 
-        if(element is KClass<*>) {
-            @Suppress("UNCHECKED_CAST")
-            val type: KClass<*> = element
+        if (element is KProperty<*>) {
 
-            type.memberProperties.forEach { property ->
+        }
+
+        if (element is KClass<*>) {
+            element.memberProperties.forEach { property ->
                 if (property.isAccessible) {
-                    val delegate = property.getDelegate(target)
-                    when (delegate) {
-                        is ValueDelegate<*> -> {
-                            builder.value(buildValueDescriptor(property, delegate))
+                    property.findAnnotation<ValueProperty>()?.let {
+                        val name = if (it.name.isEmpty()) {
+                            property.name
+                        } else {
+                            it.name
                         }
-                        is NodeDelegate<*> -> {
-                            builder.node(buildNodeDescriptor(property, delegate))
-                        }
-                        is NodeListDelegate<*> -> {
-                            builder.node(buildNodeDescriptor(property, delegate))
-                        }
+                        builder.value(
+                                name = name,
+                                info = property.description,
+                                multiple = it.multiple,
+                                defaultValue = ValueFactory.parse(it.def),
+                                required = it.def.isEmpty(),
+                                allowedValues = it.enumeration.java.enumConstants.map { it.toString() },
+                                types = it.type.toList()
+                        )
+                    }
+
+                    property.findAnnotation<NodeProperty>()?.let {
+                        builder.node(describe(property))
                     }
                 }
             }
         }
 
 
-        return builder
+        return builder.build()
     }
 
-    private fun builder(element: AnnotatedElement): DescriptorBuilder {
+    private fun describe(element: AnnotatedElement): NodeDescriptor {
         //TODO use [Descriptor] annotation
         val builder = DescriptorBuilder("meta")
 
-        element.listAnnotations(NodeDef::class.java,true)
+        element.listAnnotations(NodeDef::class.java, true)
                 .stream()
                 .filter { it -> !it.key.startsWith("@") }
                 .forEach { nodeDef ->
@@ -206,112 +212,119 @@ object Descriptors {
                 }
 
         //Filtering hidden values
-        element.listAnnotations(ValueDef::class.java,true)
+        element.listAnnotations(ValueDef::class.java, true)
                 .stream()
                 .filter { it -> !it.key.startsWith("@") }
                 .forEach { valueDef ->
                     builder.value(ValueDescriptor.build(valueDef))
                 }
 
-        return builder
+        return builder.build()
     }
 
     private val KAnnotatedElement.description: String
         get() = findAnnotation<Description>()?.value ?: ""
 
-    /**
-     * Build value descriptor based on property and its delegate
-     */
-    private fun buildValueDescriptor(property: KProperty1<*, *>, delegate: ValueDelegate<*>): ValueDescriptor {
-        val name = delegate.name ?: property.name
-        val type = property.returnType.jvmErasure
-        val valueTypes = when {
-            type.isSubclassOf(Number::class) -> listOf(ValueType.NUMBER)
-            type.isSubclassOf(String::class) -> listOf(ValueType.STRING)
-            type.isSubclassOf(Boolean::class) -> listOf(ValueType.BOOLEAN)
-            type.isSubclassOf(Instant::class) -> listOf(ValueType.TIME)
-            type.isSubclassOf(LocalDateTime::class) -> listOf(ValueType.TIME)
-            else -> emptyList()
-        }
+//    /**
+//     * Build value descriptor based on property and its delegate
+//     */
+//    private fun buildValueDescriptor(property: KProperty1<*, *>): ValueDescriptor {
+//        val def = property.findAnnotation<ValueDef>()
+//
+//        val type = property.returnType.jvmErasure
+//        val valueTypes = when {
+//            type.isSubclassOf(Number::class) -> listOf(ValueType.NUMBER)
+//            type.isSubclassOf(String::class) -> listOf(ValueType.STRING)
+//            type.isSubclassOf(Boolean::class) -> listOf(ValueType.BOOLEAN)
+//            type.isSubclassOf(Instant::class) -> listOf(ValueType.TIME)
+//            type.isSubclassOf(LocalDateTime::class) -> listOf(ValueType.TIME)
+//            else -> emptyList()
+//        }
+//
+//        if (def == null) {
+//            val name = property.name
+//
+//            return ValueDescriptor.build(
+//                    name = name,
+//                    required = true,
+//                    multiple = type is Collection<*>,
+//                    types = valueTypes,
+//                    info = property.description
+//            )
+//        } else {
+//
+//        }
 
-        val allowedValues: List<Any> = if (delegate is EnumValueDelegate<*>) {
-            delegate.type.java.enumConstants.map { type.cast(it) }
-        } else {
-            emptyList()
-        }
 
-        val descriptor = ValueDescriptor.build(
-                name = name,
-                info = property.description,
-                multiple = type.isSubclassOf(List::class),
-                required = delegate.def == null,
-                types = valueTypes,
-                defaultValue = delegate.defaultValue,
-                allowedValues = allowedValues
-        )
-
-        /**
-         * Use value annotation if it is present
-         */
-        val annotation = property.findAnnotation<ValueDef>()
-
-        return if (annotation != null) {
-            ValueDescriptor.merge(descriptor, ValueDescriptor.build(annotation))
-        } else {
-            descriptor
-        }
-    }
-
-    /**
-     * Descriptor resolution order:
-     * 1. Delegate fields + [Description] annotation
-     * 2. Annotation description
-     * 3. External descriptor
-     */
-    private fun buildNodeDescriptor(property: KProperty1<*, *>, delegate: MetaDelegate): NodeDescriptor {
-        val builder = DescriptorBuilder(delegate.name ?: property.name).apply {
-            info = property.description
-
-            //Use property annotation to describe node
-            property.annotations.filterIsInstance<NodeDef>()
-                    .filter { it -> !it.key.startsWith("@") }
-                    .forEach { nodeDef -> node(nodeDef) }
-
-            //Filtering hidden values
-            property.annotations.filterIsInstance<ValueDef>()
-                    .filter { it -> !it.key.startsWith("@") }
-                    .forEach { valueDef ->
-                        value(ValueDescriptor.build(valueDef))
-                    }
-
-            //default = delegate.def
-        }
-        property.findAnnotation<Descriptor>()?.let { builder.update(forName(it.value)) }
-
-        return builder.build()
-    }
-
-    @JvmStatic
-    fun forName(string: String): NodeDescriptor {
-        return descriptorCache.getOrPut(string) {
-            try {
-                val path = Path.of(string)
-                when (path.target) {
-                    "", "class", "method", "property" -> {
-                        val target = findAnnotatedElement(path)
-                                ?: throw RuntimeException("Target element $path not found")
-                        forElement(target)
-                    }
-                    "file" -> return NodeDescriptor(MetaFileReader.read(Global.getFile(path.name.toString()).absolutePath))
-                    "resource" -> NodeDescriptor(buildMetaFromResource("node", path.name.toString()))
-                    else -> throw NameNotFoundException("Cant create descriptor from given target", string)
-                }
-            } catch (ex: Exception) {
-                LoggerFactory.getLogger(Descriptors::class.java).error("Failed to build descriptor", ex)
-                NodeDescriptor(Meta.empty());
-            }
-        }
-    }
+//        val name = def?.key ?: property.name
+//        val type = property.returnType.jvmErasure
+//        val valueTypes = when {
+//            type.isSubclassOf(Number::class) -> listOf(ValueType.NUMBER)
+//            type.isSubclassOf(String::class) -> listOf(ValueType.STRING)
+//            type.isSubclassOf(Boolean::class) -> listOf(ValueType.BOOLEAN)
+//            type.isSubclassOf(Instant::class) -> listOf(ValueType.TIME)
+//            type.isSubclassOf(LocalDateTime::class) -> listOf(ValueType.TIME)
+//            else -> emptyList()
+//        }
+//
+//        val allowedValues: List<Any> = if (delegate is EnumValueDelegate<*>) {
+//            delegate.type.java.enumConstants.map { type.cast(it) }
+//        } else {
+//            emptyList()
+//        }
+//
+//        val descriptor = ValueDescriptor.build(
+//                name = name,
+//                info = property.description,
+//                multiple = type.isSubclassOf(List::class),
+//                required = def?.def == null,
+//                types = valueTypes,
+//                defaultValue = delegate.defaultValue,
+//                allowedValues = allowedValues
+//        )
+//
+//        /**
+//         * Use value annotation if it is present
+//         */
+//        val annotation = property.findAnnotation<ValueDef>()
+//
+//        return if (annotation != null) {
+//            ValueDescriptor.merge(descriptor, ValueDescriptor.build(annotation))
+//        } else {
+//            descriptor
+//        }
+//    }
+//
+//    /**
+//     * Descriptor resolution order:
+//     * 1. Delegate fields + [Description] annotation
+//     * 2. Annotation description
+//     * 3. External descriptor
+//     */
+//    private fun buildNodeDescriptor(property: KProperty1<*, *>, def: NodeDef?): NodeDescriptor {
+//        val builder = DescriptorBuilder(delegate.name ?: property.name).apply {
+//            info = property.description
+//
+//            //Use property annotation to describe node
+//
+//            TODO("Won't work")
+//            property.annotations.filterIsInstance<NodeDef>()
+//                    .filter { it -> !it.key.startsWith("@") }
+//                    .forEach { nodeDef -> node(nodeDef) }
+//
+//            //Filtering hidden values
+//            property.annotations.filterIsInstance<ValueDef>()
+//                    .filter { it -> !it.key.startsWith("@") }
+//                    .forEach { valueDef ->
+//                        value(ValueDescriptor.build(valueDef))
+//                    }
+//
+//            //default = delegate.def
+//        }
+//        property.findAnnotation<Descriptor>()?.let { builder.update(forName(it.value)) }
+//
+//        return builder.build()
+//    }
 
 //    /**
 //     * Build descriptor for given instance
@@ -355,13 +368,35 @@ object Descriptors {
      * @return
      */
     @JvmStatic
-    fun forElement(element: KAnnotatedElement): NodeDescriptor {
-        return descriptorCache.getOrPut(element.toString()) { builder(element).build() }
+    fun forType(element: KAnnotatedElement): NodeDescriptor {
+        return descriptorCache.getOrPut(element.toString()) { describe(element) }
     }
 
     @JvmStatic
-    fun forElement(element: AnnotatedElement): NodeDescriptor {
-        return descriptorCache.getOrPut(element.toString()) { builder(element).build() }
+    fun forType(element: AnnotatedElement): NodeDescriptor {
+        return descriptorCache.getOrPut(element.toString()) { describe(element) }
+    }
+
+    @JvmStatic
+    fun forName(string: String): NodeDescriptor {
+        return descriptorCache.getOrPut(string) {
+            try {
+                val path = Path.of(string)
+                when (path.target) {
+                    "", "class", "method", "property" -> {
+                        val target = findAnnotatedElement(path)
+                                ?: throw RuntimeException("Target element $path not found")
+                        forType(target)
+                    }
+                    "file" -> return NodeDescriptor(MetaFileReader.read(Global.getFile(path.name.toString()).absolutePath))
+                    "resource" -> NodeDescriptor(buildMetaFromResource("node", path.name.toString()))
+                    else -> throw NameNotFoundException("Cant create descriptor from given target", string)
+                }
+            } catch (ex: Exception) {
+                LoggerFactory.getLogger(Descriptors::class.java).error("Failed to build descriptor", ex)
+                NodeDescriptor(Meta.empty());
+            }
+        }
     }
 
 }

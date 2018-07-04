@@ -110,12 +110,14 @@ class FXTextOutput(context: Context) : FXOutput(context), TextOutput {
 
         runLater {
             if (text.contains("\n")) {
-                val lines = text.split("\n".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+                val lines = text.split("\n".toRegex()).toTypedArray()
                 for (i in 0 until lines.size - 1) {
                     append(lines[i].trim { it <= ' ' }, style)
                     newline()
                 }
-                append(lines[lines.size - 1], style)
+                if(!lines.isEmpty()) {
+                    append(lines[lines.size - 1], style)
+                }
                 if (text.endsWith("\n")) {
                     newline()
                 }

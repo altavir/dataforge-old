@@ -32,8 +32,8 @@ import java.util.*
  * @author Alexander Nozik
  */
 @NodeDefs(
-        NodeDef(key = "xAxis", info = "The description of X axis", descriptor = "method::hep.dataforge.plots.XYPlotFrame.updateAxis"),
-        NodeDef(key = "yAxis", info = "The description of Y axis", descriptor = "method::hep.dataforge.plots.XYPlotFrame.updateAxis"),
+        NodeDef(key = "xAxis", info = "The description of X axis", type = Axis::class),
+        NodeDef(key = "yAxis", info = "The description of Y axis", type = Axis::class),
         NodeDef(key = "legend", info = "The configuration for plot legend", descriptor = "method::hep.dataforge.plots.XYPlotFrame.updateLegend")
 )
 abstract class XYPlotFrame : AbstractPlotFrame() {

@@ -36,8 +36,22 @@ public @interface NodeDef {
     String info() default "";
 
     /**
-     * The resource to the annotated method or class that could be used as a
-     * source for this node descriptor
+     * A target class for this node to describe
+     * @return
+     */
+    Class type() default Object.class;
+
+    /**
+     * The DataForge path to the resource containing the description. Following targets are supported:
+     * <ol>
+     *     <li>resource</li>
+     *     <li>file</li>
+     *     <li>class</li>
+     *     <li>method</li>
+     *     <li>property</li>
+     * </ol>
+     *
+     * Does not work if [type] is provided
      *
      * @return
      */

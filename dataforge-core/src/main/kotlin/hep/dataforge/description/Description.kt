@@ -16,6 +16,9 @@
 
 package hep.dataforge.description
 
+import hep.dataforge.values.ValueType
+import kotlin.reflect.KClass
+
 /**
  * Description text for meta property, node or whole object
  */
@@ -33,7 +36,7 @@ annotation class Description(val value: String)
 annotation class Multiple
 
 /**
- * Annotation for value property which states that lists are expected
+ * Descriptor target
  */
 @Target(AnnotationTarget.CLASS, AnnotationTarget.PROPERTY, AnnotationTarget.VALUE_PARAMETER)
 @Retention(AnnotationRetention.RUNTIME)
@@ -41,3 +44,50 @@ annotation class Multiple
 annotation class Descriptor(val value: String)
 
 
+/**
+ * Aggregator class for descriptor nodes
+ */
+@Target(AnnotationTarget.CLASS, AnnotationTarget.PROPERTY, AnnotationTarget.FUNCTION, AnnotationTarget.VALUE_PARAMETER)
+@Retention(AnnotationRetention.RUNTIME)
+@MustBeDocumented
+annotation class DescriptorNodes(vararg val nodes: NodeDef)
+
+/**
+ * Aggregator class for descriptor values
+ */
+@Target(AnnotationTarget.CLASS, AnnotationTarget.PROPERTY, AnnotationTarget.FUNCTION, AnnotationTarget.VALUE_PARAMETER)
+@Retention(AnnotationRetention.RUNTIME)
+@MustBeDocumented
+annotation class DescriptorValues(vararg val nodes: ValueDef)
+
+/**
+ * Alternative name for property descriptor declaration
+ */
+@Target(AnnotationTarget.PROPERTY, AnnotationTarget.VALUE_PARAMETER)
+@Retention(AnnotationRetention.RUNTIME)
+@MustBeDocumented
+annotation class DescriptorName(val name: String)
+
+@Target(AnnotationTarget.PROPERTY)
+@Retention(AnnotationRetention.RUNTIME)
+@MustBeDocumented
+annotation class DescriptorValue(val def: ValueDef)
+//TODO enter fields directly?
+
+@Target(AnnotationTarget.PROPERTY)
+@Retention(AnnotationRetention.RUNTIME)
+@MustBeDocumented
+annotation class ValueProperty(
+        val name: String = "",
+        val type: Array<ValueType> = [ValueType.STRING],
+        val multiple: Boolean = false,
+        val def: String = "",
+        val enumeration: KClass<*> = Any::class
+//        val tags: Array<String> = []
+)
+
+
+@Target(AnnotationTarget.PROPERTY)
+@Retention(AnnotationRetention.RUNTIME)
+@MustBeDocumented
+annotation class NodeProperty
