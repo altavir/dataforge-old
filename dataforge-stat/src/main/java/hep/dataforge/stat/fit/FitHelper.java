@@ -171,6 +171,11 @@ public class FitHelper {
             return this;
         }
 
+        public FitBuilder model(Model model) {
+            this.model = model;
+            return this;
+        }
+
         public FitBuilder model(String name) {
             this.model = manager.buildModel(name);
             return this;
