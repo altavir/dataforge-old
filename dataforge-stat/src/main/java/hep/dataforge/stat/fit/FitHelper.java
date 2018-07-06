@@ -256,7 +256,7 @@ public class FitHelper {
             FitResult result = FitResult.build(state);
             if (stages.isEmpty()) {
                 Misc.checkThread();
-                FitStage defaultStage = new FitStage(QOWFitEngine.QOW_ENGINE_NAME, FitStage.TASK_RUN);
+                FitStage defaultStage = new FitStage(QOWFitter.QOW_ENGINE_NAME, FitStage.TASK_RUN);
                 result = manager.runStage(state, defaultStage, log);
                 listener.accept(defaultStage, result);
             } else {

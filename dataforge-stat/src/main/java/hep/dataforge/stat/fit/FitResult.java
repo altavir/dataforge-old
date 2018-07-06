@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +23,7 @@ import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.meta.MetaMorph;
 import hep.dataforge.meta.SimpleMetaMorph;
 import hep.dataforge.stat.models.Model;
-import hep.dataforge.stat.models.ModelManager;
+import hep.dataforge.stat.models.ModelFactory;
 import hep.dataforge.tables.ListOfPoints;
 import hep.dataforge.tables.NavigableValuesSource;
 import hep.dataforge.utils.Optionals;
@@ -132,6 +132,12 @@ public class FitResult extends SimpleMetaMorph {
         return Optional.ofNullable(state);
     }
 
+    private static Optional<Model> restoreModel(Context context, Meta meta) {
+        return context.provideAll(ModelFactory.MODEL_TARGET, ModelFactory.class)
+                .filter(it -> it.getName().equals(meta.getString("name")))
+                .findFirst().map(it ->it.build(context,meta));
+    }
+
     /**
      * Provide a model if possible
      *
@@ -140,7 +146,7 @@ public class FitResult extends SimpleMetaMorph {
      */
     public Optional<Model> optModel(Context context) {
         return Optionals.either(optState().map(FitState::getModel))
-                .or(() -> getMeta().optMeta("model").flatMap(meta -> ModelManager.restoreModel(context, meta)))
+                .or(() -> getMeta().optMeta("model").flatMap(meta -> restoreModel(context, getMeta())))
                 .opt();
     }
 

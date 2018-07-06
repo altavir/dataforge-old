@@ -1,2 +1,2 @@
-hep.dataforge.stat.models.ModelManager$Factory
+hep.dataforge.stat.models.ModelLibrary$Factory
 hep.dataforge.stat.fit.FitManager$Factory

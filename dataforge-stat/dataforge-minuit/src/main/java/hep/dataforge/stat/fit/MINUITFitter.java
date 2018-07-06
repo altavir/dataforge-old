@@ -21,17 +21,20 @@ import hep.dataforge.io.history.Chronicle;
 import hep.dataforge.io.history.History;
 import hep.dataforge.maths.NamedMatrix;
 import hep.dataforge.maths.functions.MultiFunction;
+import hep.dataforge.meta.Meta;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import static hep.dataforge.stat.fit.FitStage.*;
 
 /**
  * <p>
- * MINUITFitEngine class.</p>
+ * MINUITFitter class.</p>
  *
  * @author Darksnake
  * @version $Id: $Id
  */
-public class MINUITFitEngine implements FitEngine {
+public class MINUITFitter implements Fitter {
 
     /**
      * Constant <code>MINUIT_MIGRAD="MIGRAD"</code>
@@ -59,29 +62,31 @@ public class MINUITFitEngine implements FitEngine {
      */
     public static final String MINUIT_ENGINE_NAME = "MINUIT";
 
-    public MINUITFitEngine() {
+    public MINUITFitter() {
 
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @param parentLog
-     */
+    @NotNull
     @Override
-    public FitResult run(FitState state, FitStage task, History parentLog) {
+    public FitResult run(@NotNull FitState state, @Nullable History parentLog, @NotNull Meta meta) {
         Chronicle log = new Chronicle("MINUIT", parentLog);
-
-        log.report("MINUIT fit engine started task '{}'", task.getType());
-        switch (task.getType()) {
+        String action = meta.getString("action", TASK_RUN);
+        log.report("MINUIT fit engine started action '{}'", action);
+        switch (action) {
             case TASK_COVARIANCE:
-                return runHesse(state, task, log);
+                return runHesse(state, log, meta);
             case TASK_SINGLE:
             case TASK_RUN:
-                return runFit(state, task, log);
+                return runFit(state, log, meta);
             default:
                 throw new IllegalArgumentException("Unknown task");
         }
+    }
+
+    @NotNull
+    @Override
+    public String getName() {
+        return MINUIT_ENGINE_NAME;
     }
 
     /**
@@ -89,18 +94,17 @@ public class MINUITFitEngine implements FitEngine {
      * runHesse.</p>
      *
      * @param state a {@link hep.dataforge.stat.fit.FitState} object.
-     * @param task a {@link hep.dataforge.stat.fit.FitStage} object.
      * @param log
      * @return a {@link FitResult} object.
      */
-    public FitResult runHesse(FitState state, FitStage task, History log) {
+    public FitResult runHesse(FitState state, History log, Meta meta) {
         int strategy;
         strategy = Global.INSTANCE.getInt("MINUIT_STRATEGY", 2);
 
         log.report("Generating errors using MnHesse 2-nd order gradient calculator.");
 
         MultiFunction fcn;
-        String[] fitPars = getFitPars(state, task);
+        String[] fitPars = Fitter.Companion.getFitPars(state,meta);
         ParamSet pars = state.getParameters();
 
         fcn = MINUITUtils.getFcn(state, pars, fitPars);
@@ -132,19 +136,10 @@ public class MINUITFitEngine implements FitEngine {
 
         }
 
-        return FitResult.build(newState.build(), task.getFreePars());
+        return FitResult.build(newState.build(), fitPars);
     }
 
-    /**
-     * <p>
-     * runFit.</p>
-     *
-     * @param state a {@link hep.dataforge.stat.fit.FitState} object.
-     * @param task a {@link hep.dataforge.stat.fit.FitStage} object.
-     * @param log
-     * @return a {@link FitResult} object.
-     */
-    public FitResult runFit(FitState state, FitStage task, History log) {
+    public FitResult runFit(FitState state, History log, Meta meta) {
 
         MnApplication minuit;
         log.report("Starting fit using Minuit.");
@@ -154,7 +149,7 @@ public class MINUITFitEngine implements FitEngine {
         boolean force;
         force = Global.INSTANCE.getBoolean("FORCE_DERIVS", false);
 
-        String[] fitPars = getFitPars(state, task);
+        String[] fitPars = Fitter.Companion.getFitPars(state,meta);
 
         for (String fitPar : fitPars) {
             if (!state.modelProvidesDerivs(fitPar)) {
@@ -171,7 +166,9 @@ public class MINUITFitEngine implements FitEngine {
         ParamSet pars = state.getParameters().copy();
         fcn = MINUITUtils.getFcn(state, pars, fitPars);
 
-        switch (task.getMethodName()) {
+        String method = meta.getString("method", MINUIT_MIGRAD);
+
+        switch (method) {
             case MINUIT_MINOS:    // Для миноса используем универсальный алгоритм
             case MINUIT_MINIMIZE:
                 minuit = new MnMinimize(fcn, MINUITUtils.getFitParameters(pars, fitPars), strategy);
@@ -191,8 +188,8 @@ public class MINUITFitEngine implements FitEngine {
 //        minuit.setUseAnalyticalDerivatives(true);
         FunctionMinimum minimum;
 
-        int maxSteps = task.getMeta().getInt("iterations", -1);
-        double tolerance = task.getMeta().getDouble("tolerance", -1);
+        int maxSteps = meta.getInt("iterations", -1);
+        double tolerance = meta.getDouble("tolerance", -1);
 
         if (maxSteps > 0) {
             if (tolerance > 0) {
@@ -238,7 +235,7 @@ public class MINUITFitEngine implements FitEngine {
 
         }
 
-        if (task.getMethodName().equals(MINUIT_MINOS)) {
+        if (method.equals(MINUIT_MINOS)) {
             log.report("Starting MINOS procedure for precise error estimation.");
             MnMinos minos = new MnMinos(fcn, minimum, strategy);
             MinosError mnError;
@@ -257,7 +254,7 @@ public class MINUITFitEngine implements FitEngine {
             newState.setInterval(minosErrors);
         }
 
-        return FitResult.build(newState.build(),valid, task.getFreePars());
+        return FitResult.build(newState.build(),valid, fitPars);
 
     }
 

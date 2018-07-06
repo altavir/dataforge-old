@@ -34,11 +34,11 @@ public class FitStage extends SimpleMetaMorph {
     public static final String TASK_SINGLE = "single";
     public static final String TASK_COVARIANCE = "covariance";
 
-    private static final String FIT_STAGE_TYPE = "type";
-    private static final String FREE_PARAMETERS = "freepars";
-    private static final String ENGINE_NAME = "engine";
-    private static final String METHOD_NAME = "method";
-    private static final String DEFAULT_METHOD_NAME = "default";
+    public static final String FIT_STAGE_TYPE = "action";
+    public static final String FREE_PARAMETERS = "freePars";
+    public static final String ENGINE_NAME = "engine";
+    public static final String METHOD_NAME = "method";
+    public static final String DEFAULT_METHOD_NAME = "default";
 
 
     public FitStage(Meta taskAnnotation) {
@@ -72,7 +72,7 @@ public class FitStage extends SimpleMetaMorph {
     }
 
     public String getEngineName() {
-        return getMeta().getString(ENGINE_NAME, QOWFitEngine.QOW_ENGINE_NAME);
+        return getMeta().getString(ENGINE_NAME, QOWFitter.QOW_ENGINE_NAME);
     }
 
     public String getMethodName() {

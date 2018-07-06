@@ -16,6 +16,7 @@
 package hep.dataforge.context
 
 import hep.dataforge.Named
+import hep.dataforge.context.Plugin.Companion.PLUGIN_TARGET
 import hep.dataforge.data.binary.Binary
 import hep.dataforge.data.binary.StreamBinary
 import hep.dataforge.io.DefaultOutputManager
@@ -34,6 +35,7 @@ import hep.dataforge.providers.Provides
 import hep.dataforge.providers.ProvidesNames
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueProvider
+import hep.dataforge.values.ValueProvider.Companion.VALUE_TARGET
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -45,14 +47,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.stream.Stream
-import kotlin.collections.Collection
 import kotlin.collections.HashMap
-import kotlin.collections.Map
-import kotlin.collections.MutableMap
-import kotlin.collections.asSequence
-import kotlin.collections.forEach
-import kotlin.collections.getOrPut
-import kotlin.collections.map
 import kotlin.collections.set
 import kotlin.streams.asSequence
 import kotlin.streams.asStream
@@ -171,8 +166,8 @@ open class Context(
     }
 
     @Provides(Plugin.PLUGIN_TARGET)
-    fun optPlugin(pluginName: String): Optional<Plugin> {
-        return pluginManager.get(PluginTag.fromString(pluginName)).optional
+    fun getPlugin(pluginName: String): Plugin? {
+        return pluginManager.get(PluginTag.fromString(pluginName))
     }
 
     @ProvidesNames(Plugin.PLUGIN_TARGET)
@@ -377,6 +372,16 @@ open class Context(
         return resource?.let { StreamBinary { it.openStream() } }
     }
 
+    /**
+     * For anything but values and plugins, list all elements with given target, provided by plugins
+     */
+    override fun <T : Any?> provideAll(target: String, type: Class<T>): Stream<T> {
+        if(target == PLUGIN_TARGET || target == VALUE_TARGET){
+            return super.provideAll(target,type)
+        } else {
+            return pluginManager.stream(true).flatMap { it.provideAll(target, type) }
+        }
+    }
 
     companion object {
 

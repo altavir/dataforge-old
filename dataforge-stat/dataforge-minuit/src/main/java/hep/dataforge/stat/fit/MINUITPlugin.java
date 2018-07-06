@@ -18,7 +18,13 @@ package hep.dataforge.stat.fit;
 import hep.dataforge.context.*;
 import hep.dataforge.io.history.Chronicle;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.providers.Provides;
+import hep.dataforge.providers.ProvidesNames;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Мэнеджер для MINUITа. Пока не играет никакой активной роли кроме ведения
@@ -63,10 +69,24 @@ public class MINUITPlugin extends BasicPlugin {
     }
 
     @Override
-    public void attach(Context context) {
+    public void attach(@NotNull Context context) {
         super.attach(context);
-        context.get(FitManager.class).addEngine(MINUITFitEngine.MINUIT_ENGINE_NAME, new MINUITFitEngine());
         clearStaticLog();
+    }
+
+
+    @Provides(Fitter.FITTER_TARGET)
+    public Fitter getFitter(String fitterName) {
+        if (fitterName.equals("MINUIT")) {
+            return new MINUITFitter();
+        } else {
+            return null;
+        }
+    }
+
+    @ProvidesNames(Fitter.FITTER_TARGET)
+    public List<String> listFitters() {
+        return Collections.singletonList("MINUIT");
     }
 
     @Override
