@@ -241,7 +241,7 @@ public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable, Se
      * @param meta
      */
     protected void push(Context context, String name, Object obj, Meta meta) {
-        context.getOutput().get(Name.of(name), Name.of(getName()), TEXT_MODE).render(obj, meta);
+        context.getOutput().get(name, getName(), TEXT_MODE).render(obj, meta);
     }
 
     protected void push(Context context, String name, Object obj) {

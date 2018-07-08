@@ -238,9 +238,7 @@ public class MetaUtils {
         return nodeStream(Name.empty(), node, true).flatMap((Pair<Name, Meta> entry) -> {
             Name key = entry.getFirst();
             Meta childMeta = entry.getSecond();
-            return childMeta.getValueNames().map((String valueName) -> {
-                return new Pair<>(key.append(valueName), childMeta.getValue(valueName));
-            });
+            return childMeta.getValueNames().map((String valueName) -> new Pair<>(key.append(valueName), childMeta.getValue(valueName)));
         });
     }
 

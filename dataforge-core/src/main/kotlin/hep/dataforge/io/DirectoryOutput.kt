@@ -9,6 +9,9 @@ import hep.dataforge.context.FileReference
 import hep.dataforge.context.Plugin
 import hep.dataforge.context.PluginDef
 import hep.dataforge.context.PluginFactory
+import hep.dataforge.io.OutputManager.Companion.OUTPUT_MODE_KEY
+import hep.dataforge.io.OutputManager.Companion.OUTPUT_NAME_KEY
+import hep.dataforge.io.OutputManager.Companion.OUTPUT_STAGE_KEY
 import hep.dataforge.io.output.FileOutput
 import hep.dataforge.io.output.Output
 import hep.dataforge.meta.Meta
@@ -60,12 +63,15 @@ class DirectoryOutput : DefaultOutputManager() {
         }
     }
 
-    override fun get(stage: Name, name: Name, mode: String): Output {
-        val reference = FileReference.newWorkFile(context, name.toUnescaped(), getExtension(mode), stage)
+    override fun get(meta: Meta): Output {
+        val name = meta.getString(OUTPUT_NAME_KEY)
+        val stage = Name.of(meta.getString(OUTPUT_STAGE_KEY, ""))
+        val extension = meta.optString("file.extension").orElseGet { getExtension(meta.getString(OUTPUT_MODE_KEY, Output.TEXT_MODE)) }
+        val reference = FileReference.newWorkFile(context, name, extension, stage)
         return FileOutput(reference)
     }
 
-    class Factory: PluginFactory() {
+    class Factory : PluginFactory() {
         override val type: Class<out Plugin> = DirectoryOutput::class.java
 
         override fun build(meta: Meta): Plugin {

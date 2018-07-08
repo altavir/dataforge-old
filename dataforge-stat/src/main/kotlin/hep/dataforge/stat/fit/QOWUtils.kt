@@ -58,7 +58,7 @@ internal object QOWUtils {
                 summ = 0.0
                 i = 0
                 while (i < source.dataSize) {
-                    summ += weight.derivs!![k][i] * weight.derivs!![l][i] / weight.dispersion!![i]
+                    summ += weight.derivs[k][i] * weight.derivs[l][i] / weight.dispersion[i]
                     i++
                 }
                 res[k][l] = summ
@@ -99,7 +99,7 @@ internal object QOWUtils {
         while (l < fitDim) {
             i = 0
             while (i < source.dataSize) {
-                eqvalues[i][l] = source.getDis(i, set) * weight.derivs!![l][i] / weight.dispersion!![i]
+                eqvalues[i][l] = source.getDis(i, set) * weight.derivs[l][i] / weight.dispersion[i]
                 i++
             }
             l++
@@ -230,7 +230,7 @@ internal object QOWUtils {
                 summ = 0.0
                 i = 0
                 while (i < source.dataSize) {
-                    summ += weight.derivs!![l][i] * weight.derivs!![k][i] / weight.dispersion!![i]
+                    summ += weight.derivs[l][i] * weight.derivs[k][i] / weight.dispersion[i]
                     i++
                 }
                 res[k][l] = summ
@@ -288,7 +288,7 @@ internal object QOWUtils {
             summ = 0.0
             i = 0
             while (i < source.dataSize) {
-                summ += diss[i] * weight.derivs!![k][i] / weight.dispersion!![i]
+                summ += diss[i] * weight.derivs[k][i] / weight.dispersion[i]
                 i++
             }
             res[k] = summ

@@ -1,7 +1,6 @@
 rootProject.name = 'dataforge'
 include ':dataforge-core' // core classes and data structures
 include ':dataforge-core:dataforge-json' // json meta converter
-//include ':dataforge-core:dataforge-html' // HTML tools
 //include ':dataforge-core:osgi' // osgi framework for easy plugin delivery
 
 include ':dataforge-plots' // plot library
@@ -21,6 +20,7 @@ include 'kodex-server' // ktor based http server
 //include ':kodex:dataforge-server' // server base
 
 include ':dataforge-gui' // javafx based gui
+include ':dataforge-gui:dataforge-html' // HTML tools
 include ':dataforge-gui:gui-demo' // javafx based gui
 include ':dataforge-gui:gui-workspace' // javafx based gui
 

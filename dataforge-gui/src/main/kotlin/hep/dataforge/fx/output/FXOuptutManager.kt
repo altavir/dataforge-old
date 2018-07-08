@@ -21,10 +21,11 @@ import hep.dataforge.context.Context
 import hep.dataforge.context.PluginTag
 import hep.dataforge.fx.FXPlugin
 import hep.dataforge.fx.dfIconView
+import hep.dataforge.io.HTMLOutput
 import hep.dataforge.io.OutputManager
+import hep.dataforge.io.OutputManager.Companion.OUTPUT_STAGE_KEY
 import hep.dataforge.io.output.Output
 import hep.dataforge.meta.Meta
-import hep.dataforge.names.Name
 import hep.dataforge.plots.output.PlotOutput
 import hep.dataforge.tables.Table
 import javafx.beans.binding.ListBinding
@@ -38,7 +39,7 @@ import tornadofx.*
 
 class OutputContainer(val context: Context, val meta: Meta) : Fragment(title = "[${context.name}] DataForge output container", icon = dfIconView) {
 
-    private val stages: ObservableMap<Name, OutputStageContainer> = FXCollections.observableHashMap()
+    private val stages: ObservableMap<String, OutputStageContainer> = FXCollections.observableHashMap()
 
     private val tabList: ObservableList<Tab> = object : ListBinding<Tab>() {
         init {
@@ -47,7 +48,7 @@ class OutputContainer(val context: Context, val meta: Meta) : Fragment(title = "
 
         override fun computeValue(): ObservableList<Tab> {
             return stages.map {
-                Tab(it.key.toUnescaped(), it.value.root).apply {
+                Tab(it.key, it.value.root).apply {
                     isClosable = false
                 }
             }.observable()
@@ -68,27 +69,34 @@ class OutputContainer(val context: Context, val meta: Meta) : Fragment(title = "
         }
     }
 
-    operator fun get(stage: Name, name: Name, type: String): Output {
-        return (stages[stage] ?: buildStageContainer().also { runLater { stages[stage] = it } })[name, type]
+    fun get(meta: Meta): Output {
+        val stage = meta.getString(OUTPUT_STAGE_KEY, "")
+        val container = stages.getOrPut(stage) {
+            buildStageContainer()
+        }
+        return container.get(meta)
     }
 
     /**
      * Create a new output
      */
-    private fun buildOutput(type: String): FXOutput {
+    private fun buildOutput(mode: String): FXOutput {
         return when {
-            type.startsWith(Output.TEXT_MODE) -> FXTextOutput(context)
-            type.startsWith(PlotOutput.PLOT_TYPE) -> FXPlotOutput(context)
-            type.startsWith(Table.TABLE_TYPE) -> FXTableOutput(context)
+            mode.startsWith(Output.TEXT_MODE) -> FXWebOutput(context)
+            mode.startsWith(PlotOutput.PLOT_TYPE) -> FXPlotOutput(context)
+            mode.startsWith(Table.TABLE_TYPE) -> FXTableOutput(context)
+            mode.startsWith(HTMLOutput.HTML_MODE) -> FXWebOutput(context)
             else -> FXDumbOutput(context)
         }
     }
 
     private abstract inner class OutputStageContainer : Fragment() {
-        val outputs: ObservableMap<Name, FXOutput> = FXCollections.observableHashMap()
+        val outputs: ObservableMap<String, FXOutput> = FXCollections.observableHashMap()
 
-        operator fun get(name: Name, type: String): FXOutput {
-            return outputs[name] ?: buildOutput(type).also { runLater { outputs[name] = it } }
+        fun get(meta: Meta): FXOutput {
+            val name = meta.getString(OutputManager.OUTPUT_NAME_KEY)
+            val mode = meta.getString(OutputManager.OUTPUT_MODE_KEY, Output.TEXT_MODE)
+            return outputs[name] ?: buildOutput(mode).also { runLater { outputs[name] = it } }
         }
     }
 
@@ -97,13 +105,13 @@ class OutputContainer(val context: Context, val meta: Meta) : Fragment(title = "
             left {
                 // name list
                 //TODO replace by tree
-                listview<Name> {
-                    items = object : ListBinding<Name>() {
+                listview<String> {
+                    items = object : ListBinding<String>() {
                         init {
                             bind(outputs)
                         }
 
-                        override fun computeValue(): ObservableList<Name> {
+                        override fun computeValue(): ObservableList<String> {
                             return outputs.keys.toList().observable()
                         }
                     }
@@ -124,7 +132,7 @@ class OutputContainer(val context: Context, val meta: Meta) : Fragment(title = "
 
             override fun computeValue(): ObservableList<Tab> {
                 return outputs.map {
-                    Tab(it.key.toUnescaped(), it.value.root).apply {
+                    Tab(it.key, it.value.root).apply {
                         isClosable = false
                     }
                 }.observable()
@@ -156,10 +164,8 @@ class FXOutputManager(meta: Meta = Meta.empty(), viewConsumer: Context.(OutputCo
     val root: UIComponent
         get() = container
 
-    override val outputModes: Collection<String> = listOf(Output.TEXT_MODE, PlotOutput.PLOT_TYPE, Table.TABLE_TYPE)
-
-    override fun get(stage: Name, name: Name, mode: String): Output {
-        return container[stage, name, mode]
+    override fun get(meta: Meta): Output {
+        return container.get(meta)
     }
 
     companion object {

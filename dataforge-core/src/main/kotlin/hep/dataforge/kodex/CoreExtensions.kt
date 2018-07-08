@@ -26,6 +26,7 @@ import kotlin.reflect.KAnnotatedElement
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.jvm.javaMethod
+import kotlin.streams.asSequence
 
 /**
  * Core DataForge classes extensions
@@ -156,10 +157,13 @@ fun <T> Meta.asMap(transform: (Value) -> T): Map<String, T> {
 }
 
 val <T : MetaNode<*>> MetaNode<T>.childNodes: List<T>
-    get() = this.nodeNames.map { this.getMeta(it) }.toList()
+    get() = this.nodeNames.flatMap { this.getMetaList(it).stream() }.toList()
 
 val Meta.childNodes: List<Meta>
-    get() = this.nodeNames.map { this.getMeta(it) }.toList()
+    get() = this.nodeNames.flatMap { this.getMetaList(it).stream() }.toList()
+
+val Meta.values: Map<String, Value>
+    get() = this.valueNames.asSequence().associate { it to this.getValue(it) }
 
 /**
  * Configure a configurable using in-place build meta

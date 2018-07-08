@@ -34,6 +34,7 @@ import java.text.ParseException
 import kotlin.reflect.KAnnotatedElement
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
+import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberFunctions
 import kotlin.reflect.full.memberProperties
@@ -139,7 +140,7 @@ object Descriptors {
         } else {
             def.type
         }
-        return element?.let{describe(it)}
+        return element?.let { describe(it) }
     }
 
     private fun describe(element: KAnnotatedElement): NodeDescriptor {
@@ -170,28 +171,26 @@ object Descriptors {
         }
 
         if (element is KClass<*>) {
-            element.memberProperties.forEach { property ->
-                if (property.isAccessible) {
-                    property.findAnnotation<ValueProperty>()?.let {
-                        val name = if (it.name.isEmpty()) {
-                            property.name
-                        } else {
-                            it.name
-                        }
-                        builder.value(
-                                name = name,
-                                info = property.description,
-                                multiple = it.multiple,
-                                defaultValue = ValueFactory.parse(it.def),
-                                required = it.def.isEmpty(),
-                                allowedValues = it.enumeration.java.enumConstants.map { it.toString() },
-                                types = it.type.toList()
-                        )
+            element.declaredMemberProperties.filter { it.isAccessible }.forEach { property ->
+                property.findAnnotation<ValueProperty>()?.let {
+                    val name = if (it.name.isEmpty()) {
+                        property.name
+                    } else {
+                        it.name
                     }
+                    builder.value(
+                            name = name,
+                            info = property.description,
+                            multiple = it.multiple,
+                            defaultValue = ValueFactory.parse(it.def),
+                            required = it.def.isEmpty(),
+                            allowedValues = it.enumeration.java.enumConstants.map { it.toString() },
+                            types = it.type.toList()
+                    )
+                }
 
-                    property.findAnnotation<NodeProperty>()?.let {
-                        builder.node(describe(property))
-                    }
+                property.findAnnotation<NodeProperty>()?.let {
+                    builder.node(describe(property))
                 }
             }
         }

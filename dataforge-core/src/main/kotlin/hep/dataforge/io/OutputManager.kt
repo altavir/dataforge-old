@@ -21,10 +21,9 @@ import hep.dataforge.context.Plugin
 import hep.dataforge.description.ValueDef
 import hep.dataforge.description.ValueDefs
 import hep.dataforge.io.output.Output
-import hep.dataforge.io.output.Output.Companion.TEXT_MODE
 import hep.dataforge.io.output.Output.Companion.splitOutput
+import hep.dataforge.meta.KMetaBuilder
 import hep.dataforge.meta.Meta
-import hep.dataforge.names.Name
 
 /**
  *
@@ -43,41 +42,44 @@ interface OutputManager : Plugin {
      * @return
      */
     @ValueDefs(
-            ValueDef(key = "stage", def = "", info = "Fully qualified name of the output stage"),
-            ValueDef(key = "name", required = true, info = "Fully qualified name of the output inside the stage if it is present"),
-            ValueDef(key = "type", def = TEXT_MODE, info = "Type of the output container")
+            ValueDef(key = OUTPUT_STAGE_KEY, def = "", info = "Fully qualified name of the output stage"),
+            ValueDef(key = OUTPUT_NAME_KEY, required = true, info = "Fully qualified name of the output inside the stage if it is present"),
+            ValueDef(key = OUTPUT_MODE_KEY, def = "", info = "Type of the output container")
     )
-    operator fun get(meta: Meta): Output {
-        val name = Name.of(meta.getString("name"))
-        val stage = Name.of(meta.getString("stage", ""))
-        val type = meta.getString("type", Output.TEXT_MODE)
-        return get(stage, name, type)
-    }
+    fun get(meta: Meta): Output
 
     /**
-     * List of all available output modes ad dataforge object type strings. By convention [TEXT_MODE] should be always available.
+     * Kotlin helper
      */
-    val outputModes: Collection<String>
-
-    /**
-     * Helper method to access output
-     */
-    operator fun get(stage: Name, name: Name, mode: String = TEXT_MODE): Output
-
-    //TODO provide outputs
+    @JvmDefault
+    fun get(action: KMetaBuilder.() -> Unit): Output = get(action)
 
     /**
      *
      */
     @JvmDefault
-    operator fun get(stage: String, name: String, vararg modes: String = arrayOf(TEXT_MODE)): Output {
-        val mode = modes.find { outputModes.contains(it) } ?: TEXT_MODE
-        return get(Name.of(stage), Name.of(name), mode)
+    operator fun get(stage: String, name: String, mode: String? = null): Output {
+        return get {
+            OUTPUT_NAME_KEY to name
+            OUTPUT_STAGE_KEY to stage
+            OUTPUT_MODE_KEY to mode
+        }
+    }
+
+
+    @JvmDefault
+    operator fun get(name: String): Output {
+        return get {
+            OUTPUT_NAME_KEY to name
+        }
     }
 
     companion object {
 
         const val LOGGER_APPENDER_NAME = "df.output"
+        const val OUTPUT_STAGE_KEY = "stage"
+        const val OUTPUT_NAME_KEY = "name"
+        const val OUTPUT_MODE_KEY = "mode"
         //const val OUTPUT_STAGE_TARGET = "stage"
         //const val OUTPUT_TARGET = "output"
 
@@ -93,14 +95,11 @@ interface OutputManager : Plugin {
  */
 class SplitOutputManager(val managers: MutableSet<OutputManager> = HashSet(), meta: Meta = Meta.empty()) : OutputManager, BasicPlugin(meta) {
 
-    override val outputModes: Collection<String>
-        get() = managers.flatMap { it.outputModes }.distinct()
-
-    override fun get(stage: Name, name: Name, mode: String): Output = splitOutput(*managers.filter { it.outputModes.contains(mode) }.map { it[stage, name, mode] }.toTypedArray())
+    override fun get(meta: Meta): Output = splitOutput(*managers.map { it.get(meta) }.toTypedArray())
 
     override fun attach(context: Context) {
         super.attach(context)
-        managers.forEach{
+        managers.forEach {
             context.pluginManager.loadDependencies(it)
             it.attach(context)
         }
@@ -108,14 +107,14 @@ class SplitOutputManager(val managers: MutableSet<OutputManager> = HashSet(), me
 
     override fun detach() {
         super.detach()
-        managers.forEach{it.detach()}
+        managers.forEach { it.detach() }
     }
 
     companion object {
         /**
          * Convenience method to build split output manager
          */
-        fun build(vararg managers: OutputManager): SplitOutputManager{
+        fun build(vararg managers: OutputManager): SplitOutputManager {
             return SplitOutputManager(hashSetOf(*managers))
         }
     }

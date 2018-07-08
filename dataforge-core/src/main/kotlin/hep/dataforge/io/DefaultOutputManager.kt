@@ -25,9 +25,7 @@ import hep.dataforge.context.Global
 import hep.dataforge.context.PluginDef
 import hep.dataforge.io.OutputManager.Companion.LOGGER_APPENDER_NAME
 import hep.dataforge.io.output.Output
-import hep.dataforge.io.output.Output.Companion.TEXT_MODE
 import hep.dataforge.meta.Meta
-import hep.dataforge.names.Name
 
 /**
  *
@@ -40,14 +38,10 @@ import hep.dataforge.names.Name
 @PluginDef(name = "output", group = "hep.dataforge", info = "Basic input and output plugin")
 open class DefaultOutputManager(meta: Meta = Meta.empty()) : OutputManager, BasicPlugin(meta) {
 
-    override val outputModes: Collection<String> = listOf(TEXT_MODE)
-
     val default: Output
         get() = Global.console
 
-    override fun get(stage: Name, name: Name, mode: String): Output {
-        return default
-    }
+    override fun get(meta: Meta): Output  = default
 
     /**
      * Create logger appender for this manager
