@@ -63,8 +63,8 @@ class ValueMap : Values, MetaMorph {
      * {@inheritDoc}
      */
     @Throws(NameNotFoundException::class)
-    override fun optValue(name: String): Optional<Value> {
-        return Optional.ofNullable(valueMap[name])
+    override fun optValue(path: String): Optional<Value> {
+        return Optional.ofNullable(valueMap[path])
     }
 
     /**

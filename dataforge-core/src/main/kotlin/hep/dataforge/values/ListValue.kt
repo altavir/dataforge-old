@@ -76,14 +76,14 @@ class ListValue(values: Collection<Value>) : Value {
         return hash
     }
 
-    override fun equals(obj: Any?): Boolean {
-        if (obj == null) {
+    override fun equals(other: Any?): Boolean {
+        if (other == null) {
             return false
         }
-        if (javaClass != obj.javaClass) {
+        if (javaClass != other.javaClass) {
             return false
         }
-        val other = obj as ListValue?
+        val other = other as ListValue?
         return this.values == other!!.values
     }
 

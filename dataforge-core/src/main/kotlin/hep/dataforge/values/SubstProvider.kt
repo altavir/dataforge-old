@@ -27,10 +27,10 @@ abstract class SubstProvider : ValueProvider {
     /**
      * {@inheritDoc}
      *
-     * @param name
+     * @param path
      */
-    override fun getValue(name: String): Value {
-        val value = getValueForName(name)
+    override fun getValue(path: String): Value {
+        val value = getValueForName(path)
         return if (value.type == ValueType.STRING && value.string.contains("$")) {
             var valStr = value.string
             val matcher = Pattern.compile("\\$\\{(?<sub>.*)}").matcher(valStr)

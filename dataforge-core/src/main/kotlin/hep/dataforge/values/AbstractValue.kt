@@ -27,38 +27,37 @@ abstract class AbstractValue : Value {
 
     /**
      * Smart equality condition
-     * @param obj
+     * @param other
      * @return
      */
-    override fun equals(obj: Any?): Boolean {
+    override fun equals(other: Any?): Boolean {
         //TODO add list values equality condition
-        return when (obj) {
+        return when (other) {
             is Value -> {
-                val other = obj as Value?
                 try {
                     when (type) {
-                        ValueType.BOOLEAN -> this.boolean == other!!.boolean
-                        ValueType.TIME -> this.time == other!!.time
-                        ValueType.STRING -> this.string == other!!.string
-                        ValueType.NUMBER -> ValueUtils.NUMBER_COMPARATOR.compare(this.number, other!!.number) == 0
-                        ValueType.NULL -> other!!.type == ValueType.NULL
+                        ValueType.BOOLEAN -> this.boolean == other.boolean
+                        ValueType.TIME -> this.time == other.time
+                        ValueType.STRING -> this.string == other.string
+                        ValueType.NUMBER -> ValueUtils.NUMBER_COMPARATOR.compare(this.number, other.number) == 0
+                        ValueType.NULL -> other.type == ValueType.NULL
                         else ->
                             //unreachable statement, but using string comparison just to be sure
-                            this.string == other!!.string
+                            this.string == other.string
                     }
                 } catch (ex: ValueConversionException) {
                     false
                 }
             }
 
-            is Double -> this.double == obj
-            is Int -> this.int == obj
-            is Number -> ValueUtils.NUMBER_COMPARATOR.compare(this.number, obj as Number?) == 0
-            is String -> this.string == obj
-            is Boolean -> this.boolean == obj
-            is Instant -> this.time == obj
+            is Double -> this.double == other
+            is Int -> this.int == other
+            is Number -> ValueUtils.NUMBER_COMPARATOR.compare(this.number, other as Number?) == 0
+            is String -> this.string == other
+            is Boolean -> this.boolean == other
+            is Instant -> this.time == other
             null -> this.type == ValueType.NULL
-            else -> super.equals(obj)
+            else -> super.equals(other)
         }
     }
 
