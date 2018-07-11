@@ -18,10 +18,7 @@ package hep.dataforge.tables
 import hep.dataforge.exceptions.NameNotFoundException
 import hep.dataforge.exceptions.NamingException
 import hep.dataforge.meta.Meta
-import hep.dataforge.values.Value
-import hep.dataforge.values.ValueMap
-import hep.dataforge.values.ValueProvider
-import hep.dataforge.values.Values
+import hep.dataforge.values.*
 import java.util.stream.Stream
 import java.util.stream.StreamSupport
 import kotlin.streams.toList
@@ -112,8 +109,11 @@ class ListTable(override val format: TableFormat, points: List<Values>, unsafe: 
 
         private val points: MutableList<Values> = ArrayList()
 
-        val format: TableFormat
+        var format: TableFormat
             get() = _format ?: throw RuntimeException("Format not defined")
+            set(value) {
+                _format = value
+            }
 
         constructor(format: Iterable<String>) : this(MetaTableFormat.forNames(format))
 
@@ -149,6 +149,14 @@ class ListTable(override val format: TableFormat, points: List<Values>, unsafe: 
             val names = format.namesAsArray()
             val map = names.associateBy({ it }) { values.getValue(it) }
             return row(ValueMap(map))
+        }
+
+        fun row(vararg values: NamedValue): Builder {
+            return row(ValueMap.of(*values))
+        }
+
+        fun row(vararg values: Pair<String,Any>): Builder {
+            return row(ValueMap.of(values.map { NamedValue.of(it.first,it.second) }))
         }
 
         fun rows(points: Iterable<Values>): Builder {
@@ -194,4 +202,8 @@ class ListTable(override val format: TableFormat, points: List<Values>, unsafe: 
         }
     }
 
+}
+
+fun buildTable(format: TableFormat? = null, builder: ListTable.Builder.() -> Unit): Table {
+    return ListTable.Builder(format).apply(builder).build()
 }

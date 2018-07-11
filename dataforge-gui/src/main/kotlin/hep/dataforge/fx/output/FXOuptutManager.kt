@@ -18,6 +18,7 @@ package hep.dataforge.fx.output
 
 import hep.dataforge.context.BasicPlugin
 import hep.dataforge.context.Context
+import hep.dataforge.context.PluginDef
 import hep.dataforge.context.PluginTag
 import hep.dataforge.fx.FXPlugin
 import hep.dataforge.fx.dfIconView
@@ -26,10 +27,12 @@ import hep.dataforge.io.OutputManager
 import hep.dataforge.io.OutputManager.Companion.OUTPUT_STAGE_KEY
 import hep.dataforge.io.output.Output
 import hep.dataforge.meta.Meta
+import hep.dataforge.plots.PlotFactory
 import hep.dataforge.plots.output.PlotOutput
 import hep.dataforge.tables.Table
 import javafx.beans.binding.ListBinding
 import javafx.collections.FXCollections
+import javafx.collections.MapChangeListener
 import javafx.collections.ObservableList
 import javafx.collections.ObservableMap
 import javafx.geometry.Side
@@ -37,28 +40,39 @@ import javafx.scene.control.Tab
 import javafx.scene.layout.BorderPane
 import tornadofx.*
 
+/**
+ * Provide a map which is synchronized on UI thread
+ */
+private fun <T, R> ObservableMap<T, R>.ui(): ObservableMap<T, R> {
+    val res = FXCollections.observableHashMap<T, R>()
+    this.addListener { change: MapChangeListener.Change<out T, out R> ->
+        runLater {
+            if (change.wasRemoved()) {
+                res.remove(change.key)
+            }
+            if (change.wasAdded()) {
+                res[change.key] = change.valueAdded
+            }
+        }
+    }
+    return res
+}
+
 class OutputContainer(val context: Context, val meta: Meta) : Fragment(title = "[${context.name}] DataForge output container", icon = dfIconView) {
 
     private val stages: ObservableMap<String, OutputStageContainer> = FXCollections.observableHashMap()
 
-    private val tabList: ObservableList<Tab> = object : ListBinding<Tab>() {
-        init {
-            bind(stages)
-        }
-
-        override fun computeValue(): ObservableList<Tab> {
-            return stages.map {
-                Tab(it.key, it.value.root).apply {
-                    isClosable = false
-                }
-            }.observable()
-        }
-    }
+    private val uiStages = stages.ui()
 
     override val root = tabpane {
         //tabs for each stage
         side = Side.LEFT
-        tabs.bind(tabList) { it }
+        tabs.bind(uiStages) { key, value ->
+            Tab(key).apply {
+                content = value.root
+                isClosable = false
+            }
+        }
     }
 
     private fun buildStageContainer(): OutputStageContainer {
@@ -70,10 +84,8 @@ class OutputContainer(val context: Context, val meta: Meta) : Fragment(title = "
     }
 
     fun get(meta: Meta): Output {
-        val stage = meta.getString(OUTPUT_STAGE_KEY, "")
-        val container = stages.getOrPut(stage) {
-            buildStageContainer()
-        }
+        val stage = meta.getString(OUTPUT_STAGE_KEY, "@default")
+        val container = stages.getOrPut(stage) { buildStageContainer() }
         return container.get(meta)
     }
 
@@ -83,7 +95,12 @@ class OutputContainer(val context: Context, val meta: Meta) : Fragment(title = "
     private fun buildOutput(mode: String): FXOutput {
         return when {
             mode.startsWith(Output.TEXT_MODE) -> FXWebOutput(context)
-            mode.startsWith(PlotOutput.PLOT_TYPE) -> FXPlotOutput(context)
+            mode.startsWith(PlotOutput.PLOT_TYPE) -> if (context.opt(PlotFactory::class.java) != null) {
+                FXPlotOutput(context)
+            } else {
+                context.logger.error("Plot output not defined in the context")
+                FXTextOutput(context)
+            }
             mode.startsWith(Table.TABLE_TYPE) -> FXTableOutput(context)
             mode.startsWith(HTMLOutput.HTML_MODE) -> FXWebOutput(context)
             else -> FXDumbOutput(context)
@@ -94,9 +111,11 @@ class OutputContainer(val context: Context, val meta: Meta) : Fragment(title = "
         val outputs: ObservableMap<String, FXOutput> = FXCollections.observableHashMap()
 
         fun get(meta: Meta): FXOutput {
-            val name = meta.getString(OutputManager.OUTPUT_NAME_KEY)
-            val mode = meta.getString(OutputManager.OUTPUT_MODE_KEY, Output.TEXT_MODE)
-            return outputs[name] ?: buildOutput(mode).also { runLater { outputs[name] = it } }
+            synchronized(outputs) {
+                val name = meta.getString(OutputManager.OUTPUT_NAME_KEY)
+                val mode = meta.getString(OutputManager.OUTPUT_MODE_KEY, Output.TEXT_MODE)
+                return outputs.getOrPut(name) { buildOutput(mode) }
+            }
         }
     }
 
@@ -116,7 +135,7 @@ class OutputContainer(val context: Context, val meta: Meta) : Fragment(title = "
                         }
                     }
                     onUserSelect {
-                        this@borderpane.center = outputs[it]!!.root
+                        this@borderpane.center = outputs[it]!!.view.root
                     }
                 }
             }
@@ -125,28 +144,22 @@ class OutputContainer(val context: Context, val meta: Meta) : Fragment(title = "
 
     private inner class TabbedStageContainer : OutputStageContainer() {
 
-        private val outputList: ObservableList<Tab> = object : ListBinding<Tab>() {
-            init {
-                bind(outputs)
-            }
-
-            override fun computeValue(): ObservableList<Tab> {
-                return outputs.map {
-                    Tab(it.key, it.value.root).apply {
-                        isClosable = false
-                    }
-                }.observable()
-            }
-        }
+        private val uiOutputs = outputs.ui()
 
         override val root = tabpane {
             //tabs for each output
             side = Side.TOP
-            tabs.bind(outputList) { it }
+            tabs.bind(uiOutputs) { key, value ->
+                Tab(key).apply {
+                    content = value.view.root
+                    isClosable = false
+                }
+            }
         }
     }
 }
 
+@PluginDef(name = "output.fx", dependsOn = ["hep.dataforge.fx", "hep.dataforge.plots"], info = "JavaFX based output manager")
 class FXOutputManager(meta: Meta = Meta.empty(), viewConsumer: Context.(OutputContainer) -> Unit = { get<FXPlugin>().display(it) }) : OutputManager, BasicPlugin(meta) {
 
     override val tag = PluginTag(name = "output.fx", dependsOn = *arrayOf("hep.dataforge:fx"))

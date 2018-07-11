@@ -24,6 +24,7 @@ import hep.dataforge.io.output.Output
 import hep.dataforge.io.output.Output.Companion.splitOutput
 import hep.dataforge.meta.KMetaBuilder
 import hep.dataforge.meta.Meta
+import hep.dataforge.meta.buildMeta
 
 /**
  *
@@ -49,10 +50,19 @@ interface OutputManager : Plugin {
     fun get(meta: Meta): Output
 
     /**
+     * Render a single object to output, using provided meta both for finding the output and output properties.
+     * Method could be overridden to infer render mode.
+     */
+    @JvmDefault
+    fun render(meta: Meta, obj: Any) {
+        get(meta).render(obj, meta)
+    }
+
+    /**
      * Kotlin helper
      */
     @JvmDefault
-    fun get(action: KMetaBuilder.() -> Unit): Output = get(action)
+    fun get(action: KMetaBuilder.() -> Unit): Output = get(buildMeta("output", action))
 
     /**
      *
@@ -79,7 +89,7 @@ interface OutputManager : Plugin {
         const val LOGGER_APPENDER_NAME = "df.output"
         const val OUTPUT_STAGE_KEY = "stage"
         const val OUTPUT_NAME_KEY = "name"
-        const val OUTPUT_MODE_KEY = "mode"
+        const val OUTPUT_MODE_KEY: String = "mode"
         //const val OUTPUT_STAGE_TARGET = "stage"
         //const val OUTPUT_TARGET = "output"
 
@@ -116,6 +126,21 @@ class SplitOutputManager(val managers: MutableSet<OutputManager> = HashSet(), me
          */
         fun build(vararg managers: OutputManager): SplitOutputManager {
             return SplitOutputManager(hashSetOf(*managers))
+        }
+    }
+}
+
+operator fun OutputManager.plus(other: OutputManager): OutputManager {
+    return when (this) {
+        is SplitOutputManager -> {
+            managers.add(other)// add to current output managers
+            this
+        }
+        else -> {
+            val split = SplitOutputManager.build(this, other)
+            context.pluginManager.remove(this)
+            context.pluginManager.load(split)
+            split
         }
     }
 }

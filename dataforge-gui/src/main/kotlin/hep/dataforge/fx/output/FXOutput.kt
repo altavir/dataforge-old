@@ -18,7 +18,6 @@ package hep.dataforge.fx.output
 
 import hep.dataforge.context.Context
 import hep.dataforge.description.Descriptors
-import hep.dataforge.fx.dfIconView
 import hep.dataforge.fx.plots.PlotContainer
 import hep.dataforge.fx.table.TableDisplay
 import hep.dataforge.io.output.Output
@@ -33,14 +32,30 @@ import hep.dataforge.plots.output.PlotOutput
 import hep.dataforge.tables.Table
 import tornadofx.*
 
-abstract class FXOutput(override val context: Context) : Fragment(icon = dfIconView), Output
+/**
+ * An output container represented as FX fragment. The view is initialized lazily to avoid problems with toolkit initialization.
+ */
+abstract class FXOutput(override val context: Context) : Output {
+    abstract val view: Fragment
+}
 
+/**
+ * A specialized output for tables. Pushing new table replaces the old one
+ */
 class FXTableOutput(context: Context) : FXOutput(context) {
-    override val root = scrollpane()
+    val tableDisplay: TableDisplay by lazy { TableDisplay() }
+
+    override val view: Fragment by lazy {
+        object : Fragment() {
+            override val root = borderpane {
+                center = tableDisplay.root
+            }
+        }
+    }
 
     override fun render(obj: Any, meta: Meta) {
         if (obj is Table) {
-            root.content = TableDisplay(obj).root
+            tableDisplay.table = obj
         } else {
             logger.error("Can't represent ${obj.javaClass} as Table")
         }
@@ -54,12 +69,15 @@ class FXPlotOutput(context: Context) : FXOutput(context), PlotOutput, Configurab
 
     val container: PlotContainer by lazy { PlotContainer(frame) }
 
-    override val root = borderpane {
-        center = container.root
+    override val view: Fragment by lazy {
+        object : Fragment() {
+            override val root = borderpane {
+                center = container.root
+            }
+        }
     }
 
     override fun getConfig(): Configuration = frame.config
-
 
     override fun render(obj: Any, meta: Meta) {
         if (!meta.isEmpty) {
@@ -68,7 +86,7 @@ class FXPlotOutput(context: Context) : FXOutput(context), PlotOutput, Configurab
             }
             frame.configure(meta)
             // Use descriptor hidden field to update root plot container description
-            meta.useValue("@descriptor"){
+            meta.useValue("@descriptor") {
                 frame.plots.descriptor = Descriptors.forName(it.string)
             }
         }

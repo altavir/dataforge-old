@@ -33,15 +33,22 @@ import kotlinx.html.head
 import kotlinx.html.html
 import tornadofx.*
 
+/**
+ * An output wrapping html view
+ */
 class FXWebOutput(context: Context) : FXOutput(context), TextOutput {
 
-    private lateinit var webView: WebView
+    private val webView: WebView  by lazy { WebView() }
 
-    override val root: Parent = borderpane {
-        center {
-            webView = webview()
+
+    override val view: Fragment by lazy {
+        object : Fragment() {
+            override val root: Parent = borderpane {
+                center = webView
+            }
         }
     }
+
 
     private val document = createHTMLDocument().html {
         head { }
@@ -51,7 +58,9 @@ class FXWebOutput(context: Context) : FXOutput(context), TextOutput {
     private val node = document.getElementsByTagName("body").item(0)
 
     private val appender = node.append.onFinalize { from, _ ->
-        webView.engine.loadContent(from.ownerDocument.serialize(true))
+        runLater {
+            webView.engine.loadContent(from.ownerDocument.serialize(true))
+        }
     }
 
     val out = HTMLOutput(Global, appender)
@@ -59,5 +68,5 @@ class FXWebOutput(context: Context) : FXOutput(context), TextOutput {
     override fun render(obj: Any, meta: Meta) = out.render(obj, meta)
 
     override fun renderText(text: String, vararg attributes: TextAttribute) = out.renderText(text, *attributes)
-
 }
+

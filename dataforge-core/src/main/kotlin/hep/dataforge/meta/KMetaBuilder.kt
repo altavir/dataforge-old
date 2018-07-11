@@ -27,6 +27,7 @@ annotation class MetaDSL
  */
 @MetaDSL
 class KMetaBuilder(name: String = MetaBuilder.DEFAULT_META_NAME) : MetaBuilder(name) {
+
     operator fun Meta.unaryPlus() {
         putNode(this);
     }
@@ -43,16 +44,16 @@ class KMetaBuilder(name: String = MetaBuilder.DEFAULT_META_NAME) : MetaBuilder(n
     /**
      * Add value
      */
-    infix fun String.to(value: Any) {
-        putValue(this, value);
+    infix fun String.to(value: Any?) {
+        setValue(this, value);
     }
 
     infix fun String.to(metaBuilder: KMetaBuilder.() -> Unit) {
-        putNode(this, KMetaBuilder(this).apply(metaBuilder))
+        setNode(this, KMetaBuilder(this).apply(metaBuilder))
     }
 
     infix fun String.to(meta: Meta) {
-        putNode(this, meta)
+        setNode(this, meta)
     }
 
 //    /**
