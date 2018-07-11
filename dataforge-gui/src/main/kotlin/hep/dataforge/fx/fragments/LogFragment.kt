@@ -62,7 +62,7 @@ class LogFragment : Fragment("DataForge output log") {
         start()
     }
 
-    override val root = outputPane.root
+    override val root = outputPane.view.root
     private var stdHooked = false
 
 

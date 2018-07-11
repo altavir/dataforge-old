@@ -183,6 +183,14 @@ class ValueMap : Values, MetaMorph {
             return builder.build()
         }
 
+        fun of(values: Iterable<NamedValue>): ValueMap{
+            return ValueMap(values.associateBy(keySelector = {it.name}, valueTransform = {it.anonymous}))
+        }
+
+        fun of(vararg values: NamedValue): ValueMap{
+            return ValueMap(values.associateBy(keySelector = {it.name}, valueTransform = {it.anonymous}))
+        }
+
         @JvmStatic
         fun of(list: Array<String>, vararg values: Any): ValueMap {
             if (list.size != values.size) {

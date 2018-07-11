@@ -51,7 +51,7 @@ class FXWebViewTest : App() {
                 }
         )
 
-        val scene = Scene(out.root, 400.0, 400.0)
+        val scene = Scene(out.view.root, 400.0, 400.0)
 
         stage.title = "FXOutputPaneTest"
         stage.scene = scene

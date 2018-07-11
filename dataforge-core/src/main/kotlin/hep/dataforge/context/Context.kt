@@ -96,15 +96,10 @@ open class Context(
                 ?: parent?.output
                 ?: pluginManager.load(DefaultOutputManager())
         set(newOutput) {
-            val currentOutput = pluginManager.get<OutputManager>(false)
-            when (currentOutput) {
-                is SplitOutputManager -> currentOutput.managers.add(newOutput) // add to current output managers
-                null -> pluginManager.load(newOutput) // if no output, then load new one
-                else -> {
-                    val split = SplitOutputManager.build(currentOutput, newOutput)
-                    pluginManager.remove(currentOutput)
-                    pluginManager.load(split)
-                }
+            //remove old output
+            lock.operate {
+                pluginManager.get<OutputManager>(false)?.let { pluginManager.remove(it) }
+                pluginManager.load(newOutput)
             }
         }
 
@@ -158,7 +153,7 @@ open class Context(
      * @param value
      */
     fun setValue(name: String, value: Any) {
-        lock.modify { properties[name] = Value.of(value) }
+        lock.operate { properties[name] = Value.of(value) }
     }
 
     override fun getDefaultTarget(): String {
@@ -376,8 +371,8 @@ open class Context(
      * For anything but values and plugins, list all elements with given target, provided by plugins
      */
     override fun <T : Any?> provideAll(target: String, type: Class<T>): Stream<T> {
-        if(target == PLUGIN_TARGET || target == VALUE_TARGET){
-            return super.provideAll(target,type)
+        if (target == PLUGIN_TARGET || target == VALUE_TARGET) {
+            return super.provideAll(target, type)
         } else {
             return pluginManager.stream(true).flatMap { it.provideAll(target, type) }
         }

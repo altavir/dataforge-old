@@ -54,7 +54,7 @@ public class FitAction extends OneToOneAction<Table, FitResult> {
      */
     @Override
     protected FitResult execute(Context context, String name, Table input, Laminate meta) {
-        OutputStream output = OutputKt.getStream(context.getOutput().get(getName(), name));
+        OutputStream output = OutputKt.getStream(context.getOutput().get(getName(), name, null));
         PrintWriter writer = new PrintWriter(output);
         writer.printf("%n*** META ***%n");
         writer.println(meta.toString());

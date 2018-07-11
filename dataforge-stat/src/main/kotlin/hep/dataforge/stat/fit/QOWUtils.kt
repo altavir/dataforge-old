@@ -183,8 +183,8 @@ internal object QOWUtils {
                 i = 0
                 while (i < source.dataSize) {
                     // Тут баг, при нулевой дисперсии скатываемся в сингулярность.!!!
-                    assert(weight.dispersion!![i] > 0)
-                    summ += sderiv[i][l] * weight.derivs!![k][i] / weight.dispersion!![i]
+                    assert(weight.dispersion[i] > 0)
+                    summ += sderiv[i][l] * weight.derivs[k][i] / weight.dispersion[i]
                     i++
                 }
                 res[k][l] = summ

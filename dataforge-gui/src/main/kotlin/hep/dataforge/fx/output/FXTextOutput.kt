@@ -29,12 +29,8 @@ import java.io.OutputStream
  */
 class FXTextOutput(context: Context) : FXOutput(context), TextOutput {
 
-    /**
-     * The root Anchor pane
-     *
-     * @return
-     */
-    override val root: AnchorPane
+
+
     private val textArea = InlineCssTextArea()
 
     private val maxLinesProperty = SimpleIntegerProperty(-1)
@@ -71,15 +67,19 @@ class FXTextOutput(context: Context) : FXOutput(context), TextOutput {
 
     private val output = StreamOutput(context, stream)
 
+    override val view : Fragment by lazy {
+        object: Fragment() {
+            override val root = anchorpane(textArea){
+                AnchorPane.setBottomAnchor(textArea, 5.0)
+                AnchorPane.setTopAnchor(textArea, 5.0)
+                AnchorPane.setLeftAnchor(textArea, 5.0)
+                AnchorPane.setRightAnchor(textArea, 5.0)
+            }
+        }
+    }
+
     init {
-        //        textArea = new InlineCssTextArea();
         textArea.isEditable = false
-        //        textArea.setWrapText(true);
-        root = AnchorPane(textArea)
-        AnchorPane.setBottomAnchor(textArea, 5.0)
-        AnchorPane.setTopAnchor(textArea, 5.0)
-        AnchorPane.setLeftAnchor(textArea, 5.0)
-        AnchorPane.setRightAnchor(textArea, 5.0)
     }
 
     fun setWrapText(wrapText: Boolean) {

@@ -29,7 +29,7 @@ class ContextLock(override val context: Context) : ContextAware {
     /**
      * Throws [ContextLockException] if context is locked
      */
-    fun tryModify() {
+    private fun tryOperate() {
         lockers.stream().findFirst().ifPresent { lock -> throw ContextLockException(lock) }
     }
 
@@ -39,8 +39,8 @@ class ContextLock(override val context: Context) : ContextAware {
      * @param mod
      */
     @Synchronized
-    fun <T> modify(mod: ()->T): T {
-        tryModify()
+    fun <T> operate(mod: () -> T): T {
+        tryOperate()
         try {
             return context.dispatcher.submit(mod).get()
         } catch (e: InterruptedException) {
@@ -52,8 +52,8 @@ class ContextLock(override val context: Context) : ContextAware {
     }
 
     @Synchronized
-    fun modify(mod: () -> Unit) {
-        tryModify()
+    fun operate(mod: () -> Unit) {
+        tryOperate()
         try {
             context.dispatcher.submit(mod).get()
         } catch (e: InterruptedException) {

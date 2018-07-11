@@ -4,6 +4,7 @@ import hep.dataforge.fx.dfIconView
 import hep.dataforge.tables.Table
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueType
+import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.input.Clipboard
 import javafx.scene.input.ClipboardContent
 import org.controlsfx.control.spreadsheet.*
@@ -12,7 +13,11 @@ import tornadofx.*
 /**
  * Table display fragment
  */
-class TableDisplay(val table: Table, title: String? = null) : Fragment(title = title, icon = dfIconView) {
+class TableDisplay(title: String? = null) : Fragment(title = title, icon = dfIconView) {
+
+    val tableProperty = SimpleObjectProperty<Table>()
+    var table: Table? by tableProperty
+
 
     private fun buildCell(row: Int, column: Int, value: Value): SpreadsheetCell {
         return when (value.type) {
@@ -21,20 +26,7 @@ class TableDisplay(val table: Table, title: String? = null) : Fragment(title = t
         }
     }
 
-    private val grid: Grid = GridBase(table.size(), table.format.count()).apply {
-        val format = table.format;
-
-        columnHeaders.setAll(format.names.asList())
-//        rows += format.names.asList().observable();
-
-        (0 until table.size()).forEach { i ->
-            rows += (0 until format.count())
-                    .map { j -> buildCell(i, j, table.get(format.names[j], i)) }
-                    .observable()
-        }
-    }
-
-    private val spreadsheet = CustomSpreadSheetView(grid).apply {
+    private val spreadsheet = CustomSpreadSheetView().apply {
         isEditable = false
 //        isShowColumnHeader = false
     }
@@ -48,23 +40,50 @@ class TableDisplay(val table: Table, title: String? = null) : Fragment(title = t
         center = spreadsheet;
     }
 
-    private fun export() {
-        chooseFile("Save table data to...", emptyArray(), mode = FileChooserMode.Save).firstOrNull()?.let {
-//            if(!it.exists()){
-//                it.createNewFile()
-//            }
-
-            it.printWriter().use {writer->
-                writer.println(table.format.names.joinToString(separator = "\t"))
-                table.forEach {values->
-                    writer.println(table.format.names.map { values[it] }.joinToString(separator = "\t"))
-                }
-                writer.flush()
+    init {
+        tableProperty.onChange {
+            runLater {
+                spreadsheet.grid = buildGrid(it)
             }
         }
     }
 
-    class CustomSpreadSheetView(grid: Grid) : SpreadsheetView(grid) {
+    private fun buildGrid(table: Table?): Grid? {
+        return table?.let {
+            GridBase(table.size(), table.format.count()).apply {
+                val format = table.format;
+
+                columnHeaders.setAll(format.names.asList())
+//        rows += format.names.asList().observable();
+
+                (0 until table.size()).forEach { i ->
+                    rows += (0 until format.count())
+                            .map { j -> buildCell(i, j, table.get(format.names[j], i)) }
+                            .observable()
+                }
+            }
+        }
+    }
+
+    private fun export() {
+        table?.let { table ->
+            chooseFile("Save table data to...", emptyArray(), mode = FileChooserMode.Save).firstOrNull()?.let {
+                //            if(!it.exists()){
+//                it.createNewFile()
+//            }
+
+                it.printWriter().use { writer ->
+                    writer.println(table.format.names.joinToString(separator = "\t"))
+                    table.forEach { values ->
+                        writer.println(table.format.names.map { values[it] }.joinToString(separator = "\t"))
+                    }
+                    writer.flush()
+                }
+            }
+        }
+    }
+
+    class CustomSpreadSheetView : SpreadsheetView() {
         override fun copyClipboard() {
             val posList = selectionModel.selectedCells
 

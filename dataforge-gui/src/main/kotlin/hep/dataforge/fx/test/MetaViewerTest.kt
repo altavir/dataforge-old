@@ -41,7 +41,7 @@ class MetaViewerTest : App() {
     override fun start(stage: Stage) {
         val scene = Scene(MetaViewer(meta).root, 400.0, 400.0)
 
-        stage.title = "Meta editor test"
+        stage.title = "Meta viewer test"
         stage.scene = scene
         stage.show()
     }

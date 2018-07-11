@@ -249,7 +249,7 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
     private fun displayData(plot: DataPlot) {
         dataWindows.getOrPut(plot) {
             Stage().apply {
-                scene = Scene(TableDisplay(PlotUtils.extractData(plot, Meta.empty())).root)
+                scene = Scene(TableDisplay().also { it.table = PlotUtils.extractData(plot, Meta.empty()) }.root)
                 height = 400.0
                 width = 400.0
                 title = "Data: ${plot.title}"
@@ -304,5 +304,5 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
 }
 
 fun Context.display(width: Double = 800.0, height: Double = 600.0, frame: () -> PlotFrame) {
-    display(width, height){PlotContainer(frame())}
+    display(width, height) { PlotContainer(frame()) }
 }
