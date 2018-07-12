@@ -83,8 +83,7 @@ class ListValue(values: Collection<Value>) : Value {
         if (javaClass != other.javaClass) {
             return false
         }
-        val other = other as ListValue?
-        return this.values == other!!.values
+        return this.values == (other as ListValue).values
     }
 
     override fun toString(): String {

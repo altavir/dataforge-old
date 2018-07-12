@@ -27,9 +27,11 @@ import hep.dataforge.io.OutputManager
 import hep.dataforge.io.OutputManager.Companion.OUTPUT_STAGE_KEY
 import hep.dataforge.io.output.Output
 import hep.dataforge.meta.Meta
+import hep.dataforge.plots.Plot.Companion.PLOT_TYPE
 import hep.dataforge.plots.PlotFactory
-import hep.dataforge.plots.output.PlotOutput
+import hep.dataforge.plots.Plottable
 import hep.dataforge.tables.Table
+import hep.dataforge.tables.Table.Companion.TABLE_TYPE
 import javafx.beans.binding.ListBinding
 import javafx.collections.FXCollections
 import javafx.collections.MapChangeListener
@@ -92,11 +94,11 @@ class OutputContainer(val context: Context, val meta: Meta) : Fragment(title = "
     /**
      * Create a new output
      */
-    private fun buildOutput(mode: String): FXOutput {
+    private fun buildOutput(mode: String, meta: Meta): FXOutput {
         return when {
             mode.startsWith(Output.TEXT_MODE) -> FXWebOutput(context)
-            mode.startsWith(PlotOutput.PLOT_TYPE) -> if (context.opt(PlotFactory::class.java) != null) {
-                FXPlotOutput(context)
+            mode.startsWith(PLOT_TYPE) -> if (context.opt(PlotFactory::class.java) != null) {
+                FXPlotOutput(context, meta)
             } else {
                 context.logger.error("Plot output not defined in the context")
                 FXTextOutput(context)
@@ -114,7 +116,7 @@ class OutputContainer(val context: Context, val meta: Meta) : Fragment(title = "
             synchronized(outputs) {
                 val name = meta.getString(OutputManager.OUTPUT_NAME_KEY)
                 val mode = meta.getString(OutputManager.OUTPUT_MODE_KEY, Output.TEXT_MODE)
-                return outputs.getOrPut(name) { buildOutput(mode) }
+                return outputs.getOrPut(name) { buildOutput(mode, meta) }
             }
         }
     }
@@ -179,6 +181,15 @@ class FXOutputManager(meta: Meta = Meta.empty(), viewConsumer: Context.(OutputCo
 
     override fun get(meta: Meta): Output {
         return container.get(meta)
+    }
+
+    override fun render(obj: Any, meta: Meta) {
+        val inferred: Meta = when (obj) {
+            is Table -> meta.builder.setValue(OutputManager.OUTPUT_MODE_KEY, TABLE_TYPE)
+            is Plottable -> meta.builder.setValue(OutputManager.OUTPUT_MODE_KEY, PLOT_TYPE)
+            else -> meta
+        }
+        get(meta).render(obj, inferred)
     }
 
     companion object {

@@ -18,39 +18,28 @@ package hep.dataforge.plots.output
 
 import hep.dataforge.context.Context
 import hep.dataforge.io.output.Output
+import hep.dataforge.io.render
 import hep.dataforge.meta.Configurable
 import hep.dataforge.meta.KMetaBuilder
-import hep.dataforge.meta.buildMeta
 import hep.dataforge.plots.FakePlotFrame
+import hep.dataforge.plots.Plot
+import hep.dataforge.plots.Plot.Companion.PLOT_TYPE
 import hep.dataforge.plots.PlotFrame
 import hep.dataforge.plots.Plottable
 
 interface PlotOutput : Output, Configurable {
     val frame: PlotFrame
-
-    companion object {
-        const val PLOT_TYPE = "hep.dataforge.plot"
-    }
 }
 
-fun Context.plot(stage: String, name: String, plottable: Plottable, transform: KMetaBuilder.() -> Unit = {}) {
-    output[stage, name, PlotOutput.PLOT_TYPE].render(plottable, buildMeta("frame", transform))
+fun Context.plot(plottable: Plottable, stage: String? = null, name: String? = null, transform: KMetaBuilder.() -> Unit = {}) {
+    output.render(plottable, stage, name, Plot.PLOT_TYPE, transform)
 }
 
-fun Context.plot(stage: String = "", name: String, plottables: Iterable<Plottable>, transform: KMetaBuilder.() -> Unit = {}) {
-    output[stage, name, PlotOutput.PLOT_TYPE].render(plottables, buildMeta("frame", transform))
+fun Context.plot(plottables: Iterable<Plottable>, stage: String? = null, name: String? = null, transform: KMetaBuilder.() -> Unit = {}) {
+    output.render(plottables, stage, name, Plot.PLOT_TYPE, transform)
 }
 
 fun Context.plot(name: String, stage: String = "", action: PlotFrame.() -> Unit) {
     val frame = FakePlotFrame().apply(action)
-    output[stage, name, PlotOutput.PLOT_TYPE].render(frame.plots, frame.config)
+    output[stage, name, PLOT_TYPE].render(frame.plots, frame.config)
 }
-
-//@JvmOverloads
-//fun Context.getPlotFrame(name: String, stage: String = "", meta: Meta = Meta.empty()): PlotFrame {
-//    return (output[name, stage, PlotOutput.PLOT_TYPE] as PlotOutput).apply { configure(meta) }.frame
-//}
-//
-//fun Context.getPlotFrame(name: String, stage: String = "", transform: KMetaBuilder.() -> Unit): PlotFrame {
-//    return (output[name, stage, PlotOutput.PLOT_TYPE] as PlotOutput).configure(transform).frame
-//}

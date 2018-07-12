@@ -80,7 +80,7 @@ class PlotDataAction : OneToOneAction<Table, Table>() {
         val plottableData = DataPlot.plot(name, adapter, input)
         plottableData.configure(meta)
 
-        context.plot(this.name, frameName, plottableData)
+        context.plot(plottableData, this.name, frameName)
 
         //        if (meta.hasMeta("snapshot")) {
         //            snapshot(name, frame, meta.getMeta("snapshot"));
@@ -105,32 +105,4 @@ class PlotDataAction : OneToOneAction<Table, Table>() {
         //        serializeTasks.clear();
         super.afterAction(context, name, res, meta)
     }
-
-    //    @ValueDef(name = "width", type = "NUMBER", def = "800", info = "The width of the snapshot in pixels")
-    //    @ValueDef(name = "height", type = "NUMBER", def = "600", info = "The height of the snapshot in pixels")
-    //    @ValueDef(name = "name", info = "The name of snapshot file or ouputstream (provided by context). By default equals frame name.")
-    //    private synchronized void snapshot(String plotName, PlotFrame frame, Meta snapshotCfg) {
-    //        frame.snapshot(snapshotCfg);
-    //    }
-    //
-    //    @ValueDef(name = "name", info = "The name of serialization file or ouputstream (provided by context). By default equals frame name.")
-    //    private synchronized void serialize(String plotName, PlotFrame frame, Meta snapshotCfg) {
-    //        if (frame instanceof JFreeChartFrame) {
-    //            JFreeChartFrame jfcFrame = (JFreeChartFrame) frame;
-    //            String fileName = snapshotCfg.getString("name", plotName) + ".jfc";
-    //            serializeTasks.put(fileName, () -> {
-    //                logger().info("Saving serialized plot to file: {}", fileName);
-    //                OutputStream stream = buildActionOutput(fileName);
-    //                try {
-    //                    ObjectOutputStream ostr = new ObjectOutputStream(stream);
-    //                    ostr.writeObject(jfcFrame.getChart());
-    //                } catch (IOException ex) {
-    //                    LoggerFactory.getLogger(getClass()).error("IO error during serialization", ex);
-    //                }
-    //            });
-    //
-    //        } else {
-    //            logger().error("The plot frame does not provide serialization capabilities.");
-    //        }
-    //    }
 }

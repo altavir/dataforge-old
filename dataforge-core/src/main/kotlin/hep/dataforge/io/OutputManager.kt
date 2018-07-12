@@ -20,6 +20,9 @@ import hep.dataforge.context.Context
 import hep.dataforge.context.Plugin
 import hep.dataforge.description.ValueDef
 import hep.dataforge.description.ValueDefs
+import hep.dataforge.io.OutputManager.Companion.OUTPUT_MODE_KEY
+import hep.dataforge.io.OutputManager.Companion.OUTPUT_NAME_KEY
+import hep.dataforge.io.OutputManager.Companion.OUTPUT_STAGE_KEY
 import hep.dataforge.io.output.Output
 import hep.dataforge.io.output.Output.Companion.splitOutput
 import hep.dataforge.meta.KMetaBuilder
@@ -54,15 +57,10 @@ interface OutputManager : Plugin {
      * Method could be overridden to infer render mode.
      */
     @JvmDefault
-    fun render(meta: Meta, obj: Any) {
+    fun render(obj: Any, meta: Meta) {
         get(meta).render(obj, meta)
     }
 
-    /**
-     * Kotlin helper
-     */
-    @JvmDefault
-    fun get(action: KMetaBuilder.() -> Unit): Output = get(buildMeta("output", action))
 
     /**
      *
@@ -99,6 +97,30 @@ interface OutputManager : Plugin {
         fun split(vararg channels: OutputManager): OutputManager = SplitOutputManager().apply { this.managers.addAll(channels) }
     }
 }
+
+/**
+ * Kotlin helper to get [Output] using meta builder
+ */
+fun OutputManager.get(builder: KMetaBuilder.() -> Unit): Output = get(buildMeta("output", builder))
+
+/**
+ * Helper to directly render an object using optional stage and name an meta builder
+ */
+fun OutputManager.render(obj: Any, stage: String? = null, name: String? = null, mode: String? = null, builder: KMetaBuilder.() -> Unit = {}) {
+    val meta = buildMeta("output").apply(builder).apply {
+        if (name != null) {
+            OUTPUT_NAME_KEY to name
+        }
+        if (stage != null) {
+            OUTPUT_STAGE_KEY to stage
+        }
+        if (mode != null) {
+            OUTPUT_MODE_KEY to mode
+        }
+    }
+    render(obj, meta)
+}
+
 
 /**
  * An [OutputManager] that supports multiple outputs simultaneously
