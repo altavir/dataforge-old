@@ -103,6 +103,21 @@ interface OutputManager : Plugin {
  */
 fun OutputManager.get(builder: KMetaBuilder.() -> Unit): Output = get(buildMeta("output", builder))
 
+fun OutputManager.render(obj: Any, stage: String? = null, name: String? = null, mode: String? = null, meta: Meta) {
+    val outputMeta = meta.builder.apply {
+        if (name != null) {
+            OUTPUT_NAME_KEY to name
+        }
+        if (stage != null) {
+            OUTPUT_STAGE_KEY to stage
+        }
+        if (mode != null) {
+            OUTPUT_MODE_KEY to mode
+        }
+    }
+    render(obj, outputMeta)
+}
+
 /**
  * Helper to directly render an object using optional stage and name an meta builder
  */

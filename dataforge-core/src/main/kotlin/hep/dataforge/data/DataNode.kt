@@ -102,7 +102,7 @@ interface DataNode<T : Any> : Iterable<NamedData<out T>>, Named, Metoid, Provide
      * @param <R>
      * @return
      */
-    fun <R : Any> getCheckedNode(nodeName: String, type: Class<R>): DataNode<R> {
+    fun <R : Any> getCheckedNode(nodeName: String, type: Class<R>): DataNode<out R> {
         val node: DataNode<out T> = if (nodeName.isEmpty()) {
             this
         } else {

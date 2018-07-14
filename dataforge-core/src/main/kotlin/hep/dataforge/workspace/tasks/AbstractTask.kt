@@ -28,7 +28,7 @@ import hep.dataforge.workspace.Workspace
  */
 abstract class AbstractTask<R : Any>(override val type: Class<R>) : Task<R> {
 
-    protected open fun gather(model: TaskModel): DataNode<*> {
+    protected open fun gather(model: TaskModel): DataNode<Any> {
         val builder: DataNodeEditor<Any> = DataTree.edit()
         model.dependencies.forEach { dep ->
             dep.apply(builder, model.workspace)
@@ -36,7 +36,7 @@ abstract class AbstractTask<R : Any>(override val type: Class<R>) : Task<R> {
         return builder.build()
     }
 
-    override fun run(model: TaskModel): DataNode<out R> {
+    override fun run(model: TaskModel): DataNode<R> {
         //validate model
         validate(model)
 
@@ -55,11 +55,11 @@ abstract class AbstractTask<R : Any>(override val type: Class<R>) : Task<R> {
     /**
      * Result handler for the task
      */
-    protected open fun handle(output: DataNode<out R>) {
+    protected open fun handle(output: DataNode<R>) {
         //do nothing
     }
 
-    protected abstract fun run(model: TaskModel, data: DataNode<*>): DataNode<out R>
+    protected abstract fun run(model: TaskModel, data: DataNode<Any>): DataNode<R>
 
     /**
      * Apply model transformation to include custom dependencies or change

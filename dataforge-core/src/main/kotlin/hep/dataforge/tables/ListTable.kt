@@ -155,8 +155,12 @@ class ListTable(override val format: TableFormat, points: List<Values>, unsafe: 
             return row(ValueMap.of(*values))
         }
 
-        fun row(vararg values: Pair<String,Any>): Builder {
-            return row(ValueMap.of(values.map { NamedValue.of(it.first,it.second) }))
+        fun row(vararg values: Pair<String, Any>): Builder {
+            return row(ValueMap.of(values.map { NamedValue.of(it.first, it.second) }))
+        }
+
+        fun row(map: Map<String, Any>): Builder {
+            return row(ValueMap.ofMap(map))
         }
 
         fun rows(points: Iterable<Values>): Builder {
@@ -170,7 +174,6 @@ class ListTable(override val format: TableFormat, points: List<Values>, unsafe: 
             stream.forEach { this.row(it) }
             return this
         }
-        //TODO make methods to add virtual columns
 
         fun build(): Table {
             return ListTable(format, points)

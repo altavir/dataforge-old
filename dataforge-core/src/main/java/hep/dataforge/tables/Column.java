@@ -17,6 +17,7 @@ package hep.dataforge.tables;
 
 import hep.dataforge.Named;
 import hep.dataforge.values.Value;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
 import java.util.List;
@@ -34,6 +35,7 @@ public interface Column extends Named, Iterable<Value>, Serializable {
 
     ColumnFormat getFormat();
 
+    @NotNull
     @Override
     default String getName() {
         return getFormat().getName();

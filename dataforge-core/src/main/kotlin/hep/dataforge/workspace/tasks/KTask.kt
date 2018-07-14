@@ -29,10 +29,10 @@ class  KTask<R: Any>(
         override val name: String,
         type: KClass<R>,
         private val modelTransform: TaskModel.Builder.(Meta) -> Unit,
-        private val dataTransform: TaskModel.(DataNode<*>) -> DataNode<R>
+        private val dataTransform: TaskModel.(DataNode<Any>) -> DataNode<R>
 ) : AbstractTask<R>(type.java) {
 
-    override fun run(model: TaskModel, data: DataNode<*>): DataNode<R> {
+    override fun run(model: TaskModel, data: DataNode<Any>): DataNode<R> {
         model.context.logger.info("Starting task '$name' on data node ${data.name} with meta: \n${model.meta}")
         return dataTransform.invoke(model, data);
     }
@@ -50,9 +50,9 @@ class KTaskBuilder(val name: String) {
     private class DataTransformation(
             val from: String = "",
             val to: String = "",
-            val transform: (TaskModel, DataNode<*>) -> DataNode<*>
+            val transform: TaskModel.(DataNode<out Any>) -> DataNode<out Any>
     ) {
-        fun apply(model: TaskModel, node: DataNode<Any>): DataNode<*> {
+        operator fun invoke(model: TaskModel,node: DataNode<Any>): DataNode<out Any> {
             val localData = if (from.isEmpty()) {
                 node
             } else {
@@ -68,13 +68,13 @@ class KTaskBuilder(val name: String) {
         this.modelTransform = modelTransform
     }
 
-    fun <T : Any> transform(inputType: Class<T>, from: String = "", to: String = "", transform: TaskModel.(DataNode<T>) -> DataNode<*>) {
-        dataTransforms += DataTransformation(from, to) { model: TaskModel, data: DataNode<*> ->
-            transform.invoke(model, data.checked(inputType))
+    fun <T : Any> transform(inputType: Class<T>, from: String = "", to: String = "", transform: TaskModel.(DataNode<out T>) -> DataNode<out Any>) {
+        dataTransforms += DataTransformation(from, to) { data: DataNode<out Any> ->
+            transform.invoke(this, data.checked(inputType))
         }
     }
 
-    inline fun <reified T : Any> transform(from: String = "", to: String = "", noinline transform: TaskModel.(DataNode<T>) -> DataNode<*>) {
+    inline fun <reified T : Any> transform(from: String = "", to: String = "", noinline transform: TaskModel.(DataNode<out T>) -> DataNode<out Any>) {
         transform(T::class.java, from, to, transform)
     }
 
@@ -82,7 +82,7 @@ class KTaskBuilder(val name: String) {
      * Perform given action on data elements in `from` node in input and put the result to `to` node
      */
     inline fun <reified T : Any, reified R : Any> action(action: Action<T, R>, from: String = "", to: String = "") {
-        val transform: TaskModel.(DataNode<T>) -> DataNode<R> = { data ->
+        val transform: TaskModel.(DataNode<out T>) -> DataNode<out R> = { data ->
             action.run(context, data, meta)
         }
         transform(from, to, transform)
@@ -165,8 +165,7 @@ class KTaskBuilder(val name: String) {
 
 
     fun build(): KTask<Any> {
-        val transform: TaskModel.(DataNode<*>) -> DataNode<Any> = { data ->
-            val model = this;
+        val transform: TaskModel.(DataNode<Any>) -> DataNode<Any> = { data ->
             if (dataTransforms.isEmpty()) {
                 //return data node as is
                 logger.warn("No transformation present, returning input data")
@@ -174,7 +173,7 @@ class KTaskBuilder(val name: String) {
             } else {
                 val builder: DataNodeEditor<Any> = DataTree.edit(Any::class.java)
                 dataTransforms.forEach {
-                    val res = it.apply(model, data as DataNode<Any>)
+                    val res = it(this, data)
                     if (it.to.isEmpty()) {
                         builder.update(res)
                     } else {
