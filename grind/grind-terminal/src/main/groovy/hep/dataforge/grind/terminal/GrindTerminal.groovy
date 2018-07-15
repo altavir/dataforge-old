@@ -7,6 +7,7 @@ import hep.dataforge.data.DataNode
 import hep.dataforge.fx.output.FXOutputManager
 import hep.dataforge.grind.GrindShell
 import hep.dataforge.io.IOUtils
+import hep.dataforge.io.SplitOutputManager
 import hep.dataforge.io.output.ANSIStreamOutput
 import hep.dataforge.io.output.Output
 import hep.dataforge.meta.Meta
@@ -83,7 +84,7 @@ class GrindTerminal extends SimpleConfigurable {
         if (Global.INSTANCE == context) {
             context = Global.INSTANCE.getContext("GRIND")
             context.load(JFreeChartPlugin)
-            context.output = FXOutputManager.display()
+            context.output = SplitOutputManager.build(FXOutputManager.display(), context.output)
             //(context.logger as Logger).setLevel(Level.INFO)
             //FIXME There is some bug in the groovy compilation here
 //            InputStream inputStream = System.in;
@@ -262,7 +263,7 @@ class GrindTerminal extends SimpleConfigurable {
     def launch() {
         LineReader reader = LineReaderBuilder.builder()
                 .terminal(getTerminal())
-                //.completer(setupCompleter())
+        //.completer(setupCompleter())
                 .appName("DataForge Grind terminal")
                 .build();
         PrintWriter writer = getTerminal().writer();

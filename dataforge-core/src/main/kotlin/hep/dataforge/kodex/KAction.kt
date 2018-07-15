@@ -49,7 +49,7 @@ class PipeBuilder<T, R>(val context: Context, val actionName: String, var name: 
  * KPipe is executed inside {@link PipeBuilder} object, which holds name of given data, execution context, meta and log.
  * Notice that name and meta could be changed. Output object receives modified name and meta.
  */
-class KPipe<T: Any, R: Any>(
+class KPipe<T : Any, R : Any>(
         actionName: String,
         private val inType: Class<T>? = null,
         private val outType: Class<R>? = null,
@@ -102,7 +102,7 @@ class KPipe<T: Any, R: Any>(
 }
 
 
-class JoinGroup<T: Any, R: Any>(val context: Context,  name: String? = null, internal val node: DataNode<out T>) {
+class JoinGroup<T : Any, R : Any>(val context: Context, name: String? = null, internal val node: DataNode<out T>) {
     var name: String = name ?: node.name;
     var meta: MetaBuilder = node.meta.builder
 
@@ -115,7 +115,7 @@ class JoinGroup<T: Any, R: Any>(val context: Context,  name: String? = null, int
 }
 
 
-class JoinGroupBuilder<T: Any, R: Any>(val context: Context, val meta: Meta) {
+class JoinGroupBuilder<T : Any, R : Any>(val context: Context, val meta: Meta) {
 
 
     private val groupRules: MutableList<(Context, DataNode<out T>) -> List<JoinGroup<T, R>>> = ArrayList();
@@ -145,16 +145,9 @@ class JoinGroupBuilder<T: Any, R: Any>(val context: Context, val meta: Meta) {
     /**
      * Apply transformation to the whole node
      */
-    fun result(resultName: String? = null, f: suspend ActionEnv.(Map<String, T>) -> R) {
+    fun result(resultName: String, f: suspend ActionEnv.(Map<String, T>) -> R) {
         groupRules += { context, node ->
-            listOf(
-                    JoinGroup<T, R>(context, resultName, node).apply {
-                        result(f)
-                        if (resultName != null) {
-                            name = resultName
-                        }
-                    }
-            )
+            listOf(JoinGroup<T, R>(context, resultName, node).apply { result(f) })
         }
     }
 
@@ -168,7 +161,7 @@ class JoinGroupBuilder<T: Any, R: Any>(val context: Context, val meta: Meta) {
 /**
  * The same rules as for KPipe
  */
-class KJoin<T: Any, R: Any>(
+class KJoin<T : Any, R : Any>(
         actionName: String,
         private val inType: Class<T>? = null,
         private val outType: Class<R>? = null,
@@ -223,7 +216,7 @@ class KJoin<T: Any, R: Any>(
 }
 
 
-class FragmentEnv<T: Any, R: Any>(val context: Context, val name: String, var meta: MetaBuilder, val log: Chronicle) {
+class FragmentEnv<T : Any, R : Any>(val context: Context, val name: String, var meta: MetaBuilder, val log: Chronicle) {
     lateinit var result: suspend (T) -> R
 
     fun result(f: suspend (T) -> R) {
@@ -232,7 +225,7 @@ class FragmentEnv<T: Any, R: Any>(val context: Context, val name: String, var me
 }
 
 
-class SplitBuilder<T: Any, R: Any>(val context: Context, val name: String, val meta: Meta) {
+class SplitBuilder<T : Any, R : Any>(val context: Context, val name: String, val meta: Meta) {
     internal val fragments: MutableMap<String, FragmentEnv<T, R>.() -> Unit> = HashMap()
 
     /**
@@ -245,7 +238,7 @@ class SplitBuilder<T: Any, R: Any>(val context: Context, val name: String, val m
     }
 }
 
-class KSplit<T: Any, R: Any>(
+class KSplit<T : Any, R : Any>(
         name: String? = null,
         private val inType: Class<T>? = null,
         private val outType: Class<R>? = null,
@@ -303,6 +296,6 @@ class KSplit<T: Any, R: Any>(
     }
 }
 
-inline fun <reified T: Any, reified R: Any> DataNode<T>.pipe(context: Context, meta: Meta, name: String = "pipe", noinline action: PipeBuilder<T, R>.() -> Unit): DataNode<R> {
+inline fun <reified T : Any, reified R : Any> DataNode<T>.pipe(context: Context, meta: Meta, name: String = "pipe", noinline action: PipeBuilder<T, R>.() -> Unit): DataNode<R> {
     return KPipe(name, T::class.java, R::class.java, action).run(context, this, meta);
 }

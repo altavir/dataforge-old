@@ -161,6 +161,7 @@ class SplitOutputManager(val managers: MutableSet<OutputManager> = HashSet(), me
         /**
          * Convenience method to build split output manager
          */
+        @JvmStatic
         fun build(vararg managers: OutputManager): SplitOutputManager {
             return SplitOutputManager(hashSetOf(*managers))
         }

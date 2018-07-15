@@ -138,7 +138,7 @@ class KTaskBuilder(val name: String) {
     }
 
     inline fun <reified T : Any, reified R : Any> join(
-            actionName: String = "join",
+            actionName: String = name,
             from: String = "",
             to: String = "",
             noinline action: suspend ActionEnv.(Map<String, T>) -> R) {
@@ -147,7 +147,7 @@ class KTaskBuilder(val name: String) {
                 inType = T::class.java,
                 outType = R::class.java,
                 action = {
-                    result(null, action)
+                    result(meta.getString("@target", actionName), action)
                 }
         )
         action(join, from, to);
