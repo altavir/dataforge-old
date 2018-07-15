@@ -38,7 +38,7 @@ abstract class SingleActionTask<T : Any, R : Any>(type: Class<R>) : AbstractTask
         return model.meta
     }
 
-    override fun run(model: TaskModel, data: DataNode<*>): DataNode<R> {
+    override fun run(model: TaskModel, data: DataNode<Any>): DataNode<R> {
         val actionMeta = transformMeta(model)
         val checkedData = gatherNode(data)
         return getAction(model).run(model.context, checkedData, actionMeta)

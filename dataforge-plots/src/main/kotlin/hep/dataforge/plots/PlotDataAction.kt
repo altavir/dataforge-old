@@ -77,7 +77,7 @@ class PlotDataAction : OneToOneAction<Table, Table>() {
         val frameName = meta.getString(groupBy, "default")
 
         val adapter = Adapters.buildAdapter(meta.getMeta("adapter", Meta.empty()))
-        val plottableData = DataPlot.plot(name, adapter, input)
+        val plottableData = DataPlot.plot(name, input, adapter)
         plottableData.configure(meta)
 
         context.plot(plottableData, this.name, frameName)

@@ -31,7 +31,7 @@ import java.util.*
  */
 abstract class MultiStageTask<R : Any>(type: Class<R>) : AbstractTask<R>(type) {
 
-    override fun run(model: TaskModel, data: DataNode<*>): DataNode<R> {
+    override fun run(model: TaskModel, data: DataNode<Any>): DataNode<R> {
         val state = MultiStageTaskState(data)
         val logger = model.logger
         //        Work work = getWork(model, data.getName());

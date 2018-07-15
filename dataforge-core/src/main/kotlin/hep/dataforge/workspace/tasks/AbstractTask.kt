@@ -19,14 +19,21 @@ package hep.dataforge.workspace.tasks
 import hep.dataforge.data.DataNode
 import hep.dataforge.data.DataNodeEditor
 import hep.dataforge.data.DataTree
+import hep.dataforge.description.NodeDescriptor
 import hep.dataforge.meta.Meta
 import hep.dataforge.workspace.Workspace
 
 
 /**
+ * @param type the upper boundary type of a node, returned by this task.
+ * @param descriptor the descriptor override for this task. If null, construct descriptor from annotations.
  * Created by darksnake on 21-Aug-16.
  */
-abstract class AbstractTask<R : Any>(override val type: Class<R>) : Task<R> {
+abstract class AbstractTask<R : Any>(override val type: Class<R>, private val descriptor: NodeDescriptor? = null) : Task<R> {
+
+    override fun getDescriptor(): NodeDescriptor {
+        return descriptor?: super.getDescriptor()
+    }
 
     protected open fun gather(model: TaskModel): DataNode<Any> {
         val builder: DataNodeEditor<Any> = DataTree.edit()

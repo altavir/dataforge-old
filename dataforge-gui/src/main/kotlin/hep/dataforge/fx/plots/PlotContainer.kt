@@ -303,6 +303,7 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
 
 }
 
-fun Context.display(width: Double = 800.0, height: Double = 600.0, frame: () -> PlotFrame) {
+@Deprecated("To be replaced by outputs")
+fun Context.displayPlot(width: Double = 800.0, height: Double = 600.0, frame: () -> PlotFrame) {
     display(width, height) { PlotContainer(frame()) }
 }

@@ -39,6 +39,7 @@ class JFreeChartPlugin : BasicPlugin(), PlotFactory {
     }
 }
 
+@Deprecated("To be replaced by outputs")
 fun chart(transform: JFreeChartFrame.() -> Unit = {}): JFreeChartFrame {
     return JFreeChartFrame().apply(transform)
 }

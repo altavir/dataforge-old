@@ -43,12 +43,6 @@ interface Task<out R : Any> : Named, Described {
     val type: Class<out R>
 
     /**
-     * Text description of the task
-     */
-    val info: String
-        get() = ""
-
-    /**
      * Build a model for this task
      *
      * @param workspace

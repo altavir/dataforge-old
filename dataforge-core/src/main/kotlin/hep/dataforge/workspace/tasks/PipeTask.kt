@@ -11,7 +11,7 @@ abstract class PipeTask<T : Any, R : Any> protected constructor(override val nam
     private val action = PipeAction()
 
 
-    override fun run(model: TaskModel, data: DataNode<*>): DataNode<R> {
+    override fun run(model: TaskModel, data: DataNode<Any>): DataNode<R> {
         return action.run(model.context, data.checked(inputType), model.meta)
     }
 

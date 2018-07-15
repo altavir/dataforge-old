@@ -16,7 +16,7 @@ class GatherTaskTemplate : TaskTemplate {
 
     override fun build(context: Context, meta: Meta): Task<*> {
         return object : AbstractTask<Any>(Any::class.java) {
-            override fun run(model: TaskModel, data: DataNode<*>): DataNode<*> {
+            override fun run(model: TaskModel, data: DataNode<Any>): DataNode<Any> {
                 return data
             }
 

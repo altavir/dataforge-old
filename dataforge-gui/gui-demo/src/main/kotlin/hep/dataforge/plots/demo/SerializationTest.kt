@@ -39,7 +39,7 @@ fun main(args: Array<String>) {
     data.add(ValueMap.of(names, 3.0, 7.0, 0, 0.5))
     val ds = ListTable.infer(data)
 
-    val dataPlot = DataPlot.plot("dataPlot", Adapters.buildXYAdapter("myX", "myXErr", "myY", "myYErr"), ds)
+    val dataPlot = DataPlot.plot("dataPlot", ds, Adapters.buildXYAdapter("myX", "myXErr", "myY", "myYErr"))
 
 
     context.plot("before"){

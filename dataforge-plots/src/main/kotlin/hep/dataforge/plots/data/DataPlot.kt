@@ -37,7 +37,7 @@ import java.util.stream.Stream
         ValueDef(key = "showSymbol", type = [ValueType.BOOLEAN], def = "true", info = "Show symbols for data point."),
         ValueDef(key = "showErrors", type = [ValueType.BOOLEAN], def = "true", info = "Show errors for points.")
 )
-class DataPlot(name: String, meta: Meta = Meta.empty(), adapter: ValuesAdapter? = null, data: Iterable<Values>? = null) : XYPlot(Name.ofSingle(name), meta, adapter) {
+class DataPlot(name: String, meta: Meta = Meta.empty(), adapter: ValuesAdapter? = null, data: Iterable<Values> = emptyList()) : XYPlot(Name.ofSingle(name), meta, adapter) {
 
     /**
      *
@@ -46,9 +46,7 @@ class DataPlot(name: String, meta: Meta = Meta.empty(), adapter: ValuesAdapter? 
     override var data: MutableList<Values> = ArrayList()
 
     init {
-        if (data != null) {
-            this.data.addAll(data)
-        }
+        this.data.addAll(data)
     }
 
     @JvmOverloads
@@ -118,14 +116,7 @@ class DataPlot(name: String, meta: Meta = Meta.empty(), adapter: ValuesAdapter? 
             return DataPlot(name, Meta.empty(), adapter, data)
         }
 
-        @JvmOverloads
-        fun plot(name: String, adapter: ValuesAdapter, metaBuilder: KMetaBuilder.() -> Unit = {}): DataPlot {
-            val meta = KMetaBuilder("plot").apply(metaBuilder)
-            return DataPlot(name, meta, adapter)
-        }
-
-        @JvmOverloads
-        fun plot(name: String, adapter: ValuesAdapter, data: Iterable<Values>, metaBuilder: KMetaBuilder.() -> Unit = {}): DataPlot {
+        fun plot(name: String, data: Iterable<Values> = emptyList(), adapter: ValuesAdapter? = null, metaBuilder: KMetaBuilder.() -> Unit = {}): DataPlot {
             val meta = KMetaBuilder("plot").apply(metaBuilder)
             return DataPlot(name, meta, adapter, data)
         }

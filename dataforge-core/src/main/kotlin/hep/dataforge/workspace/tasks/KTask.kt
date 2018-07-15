@@ -20,17 +20,20 @@ import hep.dataforge.actions.Action
 import hep.dataforge.data.DataNode
 import hep.dataforge.data.DataNodeEditor
 import hep.dataforge.data.DataTree
+import hep.dataforge.description.DescriptorBuilder
+import hep.dataforge.description.NodeDescriptor
 import hep.dataforge.kodex.*
 import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name
 import kotlin.reflect.KClass
 
-class  KTask<R: Any>(
+class KTask<R : Any>(
         override val name: String,
         type: KClass<R>,
+        descriptor: NodeDescriptor? = null,
         private val modelTransform: TaskModel.Builder.(Meta) -> Unit,
         private val dataTransform: TaskModel.(DataNode<Any>) -> DataNode<R>
-) : AbstractTask<R>(type.java) {
+) : AbstractTask<R>(type.java, descriptor) {
 
     override fun run(model: TaskModel, data: DataNode<Any>): DataNode<R> {
         model.context.logger.info("Starting task '$name' on data node ${data.name} with meta: \n${model.meta}")
@@ -45,14 +48,15 @@ class  KTask<R: Any>(
 }
 
 class KTaskBuilder(val name: String) {
-    private var modelTransform: TaskModel.Builder.(Meta) -> Unit = { data("*") };
+    private var modelTransform: TaskModel.Builder.(Meta) -> Unit = { data("*") }
+    var descriptor: NodeDescriptor? = null
 
     private class DataTransformation(
             val from: String = "",
             val to: String = "",
             val transform: TaskModel.(DataNode<out Any>) -> DataNode<out Any>
     ) {
-        operator fun invoke(model: TaskModel,node: DataNode<Any>): DataNode<out Any> {
+        operator fun invoke(model: TaskModel, node: DataNode<Any>): DataNode<out Any> {
             val localData = if (from.isEmpty()) {
                 node
             } else {
@@ -163,6 +167,12 @@ class KTaskBuilder(val name: String) {
         action(split, from, to);
     }
 
+    /**
+     * Use DSL to create a descriptor for this task
+     */
+    fun descriptor(transform: DescriptorBuilder.() -> Unit) {
+        this.descriptor = DescriptorBuilder().apply(transform).build()
+    }
 
     fun build(): KTask<Any> {
         val transform: TaskModel.(DataNode<Any>) -> DataNode<Any> = { data ->
@@ -183,7 +193,7 @@ class KTaskBuilder(val name: String) {
                 builder.build()
             }
         }
-        return KTask(name, Any::class, modelTransform, transform);
+        return KTask(name, Any::class, descriptor, modelTransform, transform);
     }
 }
 
