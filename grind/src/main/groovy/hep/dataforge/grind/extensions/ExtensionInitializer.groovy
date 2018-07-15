@@ -50,7 +50,7 @@ class ExtensionInitializer {
     static def initWorkspace(){
         Workspace.metaClass.methodMissing = {String name, Object args ->
             String str = args.getClass().isArray() ? ((Object[]) args).join(" ") : args.toString()
-            return delegate.runTask(name, str)
+            return (delegate as Workspace).runTask(name, str)
         }
     }
 

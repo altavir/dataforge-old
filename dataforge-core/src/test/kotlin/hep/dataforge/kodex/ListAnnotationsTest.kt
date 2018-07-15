@@ -30,7 +30,7 @@ class ListAnnotationsTest {
 
     @Test
     fun testSingleAnnotation() {
-        val annotations = listAnnotations(Test1::class.java, StateDef::class.java)
+        val annotations = Test1::class.java.listAnnotations(StateDef::class.java)
         assertEquals(1, annotations.size)
     }
 
@@ -42,7 +42,7 @@ class ListAnnotationsTest {
 
     @Test
     fun testMultipleAnnotations() {
-        val annotations = listAnnotations(Test2::class.java, StateDef::class.java)
+        val annotations = Test2::class.java.listAnnotations(StateDef::class.java)
         assertEquals(2, annotations.size)
     }
 

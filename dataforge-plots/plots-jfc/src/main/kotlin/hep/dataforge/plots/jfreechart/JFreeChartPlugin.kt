@@ -18,14 +18,14 @@ package hep.dataforge.plots.jfreechart
 
 import hep.dataforge.context.BasicPlugin
 import hep.dataforge.context.Plugin
+import hep.dataforge.context.PluginDef
 import hep.dataforge.context.PluginFactory
-import hep.dataforge.context.PluginTag
 import hep.dataforge.meta.Meta
 import hep.dataforge.plots.PlotFactory
 import hep.dataforge.plots.PlotFrame
 
+@PluginDef(group = "hep.dataforge", name = "plots.jfreechart", info = "JFreeChart plot frame factory")
 class JFreeChartPlugin : BasicPlugin(), PlotFactory {
-    override val tag: PluginTag = PluginTag("plots.jfreechart")
 
     override fun build(meta: Meta): PlotFrame = JFreeChartFrame().apply { configure(meta) }
 

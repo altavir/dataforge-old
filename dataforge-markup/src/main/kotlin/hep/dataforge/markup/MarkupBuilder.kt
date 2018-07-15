@@ -1,6 +1,7 @@
 package hep.dataforge.markup.markup
 
 import hep.dataforge.kodex.set
+import hep.dataforge.meta.Configuration
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.Metoid
 import hep.dataforge.utils.GenericBuilder
@@ -32,7 +33,7 @@ class MarkupBuilder : GenericBuilder<Markup, MarkupBuilder>, Metoid {
      * @return
      */
     fun setStyle(style: Meta): MarkupBuilder {
-        markup.style = style.builder
+        markup.style = Configuration(style)
         return self()
     }
 

@@ -10,6 +10,7 @@ import hep.dataforge.grind.helpers.GrindHelperFactory
 import hep.dataforge.meta.Meta
 import org.codehaus.groovy.control.CompilerConfiguration
 import org.codehaus.groovy.control.customizers.ImportCustomizer
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 /**
@@ -67,7 +68,7 @@ class GrindShell implements ContextAware {
         shell = new GroovyShell(context.classLoader, binding, configuration);
     }
 
-    org.slf4j.Logger getLogger(){
+    Logger getLogger(){
         return LoggerFactory.getLogger(context.name + ".grind")
     }
 

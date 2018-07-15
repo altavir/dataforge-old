@@ -101,6 +101,7 @@ interface Loader : Metoid, AutoCloseable, Named, AutoConnectible, ContextAware, 
         return AlphanumComparator.INSTANCE.compare(this.name, other.name)
     }
 
+    @JvmDefault
     override val logger: Logger
         get() = optConnection(LOGGER_ROLE, Logger::class.java).orElse(context.logger)
 

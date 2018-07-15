@@ -42,7 +42,7 @@ sealed class Markup : MetaMorph {
     abstract val type: String
 
 
-    var style: MetaBuilder = MetaBuilder(Markup.MARKUP_STYLE_NODE)
+    var style: Configuration = Configuration(Markup.MARKUP_STYLE_NODE)
 
     /**
      * Return index of column if parent is row. Otherwise return null
@@ -209,7 +209,7 @@ open class MarkupGroup : Markup() {
      * Apply the meta to create
      */
     protected fun applyMeta(meta: Meta) {
-        style = meta.getMetaOrEmpty(Markup.MARKUP_STYLE_NODE).builder
+        style = Configuration(meta.getMetaOrEmpty(Markup.MARKUP_STYLE_NODE))
         meta.childNodes.forEach {
             if (it.name != Markup.MARKUP_STYLE_NODE) {
                 content.add(MetaMorph.morph(TAG_MAP[it.name]!!, it).apply { parent = this })
@@ -246,7 +246,7 @@ class TextMarkup() : Markup() {
         override fun morph(meta: Meta): TextMarkup {
             return TextMarkup().apply {
                 text = meta.getString("text", "")
-                style = meta.getMetaOrEmpty(Markup.MARKUP_STYLE_NODE).builder
+                style = Configuration(meta.getMetaOrEmpty(Markup.MARKUP_STYLE_NODE))
             }
         }
 
@@ -336,7 +336,7 @@ class TableMarkup : Markup() {
     companion object : MorphProvider<TableMarkup> {
         override fun morph(meta: Meta): TableMarkup {
             return TableMarkup().apply {
-                style = meta.getMetaOrEmpty(Markup.MARKUP_STYLE_NODE).builder
+                style = Configuration(meta.getMetaOrEmpty(Markup.MARKUP_STYLE_NODE))
                 meta.getMetaList(Markup.ROW_TYPE).forEach {
                     row { content.add(RowMarkup.morph(it).apply { parent = this }) }
                 }

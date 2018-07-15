@@ -7,6 +7,7 @@ import hep.dataforge.grind.workspace.WorkspaceSpec
 import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.workspace.Workspace
 import org.codehaus.groovy.control.CompilerConfiguration
+import org.slf4j.LoggerFactory
 
 /**
  * Created by darksnake on 04-Aug-16.
@@ -15,6 +16,7 @@ import org.codehaus.groovy.control.CompilerConfiguration
 class Grind {
 
     static {
+        LoggerFactory.getLogger("GRIND").debug("Initializing static GRIND extensions")
         ExtensionInitializer.initAll()
     }
 

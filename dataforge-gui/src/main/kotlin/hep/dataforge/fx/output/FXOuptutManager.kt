@@ -194,6 +194,9 @@ class FXOutputManager(meta: Meta = Meta.empty(), viewConsumer: Context.(OutputCo
 
     companion object {
 
+        @JvmStatic
+        fun display(): FXOutputManager = FXOutputManager()
+
         /**
          * Display in existing BorderPane
          */
