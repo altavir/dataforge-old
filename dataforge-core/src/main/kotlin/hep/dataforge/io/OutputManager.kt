@@ -15,14 +15,15 @@
  */
 package hep.dataforge.io
 
+import hep.dataforge.Types
 import hep.dataforge.context.BasicPlugin
 import hep.dataforge.context.Context
 import hep.dataforge.context.Plugin
 import hep.dataforge.description.ValueDef
 import hep.dataforge.description.ValueDefs
-import hep.dataforge.io.OutputManager.Companion.OUTPUT_MODE_KEY
 import hep.dataforge.io.OutputManager.Companion.OUTPUT_NAME_KEY
 import hep.dataforge.io.OutputManager.Companion.OUTPUT_STAGE_KEY
+import hep.dataforge.io.OutputManager.Companion.OUTPUT_TYPE_KEY
 import hep.dataforge.io.output.Output
 import hep.dataforge.io.output.Output.Companion.splitOutput
 import hep.dataforge.meta.KMetaBuilder
@@ -48,29 +49,19 @@ interface OutputManager : Plugin {
     @ValueDefs(
             ValueDef(key = OUTPUT_STAGE_KEY, def = "", info = "Fully qualified name of the output stage"),
             ValueDef(key = OUTPUT_NAME_KEY, required = true, info = "Fully qualified name of the output inside the stage if it is present"),
-            ValueDef(key = OUTPUT_MODE_KEY, def = "", info = "Type of the output container")
+            ValueDef(key = OUTPUT_TYPE_KEY, def = "", info = "Type of the output container")
     )
     fun get(meta: Meta): Output
-
-    /**
-     * Render a single object to output, using provided meta both for finding the output and output properties.
-     * Method could be overridden to infer render mode.
-     */
-    @JvmDefault
-    fun render(obj: Any, meta: Meta) {
-        get(meta).render(obj, meta)
-    }
-
 
     /**
      *
      */
     @JvmDefault
-    operator fun get(stage: String, name: String, mode: String? = null): Output {
+    operator fun get(stage: String, name: String, type: String? = null): Output {
         return get {
             OUTPUT_NAME_KEY to name
             OUTPUT_STAGE_KEY to stage
-            OUTPUT_MODE_KEY to mode
+            OUTPUT_TYPE_KEY to type
         }
     }
 
@@ -87,9 +78,7 @@ interface OutputManager : Plugin {
         const val LOGGER_APPENDER_NAME = "df.output"
         const val OUTPUT_STAGE_KEY = "stage"
         const val OUTPUT_NAME_KEY = "name"
-        const val OUTPUT_MODE_KEY: String = "mode"
-        //const val OUTPUT_STAGE_TARGET = "stage"
-        //const val OUTPUT_TARGET = "output"
+        const val OUTPUT_TYPE_KEY = "type"
 
         /**
          * Produce a split [OutputManager]
@@ -103,7 +92,7 @@ interface OutputManager : Plugin {
  */
 fun OutputManager.get(builder: KMetaBuilder.() -> Unit): Output = get(buildMeta("output", builder))
 
-fun OutputManager.render(obj: Any, stage: String? = null, name: String? = null, mode: String? = null, meta: Meta) {
+fun OutputManager.render(obj: Any, stage: String? = null, name: String? = null, type: String? = null, meta: Meta) {
     val outputMeta = meta.builder.apply {
         if (name != null) {
             setValue(OUTPUT_NAME_KEY, name)
@@ -111,18 +100,18 @@ fun OutputManager.render(obj: Any, stage: String? = null, name: String? = null, 
         if (stage != null) {
             setValue(OUTPUT_STAGE_KEY, stage)
         }
-        if (mode != null) {
-            setValue(OUTPUT_MODE_KEY, mode)
+        if (type != null || !meta.hasValue(OUTPUT_TYPE_KEY)) {
+            setValue(OUTPUT_TYPE_KEY, type ?: Types.get(obj))
         }
     }
-    render(obj, outputMeta)
+    get(outputMeta).render(obj, outputMeta)
 }
 
 /**
  * Helper to directly render an object using optional stage and name an meta builder
  */
-fun OutputManager.render(obj: Any, stage: String? = null, name: String? = null, mode: String? = null, builder: KMetaBuilder.() -> Unit = {}) {
-    render(obj, stage, name, mode, buildMeta("output", builder))
+fun OutputManager.render(obj: Any, stage: String? = null, name: String? = null, type: String? = null, builder: KMetaBuilder.() -> Unit = {}) {
+    render(obj, stage, name, type, buildMeta("output", builder))
 }
 
 

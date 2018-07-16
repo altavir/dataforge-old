@@ -17,17 +17,17 @@
 package hep.dataforge.io
 
 import ch.qos.logback.classic.spi.ILoggingEvent
+import hep.dataforge.childNodes
 import hep.dataforge.context.Context
 import hep.dataforge.description.NodeDescriptor
 import hep.dataforge.description.ValueDescriptor
 import hep.dataforge.io.envelopes.Envelope
 import hep.dataforge.io.history.Record
 import hep.dataforge.io.output.*
-import hep.dataforge.kodex.childNodes
-import hep.dataforge.kodex.values
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.Metoid
 import hep.dataforge.tables.Table
+import hep.dataforge.values
 import hep.dataforge.values.ValueType
 import kotlinx.html.*
 import org.w3c.dom.Node
@@ -186,11 +186,11 @@ open class HTMLOutput(override val context: Context, private val consumer: TagCo
                                 th { +it }
                             }
                         }
-                        obj.rows.forEach {
+                        obj.rows.forEach {values->
                             tr {
                                 obj.format.names.forEach {
                                     td {
-                                        +it
+                                        +values[it].string
                                     }
                                 }
                             }

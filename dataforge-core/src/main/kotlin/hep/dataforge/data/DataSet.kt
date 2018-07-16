@@ -6,9 +6,9 @@
 package hep.dataforge.data
 
 import hep.dataforge.exceptions.AnonymousNotAlowedException
-import hep.dataforge.kodex.nullable
 import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name
+import hep.dataforge.nullable
 import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.stream.Collectors

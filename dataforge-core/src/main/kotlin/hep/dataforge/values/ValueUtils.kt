@@ -17,9 +17,9 @@
 package hep.dataforge.values
 
 import hep.dataforge.io.IOUtils
-import hep.dataforge.kodex.toBigDecimal
 import hep.dataforge.providers.Path
 import hep.dataforge.providers.Provider
+import hep.dataforge.toBigDecimal
 import java.io.DataInput
 import java.io.DataOutput
 import java.io.IOException

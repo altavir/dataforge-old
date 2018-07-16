@@ -1,8 +1,8 @@
 package hep.dataforge.goals
 
+import hep.dataforge.await
 import hep.dataforge.context.Context
-import hep.dataforge.kodex.await
-import hep.dataforge.kodex.coroutineContext
+import hep.dataforge.coroutineContext
 import hep.dataforge.utils.ReferenceRegistry
 import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.future.asCompletableFuture

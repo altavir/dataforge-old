@@ -18,7 +18,6 @@ package hep.dataforge.plots.data
 import hep.dataforge.description.NodeDef
 import hep.dataforge.description.ValueDef
 import hep.dataforge.description.ValueDefs
-import hep.dataforge.kodex.toList
 import hep.dataforge.meta.Configuration.FINAL_TAG
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
@@ -26,6 +25,7 @@ import hep.dataforge.names.Name
 import hep.dataforge.tables.Adapters
 import hep.dataforge.tables.ValuesAdapter
 import hep.dataforge.tables.ValuesAdapter.ADAPTER_KEY
+import hep.dataforge.toList
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueType
 import hep.dataforge.values.Values

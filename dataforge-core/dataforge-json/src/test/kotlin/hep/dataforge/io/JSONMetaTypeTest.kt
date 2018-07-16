@@ -16,7 +16,7 @@
 
 package hep.dataforge.io
 
-import hep.dataforge.kodex.get
+import hep.dataforge.get
 import hep.dataforge.meta.buildMeta
 import org.junit.Assert.assertEquals
 import org.junit.Test

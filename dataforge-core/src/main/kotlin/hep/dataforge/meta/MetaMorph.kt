@@ -18,6 +18,7 @@ package hep.dataforge.meta
 
 import java.io.ObjectStreamException
 import java.io.Serializable
+import java.lang.annotation.Inherited
 import kotlin.reflect.KClass
 import kotlin.reflect.full.*
 import kotlin.reflect.jvm.javaType
@@ -32,6 +33,7 @@ interface MetaID {
 }
 
 @MustBeDocumented
+@Inherited
 annotation class MorphTarget(val target: KClass<*>)
 
 interface MorphProvider<T> {

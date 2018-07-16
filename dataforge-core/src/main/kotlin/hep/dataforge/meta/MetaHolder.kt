@@ -23,7 +23,7 @@ package hep.dataforge.meta
 
 import hep.dataforge.description.Described
 import hep.dataforge.description.NodeDescriptor
-import hep.dataforge.kodex.optional
+import hep.dataforge.optional
 import hep.dataforge.utils.Optionals
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueProvider

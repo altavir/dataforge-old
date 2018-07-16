@@ -48,7 +48,7 @@ public class TransformTableAction extends OneToOneAction<Table, Table> {
 
         Table res;
         if (filterSet != null) {
-            res = TableTransform.filter(input, filterSet);
+            res = Tables.filter(input, filterSet);
         } else {
             res = input;
         }

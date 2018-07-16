@@ -3,8 +3,8 @@ package hep.dataforge.workspace.templates
 import hep.dataforge.actions.Action
 import hep.dataforge.actions.ActionUtils.*
 import hep.dataforge.context.Context
-import hep.dataforge.kodex.toList
 import hep.dataforge.meta.Meta
+import hep.dataforge.toList
 import hep.dataforge.workspace.tasks.MultiStageTask
 import hep.dataforge.workspace.tasks.Task
 import hep.dataforge.workspace.tasks.TaskModel

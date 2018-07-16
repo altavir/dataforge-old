@@ -17,8 +17,8 @@ package hep.dataforge.storage.filestorage
 
 import hep.dataforge.io.envelopes.MetaType
 import hep.dataforge.io.jsonMetaType
-import hep.dataforge.kodex.nullable
 import hep.dataforge.meta.Meta
+import hep.dataforge.nullable
 import hep.dataforge.storage.api.StateLoader
 import hep.dataforge.storage.api.Storage
 import hep.dataforge.storage.loaders.StateHolder

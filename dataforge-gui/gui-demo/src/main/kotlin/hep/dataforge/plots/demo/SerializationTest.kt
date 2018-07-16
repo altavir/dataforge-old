@@ -1,7 +1,7 @@
 package hep.dataforge.plots.demo
 
+import hep.dataforge.buildContext
 import hep.dataforge.fx.output.FXOutputManager
-import hep.dataforge.kodex.buildContext
 import hep.dataforge.plots.XYFunctionPlot
 import hep.dataforge.plots.data.DataPlot
 import hep.dataforge.plots.jfreechart.JFreeChartPlugin

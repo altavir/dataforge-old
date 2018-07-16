@@ -31,9 +31,9 @@ import hep.dataforge.description.ValueDef
 import hep.dataforge.description.ValueDefs
 import hep.dataforge.events.EventBuilder
 import hep.dataforge.exceptions.ControlException
-import hep.dataforge.kodex.useValue
 import hep.dataforge.meta.Meta
 import hep.dataforge.states.*
+import hep.dataforge.useValue
 import hep.dataforge.values.ValueType.BOOLEAN
 import hep.dataforge.values.ValueType.NUMBER
 import java.time.Duration

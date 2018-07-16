@@ -9,9 +9,9 @@ import hep.dataforge.context.FileReference
 import hep.dataforge.context.Plugin
 import hep.dataforge.context.PluginDef
 import hep.dataforge.context.PluginFactory
-import hep.dataforge.io.OutputManager.Companion.OUTPUT_MODE_KEY
 import hep.dataforge.io.OutputManager.Companion.OUTPUT_NAME_KEY
 import hep.dataforge.io.OutputManager.Companion.OUTPUT_STAGE_KEY
+import hep.dataforge.io.OutputManager.Companion.OUTPUT_TYPE_KEY
 import hep.dataforge.io.output.FileOutput
 import hep.dataforge.io.output.Output
 import hep.dataforge.meta.Meta
@@ -57,8 +57,8 @@ class DirectoryOutput : DefaultOutputManager() {
      */
     private fun getExtension(type: String): String {
         return when (type) {
-            Output.TEXT_MODE -> "out"
-            Output.BINARY_MODE -> "df"
+            Output.TEXT_TYPE -> "out"
+            Output.BINARY_TYPE -> "df"
             else -> type
         }
     }
@@ -66,7 +66,7 @@ class DirectoryOutput : DefaultOutputManager() {
     override fun get(meta: Meta): Output {
         val name = meta.getString(OUTPUT_NAME_KEY)
         val stage = Name.of(meta.getString(OUTPUT_STAGE_KEY, ""))
-        val extension = meta.optString("file.extension").orElseGet { getExtension(meta.getString(OUTPUT_MODE_KEY, Output.TEXT_MODE)) }
+        val extension = meta.optString("file.extension").orElseGet { getExtension(meta.getString(OUTPUT_TYPE_KEY, Output.TEXT_TYPE)) }
         val reference = FileReference.newWorkFile(context, name, extension, stage)
         return FileOutput(reference)
     }

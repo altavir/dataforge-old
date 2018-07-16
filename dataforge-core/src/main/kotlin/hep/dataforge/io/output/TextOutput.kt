@@ -22,6 +22,7 @@ import ch.qos.logback.classic.encoder.PatternLayoutEncoder
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.encoder.Encoder
 import ch.qos.logback.core.encoder.EncoderBase
+import hep.dataforge.asMap
 import hep.dataforge.context.Context
 import hep.dataforge.context.FileReference
 import hep.dataforge.description.NodeDescriptor
@@ -31,11 +32,10 @@ import hep.dataforge.io.envelopes.Envelope
 import hep.dataforge.io.envelopes.EnvelopeType
 import hep.dataforge.io.envelopes.TaglessEnvelopeType
 import hep.dataforge.io.history.Record
-import hep.dataforge.kodex.asMap
-import hep.dataforge.kodex.useValue
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.Metoid
 import hep.dataforge.tables.Table
+import hep.dataforge.useValue
 import hep.dataforge.values.ValueType
 import javafx.scene.paint.Color
 import org.slf4j.LoggerFactory

@@ -16,9 +16,9 @@
 
 package hep.dataforge.markup.markup
 
-import hep.dataforge.kodex.childNodes
-import hep.dataforge.kodex.nullable
+import hep.dataforge.childNodes
 import hep.dataforge.meta.*
+import hep.dataforge.nullable
 import kotlin.reflect.KClass
 
 @DslMarker

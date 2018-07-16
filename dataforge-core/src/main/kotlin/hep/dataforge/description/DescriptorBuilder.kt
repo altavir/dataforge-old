@@ -21,9 +21,9 @@
  */
 package hep.dataforge.description
 
-import hep.dataforge.kodex.set
 import hep.dataforge.meta.*
 import hep.dataforge.names.Name
+import hep.dataforge.set
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueType
 import org.slf4j.LoggerFactory

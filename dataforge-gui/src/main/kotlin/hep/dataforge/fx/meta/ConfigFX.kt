@@ -4,7 +4,7 @@ import hep.dataforge.description.NodeDescriptor
 import hep.dataforge.description.ValueDescriptor
 import hep.dataforge.fx.values.ValueCallbackResponse
 import hep.dataforge.fx.values.ValueChooserFactory
-import hep.dataforge.kodex.isNull
+import hep.dataforge.isNull
 import hep.dataforge.meta.ConfigChangeListener
 import hep.dataforge.meta.Configuration
 import hep.dataforge.meta.Meta

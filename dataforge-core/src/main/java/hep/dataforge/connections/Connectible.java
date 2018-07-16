@@ -21,7 +21,7 @@
  */
 package hep.dataforge.connections;
 
-import hep.dataforge.kodex.CoreExtensionsKt;
+import hep.dataforge.CoreExtensionsKt;
 
 import java.util.List;
 import java.util.Optional;

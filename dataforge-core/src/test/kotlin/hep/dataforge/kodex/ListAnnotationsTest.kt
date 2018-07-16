@@ -17,6 +17,7 @@
 package hep.dataforge.kodex
 
 import hep.dataforge.description.ValueDef
+import hep.dataforge.listAnnotations
 import hep.dataforge.states.StateDef
 import hep.dataforge.states.StateDefs
 import org.junit.Assert.assertEquals

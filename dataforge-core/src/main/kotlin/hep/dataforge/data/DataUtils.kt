@@ -23,9 +23,9 @@ import hep.dataforge.goals.Goal
 import hep.dataforge.goals.PipeGoal
 import hep.dataforge.io.MetaFileReader
 import hep.dataforge.io.envelopes.EnvelopeReader
-import hep.dataforge.kodex.toList
 import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta
+import hep.dataforge.toList
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path

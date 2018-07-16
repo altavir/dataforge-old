@@ -17,10 +17,10 @@ package hep.dataforge.messages
 
 import hep.dataforge.io.envelopes.Envelope
 import hep.dataforge.io.envelopes.EnvelopeBuilder
-import hep.dataforge.kodex.nullable
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.names.Name
+import hep.dataforge.nullable
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.future.asCompletableFuture
 import java.util.concurrent.CompletableFuture

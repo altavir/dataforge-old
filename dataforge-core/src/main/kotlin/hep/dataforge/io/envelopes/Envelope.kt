@@ -18,9 +18,9 @@ package hep.dataforge.io.envelopes
 import hep.dataforge.data.Data
 import hep.dataforge.data.binary.Binary
 import hep.dataforge.description.NodeDef
-import hep.dataforge.kodex.nullable
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.Metoid
+import hep.dataforge.nullable
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.io.Serializable

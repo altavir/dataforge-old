@@ -16,6 +16,7 @@
 
 package hep.dataforge.kodex
 
+import hep.dataforge.actions.KPipe
 import hep.dataforge.context.Global
 import hep.dataforge.data.DataSet
 import hep.dataforge.meta.Meta

@@ -21,7 +21,6 @@ import hep.dataforge.description.Descriptors
 import hep.dataforge.fx.plots.PlotContainer
 import hep.dataforge.fx.table.TableDisplay
 import hep.dataforge.io.output.Output
-import hep.dataforge.kodex.useValue
 import hep.dataforge.meta.Configurable
 import hep.dataforge.meta.Configuration
 import hep.dataforge.meta.Meta
@@ -30,6 +29,7 @@ import hep.dataforge.plots.PlotFrame
 import hep.dataforge.plots.Plottable
 import hep.dataforge.plots.output.PlotOutput
 import hep.dataforge.tables.Table
+import hep.dataforge.useValue
 import tornadofx.*
 
 /**
@@ -91,15 +91,23 @@ class FXPlotOutput(context: Context, meta: Meta = Meta.empty()) : FXOutput(conte
                 frame.plots.descriptor = Descriptors.forName(it.string)
             }
         }
-        when (obj) {
-            is Plottable -> {
-                frame.add(obj)
-            }
-            is Iterable<*> -> {
-                frame.addAll(obj.filterIsInstance<Plottable>())
-            }
-            else -> {
-                logger.error("Can't represent ${obj.javaClass} as Plottable")
+        runLater {
+            when (obj) {
+                is PlotFrame -> {
+                    frame.configure(obj.config)
+                    frame.plots.configure(obj.plots.config)
+                    frame.plots.descriptor = obj.plots.descriptor
+                    frame.addAll(obj.plots.children)
+                }
+                is Plottable -> {
+                    frame.add(obj)
+                }
+                is Iterable<*> -> {
+                    frame.addAll(obj.filterIsInstance<Plottable>())
+                }
+                else -> {
+                    logger.error("Can't represent ${obj.javaClass} as Plottable")
+                }
             }
         }
     }

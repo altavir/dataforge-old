@@ -19,7 +19,7 @@ package hep.dataforge.description
 import hep.dataforge.context.Global
 import hep.dataforge.exceptions.NameNotFoundException
 import hep.dataforge.io.MetaFileReader
-import hep.dataforge.kodex.listAnnotations
+import hep.dataforge.listAnnotations
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.providers.Path

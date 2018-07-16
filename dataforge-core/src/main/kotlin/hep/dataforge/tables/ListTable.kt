@@ -34,11 +34,8 @@ import kotlin.streams.toList
  * @param unsafe if `true`, skip format compatibility on the init.
  * @author Alexander Nozik
  */
-class ListTable(override val format: TableFormat, points: List<Values>, unsafe: Boolean = false) : ListOfPoints(points), Table {
+class ListTable @JvmOverloads constructor(override val format: TableFormat, points: List<Values>, unsafe: Boolean = false) : ListOfPoints(points), Table {
 
-    constructor(format: TableFormat, points: Iterable<Values>) : this(format, points.toList())
-
-    constructor(format: TableFormat, points: Stream<Values>) : this(format, points.toList())
 
     constructor(meta: Meta) : this(
             MetaTableFormat(meta.getMeta("format")),
@@ -58,17 +55,17 @@ class ListTable(override val format: TableFormat, points: List<Values>, unsafe: 
     /**
      * {@inheritDoc}
      *
-     * @param columnName
+     * @param name
      * @return
      */
     @Throws(NameNotFoundException::class)
-    override fun getColumn(columnName: String): Column {
-        if (!this.format.names.contains(columnName)) {
-            throw NameNotFoundException(columnName)
+    override fun getColumn(name: String): Column {
+        if (!this.format.names.contains(name)) {
+            throw NameNotFoundException(name)
         }
         return object : Column {
             override fun getFormat(): ColumnFormat {
-                return this@ListTable.format.getColumn(columnName)
+                return this@ListTable.format.getColumn(name)
             }
 
             override fun get(n: Int): Value {
@@ -80,7 +77,7 @@ class ListTable(override val format: TableFormat, points: List<Values>, unsafe: 
             }
 
             override fun stream(): Stream<Value> {
-                return this@ListTable.rows.map { point -> point.getValue(columnName) }
+                return this@ListTable.rows.map { point -> point.getValue(name) }
             }
 
             override fun iterator(): MutableIterator<Value> {
@@ -190,7 +187,7 @@ class ListTable(override val format: TableFormat, points: List<Values>, unsafe: 
     companion object {
 
         fun copy(table: Table): ListTable {
-            return table as? ListTable ?: ListTable(table.format, table.rows)
+            return table as? ListTable ?: ListTable(table.format, table.rows.toList())
         }
 
         /**

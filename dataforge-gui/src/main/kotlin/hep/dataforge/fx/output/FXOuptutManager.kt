@@ -22,16 +22,13 @@ import hep.dataforge.context.PluginDef
 import hep.dataforge.context.PluginTag
 import hep.dataforge.fx.FXPlugin
 import hep.dataforge.fx.dfIconView
-import hep.dataforge.io.HTMLOutput
 import hep.dataforge.io.OutputManager
 import hep.dataforge.io.OutputManager.Companion.OUTPUT_STAGE_KEY
 import hep.dataforge.io.output.Output
 import hep.dataforge.meta.Meta
-import hep.dataforge.plots.Plot.Companion.PLOT_TYPE
 import hep.dataforge.plots.PlotFactory
 import hep.dataforge.plots.Plottable
 import hep.dataforge.tables.Table
-import hep.dataforge.tables.Table.Companion.TABLE_TYPE
 import javafx.beans.binding.ListBinding
 import javafx.collections.FXCollections
 import javafx.collections.MapChangeListener
@@ -94,18 +91,16 @@ class OutputContainer(val context: Context, val meta: Meta) : Fragment(title = "
     /**
      * Create a new output
      */
-    private fun buildOutput(mode: String, meta: Meta): FXOutput {
+    private fun buildOutput(type: String, meta: Meta): FXOutput {
         return when {
-            mode.startsWith(Output.TEXT_MODE) -> FXWebOutput(context)
-            mode.startsWith(PLOT_TYPE) -> if (context.opt(PlotFactory::class.java) != null) {
+            type.startsWith(Plottable.PLOTTABLE_TYPE) -> if (context.opt(PlotFactory::class.java) != null) {
                 FXPlotOutput(context, meta)
             } else {
                 context.logger.error("Plot output not defined in the context")
                 FXTextOutput(context)
             }
-            mode.startsWith(Table.TABLE_TYPE) -> FXTableOutput(context)
-            mode.startsWith(HTMLOutput.HTML_MODE) -> FXWebOutput(context)
-            else -> FXDumbOutput(context)
+            type.startsWith(Table.TABLE_TYPE) -> FXTableOutput(context)
+            else -> FXWebOutput(context)
         }
     }
 
@@ -115,8 +110,8 @@ class OutputContainer(val context: Context, val meta: Meta) : Fragment(title = "
         fun get(meta: Meta): FXOutput {
             synchronized(outputs) {
                 val name = meta.getString(OutputManager.OUTPUT_NAME_KEY)
-                val mode = meta.getString(OutputManager.OUTPUT_MODE_KEY, Output.TEXT_MODE)
-                return outputs.getOrPut(name) { buildOutput(mode, meta) }
+                val type = meta.getString(OutputManager.OUTPUT_TYPE_KEY, Output.TEXT_TYPE)
+                return outputs.getOrPut(name) { buildOutput(type, meta) }
             }
         }
     }
@@ -181,15 +176,6 @@ class FXOutputManager(meta: Meta = Meta.empty(), viewConsumer: Context.(OutputCo
 
     override fun get(meta: Meta): Output {
         return container.get(meta)
-    }
-
-    override fun render(obj: Any, meta: Meta) {
-        val inferred: Meta = when (obj) {
-            is Table -> meta.builder.setValue(OutputManager.OUTPUT_MODE_KEY, TABLE_TYPE)
-            is Plottable -> meta.builder.setValue(OutputManager.OUTPUT_MODE_KEY, PLOT_TYPE)
-            else -> meta
-        }
-        get(inferred).render(obj, meta)
     }
 
     companion object {

@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
-import static hep.dataforge.io.output.Output.TEXT_MODE;
+import static hep.dataforge.io.output.Output.TEXT_TYPE;
 import static hep.dataforge.stat.fit.FitStage.STAGE_KEY;
 
 /**
@@ -167,7 +167,7 @@ public class FitHelper {
          * @return
          */
         public FitBuilder setListenerStream(String outputName) {
-            this.listener = buildDefaultListener(OutputKt.getStream(getManager().getContext().getOutput().get("", outputName, TEXT_MODE)));
+            this.listener = buildDefaultListener(OutputKt.getStream(getManager().getContext().getOutput().get("", outputName, TEXT_TYPE)));
             return this;
         }
 

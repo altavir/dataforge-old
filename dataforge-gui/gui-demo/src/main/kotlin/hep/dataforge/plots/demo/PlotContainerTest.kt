@@ -15,10 +15,10 @@
  */
 package hep.dataforge.plots.demo
 
+import hep.dataforge.buildContext
+import hep.dataforge.configure
 import hep.dataforge.fx.output.FXOutputManager
 import hep.dataforge.fx.plots.group
-import hep.dataforge.kodex.buildContext
-import hep.dataforge.kodex.configure
 import hep.dataforge.plots.XYFunctionPlot
 import hep.dataforge.plots.data.DataPlot
 import hep.dataforge.plots.jfreechart.JFreeChartPlugin

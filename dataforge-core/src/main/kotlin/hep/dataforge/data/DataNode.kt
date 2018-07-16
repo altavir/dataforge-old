@@ -8,12 +8,12 @@ package hep.dataforge.data
 import hep.dataforge.Named
 import hep.dataforge.exceptions.NameNotFoundException
 import hep.dataforge.goals.GoalGroup
-import hep.dataforge.kodex.nullable
-import hep.dataforge.kodex.toList
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.Metoid
+import hep.dataforge.nullable
 import hep.dataforge.providers.Provider
 import hep.dataforge.providers.Provides
+import hep.dataforge.toList
 import java.util.concurrent.Executor
 import java.util.function.BiConsumer
 import java.util.function.Consumer

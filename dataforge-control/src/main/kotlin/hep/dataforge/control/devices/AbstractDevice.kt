@@ -25,7 +25,7 @@ import hep.dataforge.description.ValueDef
 import hep.dataforge.events.Event
 import hep.dataforge.events.EventHandler
 import hep.dataforge.exceptions.ControlException
-import hep.dataforge.kodex.listAnnotations
+import hep.dataforge.listAnnotations
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaHolder
 import hep.dataforge.names.AnonymousNotAlowed

@@ -17,13 +17,13 @@ package hep.dataforge.plots
 
 import hep.dataforge.description.ValueDef
 import hep.dataforge.description.ValueDefs
-import hep.dataforge.kodex.toList
 import hep.dataforge.meta.*
 import hep.dataforge.names.Name
 import hep.dataforge.plots.data.XYPlot
 import hep.dataforge.tables.Adapters
 import hep.dataforge.tables.Adapters.DEFAULT_XY_ADAPTER
 import hep.dataforge.tables.Adapters.buildXYDataPoint
+import hep.dataforge.toList
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueType.BOOLEAN
 import hep.dataforge.values.ValueType.NUMBER

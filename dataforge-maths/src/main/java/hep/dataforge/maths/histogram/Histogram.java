@@ -8,6 +8,7 @@ import hep.dataforge.tables.TableFormat;
 import hep.dataforge.tables.TableFormatBuilder;
 
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -86,7 +87,7 @@ public abstract class Histogram implements BinFactory, Iterable<Bin> {
      * @return
      */
     public Table asTable() {
-        return new ListTable(getFormat(), binStream().map(Bin::describe));
+        return new ListTable(getFormat(), binStream().map(Bin::describe).collect(Collectors.toList()));
     }
 
     public abstract int getDimension();

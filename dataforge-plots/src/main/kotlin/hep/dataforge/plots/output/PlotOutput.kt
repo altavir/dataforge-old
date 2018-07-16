@@ -41,5 +41,5 @@ fun Context.plot(plottables: Iterable<Plottable>, stage: String? = null, name: S
 
 fun Context.plot(name: String, stage: String = "", action: PlotFrame.() -> Unit) {
     val frame = FakePlotFrame().apply(action)
-    output[stage, name, PLOT_TYPE].render(frame.plots, frame.config)
+    output[stage, name, PLOT_TYPE].render(frame)
 }

@@ -16,17 +16,20 @@
 
 package hep.dataforge.plots
 
+import hep.dataforge.Type
 import hep.dataforge.description.Described
 import hep.dataforge.description.ValueDef
 import hep.dataforge.description.ValueDefs
 import hep.dataforge.meta.Configurable
 import hep.dataforge.names.Name
+import hep.dataforge.plots.Plottable.Companion.PLOTTABLE_TYPE
 import hep.dataforge.values.ValueType
 
 @ValueDefs(
         ValueDef(key = "title", info = "The title of series. Could be not unique. By default equals series name."),
         ValueDef(key = "visible", def = "true", type = arrayOf(ValueType.BOOLEAN), info = "The current visibility of this plottable")
 )
+@Type(PLOTTABLE_TYPE)
 interface Plottable : Configurable, Described {
 
     val name: Name
@@ -47,4 +50,8 @@ interface Plottable : Configurable, Described {
      * @param listener
      */
     fun removeListener(listener: PlotListener)
+
+    companion object {
+        const val PLOTTABLE_TYPE = "hep.dataforge.plottable"
+    }
 }

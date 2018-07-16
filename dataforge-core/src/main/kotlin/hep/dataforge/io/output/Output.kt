@@ -16,8 +16,8 @@ interface Output : ContextAware {
     fun render(obj: Any, meta: Meta = Meta.empty())
 
     companion object {
-        const val TEXT_MODE = "text"
-        const val BINARY_MODE = "binary"
+        const val TEXT_TYPE = "text"
+        const val BINARY_TYPE = "binary"
 
 
         fun splitOutput(vararg outputs: Output): Output {

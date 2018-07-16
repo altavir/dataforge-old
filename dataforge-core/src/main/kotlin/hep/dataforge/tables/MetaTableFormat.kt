@@ -18,13 +18,13 @@ package hep.dataforge.tables
 import hep.dataforge.description.NodeDef
 import hep.dataforge.description.NodeDefs
 import hep.dataforge.exceptions.NameNotFoundException
-import hep.dataforge.kodex.toList
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.meta.MetaNode.DEFAULT_META_NAME
 import hep.dataforge.meta.MetaUtils
 import hep.dataforge.meta.SimpleMetaMorph
 import hep.dataforge.names.Names
+import hep.dataforge.toList
 import hep.dataforge.values.Values
 import java.util.stream.Stream
 

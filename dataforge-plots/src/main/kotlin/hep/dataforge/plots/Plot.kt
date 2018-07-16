@@ -15,6 +15,7 @@
  */
 package hep.dataforge.plots
 
+import hep.dataforge.Type
 import hep.dataforge.description.ValueDef
 import hep.dataforge.io.envelopes.Envelope
 import hep.dataforge.io.envelopes.EnvelopeBuilder
@@ -23,6 +24,7 @@ import hep.dataforge.io.envelopes.Wrapper.Companion.WRAPPER_CLASS_KEY
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaNode.DEFAULT_META_NAME
 import hep.dataforge.names.AnonymousNotAlowed
+import hep.dataforge.plots.Plot.Companion.PLOT_TYPE
 import hep.dataforge.plots.data.DataPlot
 import hep.dataforge.tables.ListOfPoints
 import hep.dataforge.tables.ValuesAdapter
@@ -42,6 +44,7 @@ import java.io.ObjectOutputStream
 //        info = "A prefered plotting library. It is used if supported by destination PlotFrame.", tags = {NO_CONFIGURATOR_TAG})
 @AnonymousNotAlowed
 @ValueDef(key = "connectionType", def = "default", allowed = ["default", "step", "spline"], info = "Connection line type")
+@Type(PLOT_TYPE)
 interface Plot : Plottable {
 
     /**
@@ -120,8 +123,9 @@ interface Plot : Plottable {
 
 
     }
+
     companion object {
-        const val PLOT_TYPE = "hep.dataforge.plots.plot"
+        const val PLOT_TYPE = "hep.dataforge.plottable.plot"
     }
 
 }

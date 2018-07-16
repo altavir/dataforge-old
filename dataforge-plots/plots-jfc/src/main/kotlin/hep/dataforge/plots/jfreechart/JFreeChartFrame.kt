@@ -16,7 +16,6 @@
 package hep.dataforge.plots.jfreechart
 
 import hep.dataforge.exceptions.NameNotFoundException
-import hep.dataforge.kodex.useValue
 import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name
@@ -24,6 +23,7 @@ import hep.dataforge.plots.Plot
 import hep.dataforge.plots.PlotFrame
 import hep.dataforge.plots.PlotUtils
 import hep.dataforge.plots.XYPlotFrame
+import hep.dataforge.useValue
 import hep.dataforge.utils.FXObject
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueFactory

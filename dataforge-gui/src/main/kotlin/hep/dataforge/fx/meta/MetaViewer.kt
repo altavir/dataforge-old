@@ -17,8 +17,8 @@
 package hep.dataforge.fx.meta
 
 import hep.dataforge.fx.dfIconView
-import hep.dataforge.kodex.toList
 import hep.dataforge.meta.Meta
+import hep.dataforge.toList
 import hep.dataforge.values.Value
 import javafx.beans.property.SimpleStringProperty
 import javafx.beans.property.StringProperty

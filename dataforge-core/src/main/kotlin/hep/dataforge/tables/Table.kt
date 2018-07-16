@@ -15,10 +15,20 @@
  */
 package hep.dataforge.tables
 
+import hep.dataforge.Type
+import hep.dataforge.exceptions.NamingException
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.meta.MetaMorph
+import hep.dataforge.tables.Filtering.getTagCondition
+import hep.dataforge.tables.Filtering.getValueCondition
+import hep.dataforge.tables.Table.Companion.TABLE_TYPE
+import hep.dataforge.toList
 import hep.dataforge.values.Value
+import hep.dataforge.values.ValueFactory
+import hep.dataforge.values.Values
+import java.util.*
+import java.util.function.Predicate
 
 
 /**
@@ -26,6 +36,7 @@ import hep.dataforge.values.Value
  *
  * @author Alexander Nozik
  */
+@Type(TABLE_TYPE)
 interface Table : NavigableValuesSource, MetaMorph {
 
     /**
@@ -100,5 +111,73 @@ interface Table : NavigableValuesSource, MetaMorph {
 
     companion object {
         const val TABLE_TYPE = "hep.dataforge.table"
+    }
+}
+
+object Tables{
+
+    @JvmStatic
+    fun sort(table: Table, comparator: Comparator<Values>): Table {
+        return ListTable(table.format, table.rows.sorted(comparator).toList())
+    }
+
+    @JvmStatic
+    fun sort(table: Table, name: String, ascending: Boolean): Table {
+        return sort(
+                table,
+                Comparator { o1: Values, o2: Values ->
+                    val signum = if (ascending) +1 else -1
+                    o1.getValue(name).compareTo(o2.getValue(name)) * signum
+                }
+        )
+    }
+
+    /**
+     * Фильтрует набор данных и оставляет только те точки, что удовлетовряют
+     * условиям
+     *
+     * @param condition a [java.util.function.Predicate] object.
+     * @return a [hep.dataforge.tables.Table] object.
+     * @throws hep.dataforge.exceptions.NamingException if any.
+     */
+    @Throws(NamingException::class)
+    @JvmStatic
+    fun filter(table: Table, condition: Predicate<Values>): Table {
+        return ListTable(table.format, table.rows.filter(condition).toList())
+    }
+
+    /**
+     * Быстрый фильтр для значений одного поля
+     *
+     * @param valueName
+     * @param a
+     * @param b
+     * @return
+     * @throws hep.dataforge.exceptions.NamingException
+     */
+    @Throws(NamingException::class)
+    @JvmStatic
+    fun filter(table: Table, valueName: String, a: Value, b: Value): Table {
+        return filter(table, getValueCondition(valueName, a, b))
+    }
+
+    @Throws(NamingException::class)
+    @JvmStatic
+    fun filter(table: Table, valueName: String, a: Number, b: Number): Table {
+        return filter(table, getValueCondition(valueName, ValueFactory.of(a), ValueFactory.of(b)))
+    }
+
+    /**
+     * Быстрый фильтр по меткам
+     *
+     * @param tags
+     * @return a [hep.dataforge.tables.Column] object.
+     * @throws hep.dataforge.exceptions.NamingException
+     * @throws hep.dataforge.exceptions.NameNotFoundException if any.
+     */
+    @Throws(NamingException::class)
+    @JvmStatic
+    fun filter(table: Table, vararg tags: String): Table {
+        return filter(table, getTagCondition(*tags))
     }
 }

@@ -5,10 +5,10 @@
  */
 package hep.dataforge.data
 
-import hep.dataforge.kodex.nullable
 import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name
+import hep.dataforge.nullable
 import java.util.*
 import java.util.stream.Stream
 import kotlin.reflect.KClass
