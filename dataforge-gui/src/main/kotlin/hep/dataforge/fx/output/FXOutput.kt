@@ -43,19 +43,20 @@ abstract class FXOutput(override val context: Context) : Output {
  * A specialized output for tables. Pushing new table replaces the old one
  */
 class FXTableOutput(context: Context) : FXOutput(context) {
-    val tableDisplay: TableDisplay by lazy { TableDisplay() }
+    val tableDisplay: TableDisplay = TableDisplay()
 
-    override val view: Fragment by lazy {
-        object : Fragment() {
-            override val root = borderpane {
-                center = tableDisplay.root
-            }
+    override val view: Fragment = object : Fragment() {
+        override val root = borderpane {
+            center = tableDisplay.root
         }
     }
 
+
     override fun render(obj: Any, meta: Meta) {
         if (obj is Table) {
-            tableDisplay.table = obj
+            runLater {
+                tableDisplay.table = obj
+            }
         } else {
             logger.error("Can't represent ${obj.javaClass} as Table")
         }

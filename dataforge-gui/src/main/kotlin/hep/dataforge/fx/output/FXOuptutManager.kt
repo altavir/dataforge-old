@@ -189,7 +189,7 @@ class FXOutputManager(meta: Meta = Meta.empty(), viewConsumer: Context.(OutputCo
             is Plottable -> meta.builder.setValue(OutputManager.OUTPUT_MODE_KEY, PLOT_TYPE)
             else -> meta
         }
-        get(meta).render(obj, inferred)
+        get(inferred).render(obj, meta)
     }
 
     companion object {

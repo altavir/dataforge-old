@@ -18,9 +18,10 @@ package hep.dataforge.fx.test
 
 import hep.dataforge.context.Global
 import hep.dataforge.fx.output.FXOutputManager
+import hep.dataforge.io.render
+import hep.dataforge.meta.Meta
 import hep.dataforge.plots.data.DataPlot
 import hep.dataforge.plots.output.plot
-import hep.dataforge.tables.Table
 import hep.dataforge.tables.buildTable
 
 fun main(args: Array<String>) {
@@ -36,12 +37,12 @@ fun main(args: Array<String>) {
         DataPlot.plot("data", x = doubleArrayOf(1.0, 2.0, 3.0), y = doubleArrayOf(2.0, 3.0, 4.0))
     }
 
-    Global.output["tables","table", Table.TABLE_TYPE].render(
-            buildTable {
-                row("a" to 1, "b" to 2)
-                row("a" to 2, "b" to 4)
-            }
-    )
+    val table = buildTable {
+        row("a" to 1, "b" to 2)
+        row("a" to 2, "b" to 4)
+    }
+
+    Global.output.render(table, stage = "tables", name = "table", meta = Meta.empty())
 
     System.`in`.read()
 }
