@@ -4,15 +4,12 @@ import hep.dataforge.context.Context
 import hep.dataforge.context.Global
 import hep.dataforge.data.Data
 import hep.dataforge.data.DataNode
-import hep.dataforge.fx.output.FXOutputManager
 import hep.dataforge.grind.GrindShell
 import hep.dataforge.io.IOUtils
-import hep.dataforge.io.SplitOutputManager
 import hep.dataforge.io.output.ANSIStreamOutput
 import hep.dataforge.io.output.Output
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.SimpleConfigurable
-import hep.dataforge.plots.jfreechart.JFreeChartPlugin
 import hep.dataforge.workspace.FileBasedWorkspace
 import org.jline.builtins.Completers
 import org.jline.reader.*
@@ -64,32 +61,17 @@ class GrindTerminal extends SimpleConfigurable {
     }
 
     GrindTerminal(Context context, Terminal terminal = null) {
-
-        //start fx plugin in global
-        Global.INSTANCE.getPluginManager().load("hep.dataforge:fx");
-
         //define terminal if it is not defined
         if (terminal == null) {
             terminal = new DumbTerminal(System.in, System.out);
             terminal.echo(false);
-
-
         }
-
-
         this.terminal = terminal
         context.logger.debug("Using ${terminal.class} terminal")
 
         //builder shell context
         if (Global.INSTANCE == context) {
             context = Global.INSTANCE.getContext("GRIND")
-            context.load(JFreeChartPlugin)
-            context.output = SplitOutputManager.build(FXOutputManager.display(), context.output)
-            //(context.logger as Logger).setLevel(Level.INFO)
-            //FIXME There is some bug in the groovy compilation here
-//            InputStream inputStream = System.in;
-//            OutputStream outputStream = System.out
-//            context.getPluginManager().load(new DefaultIOManager(inputStream, outputStream));
         }
 
         //create the shell
@@ -101,7 +83,7 @@ class GrindTerminal extends SimpleConfigurable {
 
         shell.bind("show", this.&show);
 
-        shell.bind("describe", this.&describe);
+        //shell.bind("describe", this.&describe);
 
         shell.bind("run", this.&run);
 

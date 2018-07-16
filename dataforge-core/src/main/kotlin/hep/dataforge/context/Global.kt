@@ -148,6 +148,7 @@ object Global : Context("GLOBAL", null, Thread.currentThread().contextClassLoade
     /**
      * Close all contexts and terminate framework
      */
+    @JvmStatic
     fun terminate() {
         try {
             close()

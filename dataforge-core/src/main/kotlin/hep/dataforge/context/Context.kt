@@ -22,7 +22,6 @@ import hep.dataforge.data.binary.StreamBinary
 import hep.dataforge.io.DefaultOutputManager
 import hep.dataforge.io.IOUtils
 import hep.dataforge.io.OutputManager
-import hep.dataforge.io.SplitOutputManager
 import hep.dataforge.kodex.nullable
 import hep.dataforge.kodex.optional
 import hep.dataforge.kodex.useMeta
@@ -33,6 +32,7 @@ import hep.dataforge.meta.buildMeta
 import hep.dataforge.providers.Provider
 import hep.dataforge.providers.Provides
 import hep.dataforge.providers.ProvidesNames
+import hep.dataforge.values.BooleanValue
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueProvider
 import hep.dataforge.values.ValueProvider.Companion.VALUE_TARGET
@@ -83,18 +83,36 @@ open class Context(
     var logger: Logger = LoggerFactory.getLogger(name)
     private val lock by lazy { ContextLock(this) }
 
+
+    /**
+     * Decorator for property with name "inheritOutput"
+     *
+     * If true, then [output] would produce between parent output (if not default) and output of this context
+     */
+    private var inheritOutput: Boolean
+        get() = properties.getOrDefault("inheritOutput", BooleanValue.TRUE).boolean
+        set(value) = properties.set("inheritOutput", BooleanValue.ofBoolean(value))
+
     /**
      * Return IO manager of this context. By default parent IOManager is
      * returned.
      *
-     * Setter sets the output or adds new output to the [SplitOutputManager] output
+     * If [inheritOutput] is true and output is present for this context, then  produce split between parent output an this
      *
      * @return the io
      */
     open var output: OutputManager
-        get() = pluginManager[OutputManager::class, false]
-                ?: parent?.output
-                ?: pluginManager.load(DefaultOutputManager())
+        get() {
+            val thisOutput = pluginManager[OutputManager::class, false]
+            return if (thisOutput == null) {
+                parent?.output ?: pluginManager.load(DefaultOutputManager())
+            } else if(parent == null || !inheritOutput){
+                thisOutput
+            } else{
+                //TODO ignore default Global output?
+                OutputManager.split(thisOutput,parent.output)
+            }
+        }
         set(newOutput) {
             //remove old output
             lock.operate {
@@ -202,7 +220,7 @@ open class Context(
     }
 
     inline fun <reified T : Plugin> load(noinline metaBuilder: KMetaBuilder.() -> Unit = {}): T {
-        return pluginManager.load<T>(metaBuilder)
+        return pluginManager.load(metaBuilder)
     }
 
 
@@ -394,6 +412,7 @@ open class Context(
          * @return
          */
         @JvmOverloads
+        @JvmStatic
         fun build(name: String, parent: Context = Global, meta: Meta = Meta.empty()): Context {
             val builder = ContextBuilder(name, parent)
 

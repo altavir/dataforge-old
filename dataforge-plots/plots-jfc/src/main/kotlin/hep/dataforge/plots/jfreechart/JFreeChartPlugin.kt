@@ -24,7 +24,7 @@ import hep.dataforge.meta.Meta
 import hep.dataforge.plots.PlotFactory
 import hep.dataforge.plots.PlotFrame
 
-@PluginDef(group = "hep.dataforge", name = "plots.jfreechart", info = "JFreeChart plot frame factory")
+@PluginDef(group = "hep.dataforge", name = "plots.jfreechart", dependsOn = ["hep.dataforge:fx"], info = "JFreeChart plot frame factory")
 class JFreeChartPlugin : BasicPlugin(), PlotFactory {
 
     override fun build(meta: Meta): PlotFrame = JFreeChartFrame().apply { configure(meta) }
