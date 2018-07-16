@@ -18,9 +18,6 @@ import javafx.scene.Node
  */
 interface ValueChooser {
 
-//    //TODO replace by fx bindings
-//    var valueCallback: ValueCallback
-
     /**
      * Get or create a Node that could be later inserted into some parent
      * object.

@@ -10,13 +10,14 @@ class TableDisplayTest: App(TableDisplayView::class) {
 }
 
 class TableDisplayView: View() {
-    private val table = ListTable.Builder("x","y")
-            .row(1,1)
-            .row(2,2)
-            .row(3,3)
-            .build()
 
-    override val root = TableDisplay(table).root
+    override val root = TableDisplay().apply {
+        table = ListTable.Builder("x","y")
+                .row(1,1)
+                .row(2,2)
+                .row(3,3)
+                .build()
+    }.root
 
 }
 

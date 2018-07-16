@@ -38,7 +38,6 @@ import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberFunctions
 import kotlin.reflect.full.memberProperties
-import kotlin.reflect.jvm.isAccessible
 
 object Descriptors {
 
@@ -167,30 +166,38 @@ object Descriptors {
         }
 
         if (element is KProperty<*>) {
-
+            LoggerFactory.getLogger(Descriptors::class.java).warn("Property node descriptor not implemented")
         }
 
         if (element is KClass<*>) {
-            element.declaredMemberProperties.filter { it.isAccessible }.forEach { property ->
-                property.findAnnotation<ValueProperty>()?.let {
-                    val name = if (it.name.isEmpty()) {
-                        property.name
-                    } else {
-                        it.name
+            element.declaredMemberProperties.forEach { property ->
+                try {
+                    property.findAnnotation<ValueProperty>()?.let {
+                        val name = if (it.name.isEmpty()) {
+                            property.name
+                        } else {
+                            it.name
+                        }
+                        builder.value(
+                                name = name,
+                                info = property.description,
+                                multiple = it.multiple,
+                                defaultValue = ValueFactory.parse(it.def),
+                                required = it.def.isEmpty(),
+                                allowedValues = if (it.enumeration == Any::class) {
+                                    emptyList()
+                                } else {
+                                    it.enumeration.java.enumConstants.map { it.toString() }
+                                },
+                                types = it.type.toList()
+                        )
                     }
-                    builder.value(
-                            name = name,
-                            info = property.description,
-                            multiple = it.multiple,
-                            defaultValue = ValueFactory.parse(it.def),
-                            required = it.def.isEmpty(),
-                            allowedValues = it.enumeration.java.enumConstants.map { it.toString() },
-                            types = it.type.toList()
-                    )
-                }
 
-                property.findAnnotation<NodeProperty>()?.let {
-                    builder.node(describe(property))
+                    property.findAnnotation<NodeProperty>()?.let {
+                        builder.node(describe(property))
+                    }
+                } catch (ex: Exception) {
+                    LoggerFactory.getLogger(Descriptors::class.java).warn("Failed to construct descriptor from property {}", property.name)
                 }
             }
         }

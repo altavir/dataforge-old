@@ -6,8 +6,10 @@
 package hep.dataforge.fx.values
 
 import hep.dataforge.values.Value
+import hep.dataforge.values.ValueFactory
 import javafx.collections.FXCollections
 import javafx.scene.control.ComboBox
+import javafx.util.StringConverter
 import java.util.*
 
 class ComboBoxValueChooser : ValueChooserBase<ComboBox<Value>>() {
@@ -17,7 +19,7 @@ class ComboBoxValueChooser : ValueChooserBase<ComboBox<Value>>() {
     //        //TODO ControlsFX decorator here
     //    }
 
-    protected fun allowedValues(): Collection<Value> {
+    private fun allowedValues(): Collection<Value> {
         return descriptor?.allowedValues ?: Collections.emptyList();
     }
 
@@ -26,6 +28,16 @@ class ComboBoxValueChooser : ValueChooserBase<ComboBox<Value>>() {
         node.maxWidth = java.lang.Double.MAX_VALUE
         node.isEditable = false
         node.selectionModel.select(currentValue())
+        node.converter = object : StringConverter<Value>() {
+            override fun toString(value: Value?): String {
+                return value?.string ?: ""
+            }
+
+            override fun fromString(string: String?): Value {
+                return ValueFactory.parse(string ?: "")
+            }
+
+        }
         this.valueProperty.bind(node.valueProperty())
         return node
     }

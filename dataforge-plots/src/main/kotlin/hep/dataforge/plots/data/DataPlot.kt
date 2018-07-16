@@ -89,6 +89,7 @@ class DataPlot(name: String, meta: Meta = Meta.empty(), adapter: ValuesAdapter? 
 
     companion object {
         @JvmOverloads
+        @JvmStatic
         fun plot(name: String, x: DoubleArray, y: DoubleArray, xErrs: DoubleArray? = null, yErrs: DoubleArray? = null): DataPlot {
             val adapter = if (yErrs == null) {
                 Adapters.DEFAULT_XY_ADAPTER
@@ -116,6 +117,8 @@ class DataPlot(name: String, meta: Meta = Meta.empty(), adapter: ValuesAdapter? 
             return DataPlot(name, Meta.empty(), adapter, data)
         }
 
+        @JvmStatic
+        @JvmOverloads
         fun plot(name: String, data: Iterable<Values> = emptyList(), adapter: ValuesAdapter? = null, metaBuilder: KMetaBuilder.() -> Unit = {}): DataPlot {
             val meta = KMetaBuilder("plot").apply(metaBuilder)
             return DataPlot(name, meta, adapter, data)

@@ -58,12 +58,12 @@ public class JFreeFXTest extends Application {
         String[] names = {"myX", "myY", "myXErr", "myYErr"};
 
         List<Values> data = new ArrayList<>();
-        data.add(ValueMap.Companion.of(names, 0.5d, 0.2, 0.1, 0.1));
-        data.add(ValueMap.Companion.of(names, 1d, 1d, 0.2, 0.5));
-        data.add(ValueMap.Companion.of(names, 3d, 7d, 0, 0.5));
+        data.add(ValueMap.of(names, 0.5d, 0.2, 0.1, 0.1));
+        data.add(ValueMap.of(names, 1d, 1d, 0.2, 0.5));
+        data.add(ValueMap.of(names, 3d, 7d, 0, 0.5));
         Table ds = ListTable.infer(data);
 
-        DataPlot dataPlot = DataPlot.Companion.plot("dataPlot", Adapters.buildXYAdapter("myX", "myY", "myXErr", "myYErr"), ds);
+        DataPlot dataPlot = DataPlot.plot("dataPlot", ds, Adapters.buildXYAdapter("myX", "myY", "myXErr", "myYErr"));
 
         frame.getConfig().putNode(new MetaBuilder("yAxis").putValue("logScale", true));
 

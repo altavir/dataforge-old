@@ -153,7 +153,7 @@ class JFreeChartFrame @JvmOverloads constructor(frameMeta: Meta = Meta.empty()) 
     }
 
     private fun getAxis(axisMeta: Meta): ValueAxis {
-        return when (axisMeta.getString("type", "number")) {
+        return when (axisMeta.getString("type", "number").toLowerCase()) {
             "log" -> getLogAxis(axisMeta)
             "time" -> getDateAxis(axisMeta)
             else -> getNumberAxis(axisMeta)
