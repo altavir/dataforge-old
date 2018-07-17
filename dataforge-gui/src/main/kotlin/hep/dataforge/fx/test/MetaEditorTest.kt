@@ -44,7 +44,7 @@ class MetaEditorTest : App() {
                         )
                 )
 
-        val descriptor = DescriptorBuilder().apply {
+        val descriptor = DescriptorBuilder("test").apply {
             info = "Configuration editor test node"
             value(name = "testValue", types = listOf(ValueType.STRING), info = "a test value")
             value(name = "defaultValue", types = listOf(ValueType.NUMBER), defaultValue = 82.5, info = "A value with default")

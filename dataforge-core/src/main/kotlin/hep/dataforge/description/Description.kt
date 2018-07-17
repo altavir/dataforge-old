@@ -90,4 +90,4 @@ annotation class ValueProperty(
 @Target(AnnotationTarget.PROPERTY)
 @Retention(AnnotationRetention.RUNTIME)
 @MustBeDocumented
-annotation class NodeProperty
+annotation class NodeProperty(val name: String = "")

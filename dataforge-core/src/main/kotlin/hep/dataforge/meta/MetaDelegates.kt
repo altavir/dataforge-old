@@ -292,10 +292,10 @@ inline fun <reified T : Enum<T>> Configuration.mutableEnumValue(valueName: Strin
 /**
  * Returns a child node of given meta that could be edited in-place
  */
-fun Configuration.mutableNode(metaName: String? = null, def: Meta? = null): ReadWriteProperty<Any, MetaBuilder> =
-        MutableNodeDelegate(this, metaName, MetaBuilder(def ?: Meta.empty()),
+fun Configuration.mutableNode(metaName: String? = null, def: Meta? = null): ReadWriteProperty<Any, Configuration> =
+        MutableNodeDelegate(this, metaName, Configuration(def ?: Meta.empty()),
                 read = {
-                    it as? MetaBuilder ?: it.builder
+                    it as? Configuration ?: Configuration(it)
                 },
                 write = { it }
         )

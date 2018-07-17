@@ -85,7 +85,7 @@ class PlotGroup(name: String, private var descriptor: NodeDescriptor = NodeDescr
      */
     private fun notifyPlotAdded(plot: Plottable) {
         plotAdded(plot.name, plot)
-        metaChanged(plot.name, plot, Laminate(plot.config).withDescriptor(Descriptors.forType(plot::class)))
+        metaChanged(plot.name, plot, Laminate(plot.config).withDescriptor(Descriptors.forType("plot", plot::class)))
         if (plot is PlotGroup) {
             plot.children.forEach { plot.notifyPlotAdded(it) }
         }
@@ -235,7 +235,7 @@ class PlotGroup(name: String, private var descriptor: NodeDescriptor = NodeDescr
     }
 
     fun setType(type: Class<out Plottable>) {
-        setDescriptor(Descriptors.forType(type.kotlin))
+        setDescriptor(Descriptors.forType("plot", type.kotlin))
         configureValue("@descriptor", "class::${type.name}")
     }
 
@@ -329,7 +329,7 @@ class PlotGroup(name: String, private var descriptor: NodeDescriptor = NodeDescr
         const val PLOT_TARGET = "plot"
 
         inline fun <reified T : Plottable> typed(name: String): PlotGroup {
-            return PlotGroup(name, Descriptors.forType(T::class))
+            return PlotGroup(name, Descriptors.forType("plot", T::class))
         }
 
         val WRAPPER = Wrapper()

@@ -170,7 +170,7 @@ class KTaskBuilder(val name: String) {
      * Use DSL to create a descriptor for this task
      */
     fun descriptor(transform: DescriptorBuilder.() -> Unit) {
-        this.descriptor = DescriptorBuilder().apply(transform).build()
+        this.descriptor = DescriptorBuilder(name).apply(transform).build()
     }
 
     fun build(): KTask<Any> {

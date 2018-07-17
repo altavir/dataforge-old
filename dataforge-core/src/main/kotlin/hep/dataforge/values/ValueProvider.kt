@@ -32,7 +32,7 @@ interface ValueProvider {
 
     @JvmDefault
     fun getValue(path: String): Value {
-        return optValue(path).orElseThrow<NameNotFoundException>({ NameNotFoundException(path) })
+        return optValue(path).orElseThrow<NameNotFoundException> { NameNotFoundException(path) }
     }
 
     @Provides(BOOLEAN_TARGET)

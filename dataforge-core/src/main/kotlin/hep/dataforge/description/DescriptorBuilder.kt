@@ -32,8 +32,9 @@ import org.slf4j.LoggerFactory
  * Helper class to builder descriptors
  * @author Alexander Nozik
  */
-class DescriptorBuilder(name: String = "node", override val meta: Configuration = Configuration("node")) : Metoid {
-    //var name by meta.mutableStringValue()
+class DescriptorBuilder(name: String, override val meta: Configuration = Configuration("node")) : Metoid {
+
+    var name by meta.mutableStringValue()
     var required by meta.mutableBooleanValue()
     var multiple by meta.mutableBooleanValue()
     var default by meta.mutableNode()
@@ -41,7 +42,7 @@ class DescriptorBuilder(name: String = "node", override val meta: Configuration 
     var tags: List<String> by meta.customMutableValue(read = { it.list.map { it.string } }, write = { Value.of(it) })
 
     init {
-        meta["name"] = name
+        this.name = name
     }
 
     //TODO add caching for node names?
@@ -98,9 +99,12 @@ class DescriptorBuilder(name: String = "node", override val meta: Configuration 
         return when (name.length) {
             0 -> this
             1 -> {
-                val node = meta.getMetaList("node").find { it.getString("name") == name.first.toUnescaped() }
-                        ?: Configuration("node").also { this.meta.attachNode(it) }
-                DescriptorBuilder(name.first.toUnescaped(), node)
+                val existingChild = meta.getMetaList("node").find { it.getString("name") == name.first.toUnescaped() }
+                return if(existingChild == null){
+                    DescriptorBuilder(name.first.toUnescaped()).also { this.meta.attachNode(it.meta) }
+                } else{
+                    DescriptorBuilder(name.first.toUnescaped(),existingChild)
+                }
             }
             else -> {
                 buildChild(name.first).buildChild(name.cutFirst())

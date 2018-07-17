@@ -139,12 +139,19 @@ object Descriptors {
         } else {
             def.type
         }
-        return element?.let { describe(it) }
+        return element?.let {
+            describe(def.key, it).apply {
+                info = def.info
+                multiple = def.multiple
+                required = def.required
+                this.tags = def.tags.toList()
+            }.build()
+        }
     }
 
-    private fun describe(element: KAnnotatedElement): NodeDescriptor {
+    private fun describe(name: String, element: KAnnotatedElement): DescriptorBuilder {
         //TODO use [Descriptor] annotation
-        val builder = DescriptorBuilder("meta")
+        val builder = DescriptorBuilder(name)
 
         element.listAnnotations<NodeDef>(true)
                 .stream()
@@ -173,13 +180,13 @@ object Descriptors {
             element.declaredMemberProperties.forEach { property ->
                 try {
                     property.findAnnotation<ValueProperty>()?.let {
-                        val name = if (it.name.isEmpty()) {
+                        val propertyName = if (it.name.isEmpty()) {
                             property.name
                         } else {
                             it.name
                         }
                         builder.value(
-                                name = name,
+                                name = propertyName,
                                 info = property.description,
                                 multiple = it.multiple,
                                 defaultValue = ValueFactory.parse(it.def),
@@ -194,7 +201,8 @@ object Descriptors {
                     }
 
                     property.findAnnotation<NodeProperty>()?.let {
-                        builder.node(describe(property))
+                        val nodeName = if (it.name.isEmpty()) property.name else it.name
+                        builder.node(describe(nodeName, property).build())
                     }
                 } catch (ex: Exception) {
                     LoggerFactory.getLogger(Descriptors::class.java).warn("Failed to construct descriptor from property {}", property.name)
@@ -203,12 +211,12 @@ object Descriptors {
         }
 
 
-        return builder.build()
+        return builder
     }
 
-    private fun describe(element: AnnotatedElement): NodeDescriptor {
+    private fun describe(name: String, element: AnnotatedElement): NodeDescriptor {
         //TODO use [Descriptor] annotation
-        val builder = DescriptorBuilder("meta")
+        val builder = DescriptorBuilder(name)
 
         element.listAnnotations(NodeDef::class.java, true)
                 .stream()
@@ -374,17 +382,17 @@ object Descriptors {
      * @return
      */
     @JvmStatic
-    fun forType(element: KAnnotatedElement): NodeDescriptor {
-        return descriptorCache.getOrPut(element.toString()) { describe(element) }
+    fun forType(name: String, element: KAnnotatedElement): NodeDescriptor {
+        return descriptorCache.getOrPut(element.toString()) { describe(name, element).build() }
     }
 
     @JvmStatic
-    fun forType(element: AnnotatedElement): NodeDescriptor {
-        return descriptorCache.getOrPut(element.toString()) { describe(element) }
+    fun forType(name: String, element: AnnotatedElement): NodeDescriptor {
+        return descriptorCache.getOrPut(element.toString()) { describe(name, element) }
     }
 
     @JvmStatic
-    fun forName(string: String): NodeDescriptor {
+    fun forName(name: String, string: String): NodeDescriptor {
         return descriptorCache.getOrPut(string) {
             try {
                 val path = Path.of(string)
@@ -392,10 +400,10 @@ object Descriptors {
                     "", "class", "method", "property" -> {
                         val target = findAnnotatedElement(path)
                                 ?: throw RuntimeException("Target element $path not found")
-                        forType(target)
+                        forType(name, target)
                     }
-                    "file" -> return NodeDescriptor(MetaFileReader.read(Global.getFile(path.name.toString()).absolutePath))
-                    "resource" -> NodeDescriptor(buildMetaFromResource("node", path.name.toString()))
+                    "file" -> return NodeDescriptor(MetaFileReader.read(Global.getFile(path.name.toString()).absolutePath).builder.setValue("name", name))
+                    "resource" -> NodeDescriptor(buildMetaFromResource("node", path.name.toString()).builder.setValue("name", name))
                     else -> throw NameNotFoundException("Cant create descriptor from given target", string)
                 }
             } catch (ex: Exception) {

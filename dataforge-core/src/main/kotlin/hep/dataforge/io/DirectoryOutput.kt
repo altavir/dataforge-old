@@ -57,9 +57,8 @@ class DirectoryOutput : DefaultOutputManager() {
      */
     private fun getExtension(type: String): String {
         return when (type) {
-            Output.TEXT_TYPE -> "out"
             Output.BINARY_TYPE -> "df"
-            else -> type
+            else -> "out"
         }
     }
 

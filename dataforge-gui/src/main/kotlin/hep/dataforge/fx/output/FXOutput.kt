@@ -88,7 +88,7 @@ class FXPlotOutput(context: Context, meta: Meta = Meta.empty()) : FXOutput(conte
             frame.configure(meta)
             // Use descriptor hidden field to update root plot container description
             meta.useValue("@descriptor") {
-                frame.plots.descriptor = Descriptors.forName(it.string)
+                frame.plots.descriptor = Descriptors.forName("plot", it.string)
             }
         }
         runLater {

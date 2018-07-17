@@ -106,11 +106,11 @@ open class Context(
             val thisOutput = pluginManager[OutputManager::class, false]
             return if (thisOutput == null) {
                 parent?.output ?: pluginManager.load(DefaultOutputManager())
-            } else if(parent == null || !inheritOutput){
+            } else if (parent == null || !inheritOutput) {
                 thisOutput
-            } else{
+            } else {
                 //TODO ignore default Global output?
-                OutputManager.split(thisOutput,parent.output)
+                OutputManager.split(thisOutput, parent.output)
             }
         }
         set(newOutput) {
@@ -336,10 +336,11 @@ open class Context(
      * @return
      */
     val workDir: Path by lazy {
-        properties[WORK_DIRECTORY_CONTEXT_KEY]
-                ?.let { rootDir.resolve(it.string).also { Files.createDirectories(it) } }
-                ?: parent?.workDir
-                ?: rootDir.resolve(".dataforge").also { Files.createDirectories(it) }
+        val workDirProperty = properties[WORK_DIRECTORY_CONTEXT_KEY]
+        when {
+            workDirProperty != null -> rootDir.resolve(workDirProperty.string).also { Files.createDirectories(it) }
+            else -> rootDir.resolve(".dataforge").also { Files.createDirectories(it) }
+        }
     }
 
     /**
@@ -359,7 +360,6 @@ open class Context(
     val tmpDir: Path by lazy {
         properties[TEMP_DIRECTORY_CONTEXT_KEY]
                 ?.let { rootDir.resolve(it.string).also { Files.createDirectories(it) } }
-                ?: parent?.workDir
                 ?: rootDir.resolve(".dataforge/.temp").also { Files.createDirectories(it) }
     }
 
@@ -389,10 +389,10 @@ open class Context(
      * For anything but values and plugins, list all elements with given target, provided by plugins
      */
     override fun <T : Any?> provideAll(target: String, type: Class<T>): Stream<T> {
-        if (target == PLUGIN_TARGET || target == VALUE_TARGET) {
-            return super.provideAll(target, type)
+        return if (target == PLUGIN_TARGET || target == VALUE_TARGET) {
+            super.provideAll(target, type)
         } else {
-            return pluginManager.stream(true).flatMap { it.provideAll(target, type) }
+            pluginManager.stream(true).flatMap { it.provideAll(target, type) }
         }
     }
 
