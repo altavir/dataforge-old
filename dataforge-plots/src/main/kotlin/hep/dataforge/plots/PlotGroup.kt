@@ -193,8 +193,8 @@ class PlotGroup(name: String, private var descriptor: NodeDescriptor = NodeDescr
      *
      * @param listener
      */
-    override fun addListener(listener: PlotListener) {
-        listeners.add(listener)
+    override fun addListener(listener: PlotListener, isStrong: Boolean) {
+        listeners.add(listener,isStrong)
     }
 
     /**

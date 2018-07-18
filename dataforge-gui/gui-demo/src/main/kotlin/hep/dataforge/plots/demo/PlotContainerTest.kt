@@ -28,6 +28,7 @@ import hep.dataforge.tables.ListTable
 import hep.dataforge.values.ValueMap
 import hep.dataforge.values.Values
 import java.util.*
+import kotlin.concurrent.thread
 
 
 /**
@@ -55,21 +56,24 @@ fun main(args: Array<String>) {
 
     val dataPlot = DataPlot.plot("data.Plot", ds, Adapters.buildXYAdapter("myX", "myXErr", "myY", "myYErr"))
 
-    context.plot("test"){
+    context.plot("test", stage = "test") {
         configure {
             "yAxis" to {
                 "type" to "log"
             }
         }
+        thread {
+            Thread.sleep(5000)
+            +dataPlot
+        }
         +funcPlot
-        +dataPlot
-        group("sub"){
+        group("sub") {
             +funcPlot
             +dataPlot
         }
     }
 
-    context.plot("test1"){
+    context.plot("test1") {
         +funcPlot
     }
 

@@ -40,7 +40,7 @@ import java.io.Serializable
 interface PlotFrame : Configurable, Serializable {
 
     /**
-     * Get root plot node
+     * Root plot node. Could be reassigned
      *
      * @return
      */

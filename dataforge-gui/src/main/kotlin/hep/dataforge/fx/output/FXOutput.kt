@@ -23,10 +23,10 @@ import hep.dataforge.fx.table.TableDisplay
 import hep.dataforge.io.output.Output
 import hep.dataforge.meta.Configurable
 import hep.dataforge.meta.Configuration
+import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta
-import hep.dataforge.plots.PlotFactory
-import hep.dataforge.plots.PlotFrame
-import hep.dataforge.plots.Plottable
+import hep.dataforge.names.Name
+import hep.dataforge.plots.*
 import hep.dataforge.plots.output.PlotOutput
 import hep.dataforge.tables.Table
 import hep.dataforge.useValue
@@ -98,6 +98,26 @@ class FXPlotOutput(context: Context, meta: Meta = Meta.empty()) : FXOutput(conte
                     frame.plots.configure(obj.plots.config)
                     frame.plots.descriptor = obj.plots.descriptor
                     frame.addAll(obj.plots.children)
+
+                    obj.plots.addListener(object: PlotListener{
+                        override fun dataChanged(name: Name, plot: Plot) {
+                            //do nothing
+                        }
+
+                        override fun metaChanged(name: Name, plottable: Plottable, laminate: Laminate) {
+                            //do nothing
+                        }
+
+                        override fun plotAdded(name: Name, plottable: Plottable) {
+                            //FIXME name!
+                            frame.plots.add(plottable)
+                        }
+
+                        override fun plotRemoved(name: Name) {
+                            frame.plots.remove(name)
+                        }
+
+                    })
                 }
                 is Plottable -> {
                     frame.add(obj)
