@@ -42,7 +42,7 @@ interface Plottable : Configurable, Described {
      *
      * @param listener
      */
-    fun addListener(listener: PlotListener)
+    fun addListener(listener: PlotListener, isStrong: Boolean = true)
 
     /**
      * Remove plottable state listener

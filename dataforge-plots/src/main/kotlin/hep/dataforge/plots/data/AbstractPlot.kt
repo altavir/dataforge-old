@@ -37,7 +37,7 @@ abstract class AbstractPlot(
     override val adapter: ValuesAdapter = adapter?: Adapters.buildAdapter(meta.getMetaOrEmpty("adapter"))
 
     private val listeners = ReferenceRegistry<PlotListener>()
-    override fun addListener(listener: PlotListener) {
+    override fun addListener(listener: PlotListener, isStrong:Boolean) {
         listeners.add(listener, true)
     }
 

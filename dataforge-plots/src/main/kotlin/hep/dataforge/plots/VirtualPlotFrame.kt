@@ -20,9 +20,9 @@ import hep.dataforge.meta.Laminate
 import hep.dataforge.names.Name
 
 /**
- * [FakePlotFrame] works as a real [PlotFrame] but does not render anything
+ * [VirtualPlotFrame] works as a real [PlotFrame] but does not render anything
  */
-class FakePlotFrame: AbstractPlotFrame() {
+class VirtualPlotFrame: AbstractPlotFrame() {
     override fun updatePlotData(name: Name, plot: Plot) {
         //do nothing
     }

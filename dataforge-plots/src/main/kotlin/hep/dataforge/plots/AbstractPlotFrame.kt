@@ -15,7 +15,6 @@
  */
 package hep.dataforge.plots
 
-import hep.dataforge.meta.Configuration
 import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.SimpleConfigurable
 import hep.dataforge.names.Name
@@ -23,17 +22,11 @@ import hep.dataforge.names.Name
 /**
  * @author Alexander Nozik
  */
-abstract class AbstractPlotFrame : SimpleConfigurable, PlotFrame, PlotListener {
+abstract class AbstractPlotFrame : SimpleConfigurable(), PlotFrame, PlotListener {
 
-    final override val plots = PlotGroup("")
-
-    init {
-        plots.addListener(this)
+    final override val plots by lazy {
+        PlotGroup("").apply { addListener(this@AbstractPlotFrame, false) }
     }
-
-    constructor(configuration: Configuration) : super(configuration) {}
-
-    constructor() {}
 
     override fun get(name: String): Plottable? {
         return plots[name]

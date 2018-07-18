@@ -63,7 +63,7 @@ import java.util.stream.Collectors
 /**
  * @author Alexander Nozik
  */
-class JFreeChartFrame @JvmOverloads constructor(frameMeta: Meta = Meta.empty()) : XYPlotFrame(), FXObject, Serializable {
+class JFreeChartFrame : XYPlotFrame(), FXObject, Serializable {
 
     private val xyPlot: XYPlot = XYPlot()
     val chart: JFreeChart = JFreeChart(xyPlot)
@@ -80,10 +80,6 @@ class JFreeChartFrame @JvmOverloads constructor(frameMeta: Meta = Meta.empty()) 
     private val colorCache = HashMap<Name, Color>()
     @Transient
     private val shapeCache = HashMap<Name, Shape>()
-
-    init {
-        configure(frameMeta)
-    }
 
     private fun runLater(runnable: () -> Unit) {
         if(FX.initialized.value){
