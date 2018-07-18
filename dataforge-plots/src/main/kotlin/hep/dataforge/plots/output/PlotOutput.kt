@@ -21,11 +21,11 @@ import hep.dataforge.io.output.Output
 import hep.dataforge.io.render
 import hep.dataforge.meta.Configurable
 import hep.dataforge.meta.KMetaBuilder
-import hep.dataforge.plots.FakePlotFrame
 import hep.dataforge.plots.Plot
 import hep.dataforge.plots.Plot.Companion.PLOT_TYPE
 import hep.dataforge.plots.PlotFrame
 import hep.dataforge.plots.Plottable
+import hep.dataforge.plots.VirtualPlotFrame
 
 interface PlotOutput : Output, Configurable {
     val frame: PlotFrame
@@ -40,6 +40,6 @@ fun Context.plot(plottables: Iterable<Plottable>, stage: String? = null, name: S
 }
 
 fun Context.plot(name: String, stage: String = "", action: PlotFrame.() -> Unit) {
-    val frame = FakePlotFrame().apply(action)
+    val frame = VirtualPlotFrame().apply(action)
     output[stage, name, PLOT_TYPE].render(frame)
 }
