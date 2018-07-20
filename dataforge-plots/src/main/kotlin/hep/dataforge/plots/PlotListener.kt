@@ -15,7 +15,6 @@
  */
 package hep.dataforge.plots
 
-import hep.dataforge.meta.Laminate
 import hep.dataforge.names.Name
 
 /**
@@ -23,35 +22,17 @@ import hep.dataforge.names.Name
  * @author darksnake
  */
 interface PlotListener {
-
     /**
      * Data changed for a specific plot. Data for group could not be changed
      * @param caller the plottable that sent the message
-     * @param name the name of added plot relative to callet
-     * @param plot the plot itself
+     * @param path the path of added plot relative to callet
      */
-    fun dataChanged(caller: Plottable, name: Name, plot: Plot)
+    fun dataChanged(caller: Plottable, path: Name)
 
     /**
      * Configuration changed for node or plot
      * @param caller the plottable that sent the message
-     * @param name full name of  plottable with changed meta relative to caller
-     * @param laminate combinded meta of all layers
+     * @param path full path of  plottable with changed meta relative to caller
      */
-    fun metaChanged(caller: Plottable, name: Name, laminate: Laminate)
-
-    /**
-     * New plot or group added
-     * @param caller the plottable that sent the message
-     * @param name name of added plottable relative to caller
-     * @param plottable the addedd plottable
-     */
-    fun plotAdded(caller: Plottable, name: Name, plottable: Plottable)
-
-    /**
-     * Plot or group removed
-     * @param caller the plottable that sent the message
-     * @param name name of removed plottable relative to caller
-     */
-    fun plotRemoved(caller: Plottable, name: Name)
+    fun metaChanged(caller: Plottable, path: Name)
 }

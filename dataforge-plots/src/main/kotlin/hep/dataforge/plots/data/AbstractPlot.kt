@@ -29,15 +29,18 @@ import hep.dataforge.utils.ReferenceRegistry
  * @author darksnake
  */
 abstract class AbstractPlot(
-        override val name: Name,
+        name: String,
         meta: Meta,
         adapter: ValuesAdapter?
 ) : SimpleConfigurable(meta), Plot {
 
-    override val adapter: ValuesAdapter = adapter?: Adapters.buildAdapter(meta.getMetaOrEmpty("adapter"))
+    //auto escape names
+    override val name: String = Name.ofSingle(name).toString()
+
+    override val adapter: ValuesAdapter = adapter ?: Adapters.buildAdapter(meta.getMetaOrEmpty("adapter"))
 
     private val listeners = ReferenceRegistry<PlotListener>()
-    override fun addListener(listener: PlotListener, isStrong:Boolean) {
+    override fun addListener(listener: PlotListener, isStrong: Boolean) {
         listeners.add(listener, true)
     }
 
@@ -53,7 +56,7 @@ abstract class AbstractPlot(
      */
     @Synchronized
     override fun applyConfig(config: Meta) {
-        listeners.forEach { l -> l.metaChanged(name, this, Laminate(getConfig())) }
+        listeners.forEach { l -> l.metaChanged(this, Name.of(name), Laminate(getConfig())) }
     }
 
     /**
@@ -61,6 +64,6 @@ abstract class AbstractPlot(
      */
     @Synchronized
     fun notifyDataChanged() {
-        listeners.forEach { l -> l.dataChanged(name, this) }
+        listeners.forEach { l -> l.dataChanged(this, Name.of(name), this) }
     }
 }

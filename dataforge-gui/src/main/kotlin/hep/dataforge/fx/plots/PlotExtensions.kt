@@ -16,12 +16,12 @@ operator fun PlotFrame.plusAssign(plot: Plottable) {
 }
 
 fun PlotGroup.plot(plot: Plottable): Plottable {
-    this.add(plot);
+    this.set(plot);
     return plot;
 }
 
 operator fun PlotGroup.plusAssign(plot: Plottable) {
-    this.add(plot)
+    this.set(plot)
 }
 
 fun PlotFrame.group(name: String, action: PlotGroup.() -> Unit) {

@@ -110,7 +110,7 @@ class FXPlotOutput(context: Context, meta: Meta = Meta.empty()) : FXOutput(conte
 
                         override fun plotAdded(name: Name, plottable: Plottable) {
                             //FIXME name!
-                            frame.plots.add(plottable)
+                            frame.plots.set(plottable)
                         }
 
                         override fun plotRemoved(name: Name) {

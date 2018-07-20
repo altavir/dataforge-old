@@ -16,11 +16,13 @@
 
 package hep.dataforge.plots
 
+import hep.dataforge.Named
 import hep.dataforge.Type
 import hep.dataforge.description.Described
 import hep.dataforge.description.ValueDef
 import hep.dataforge.description.ValueDefs
 import hep.dataforge.meta.Configurable
+import hep.dataforge.names.Name
 import hep.dataforge.plots.Plottable.Companion.PLOTTABLE_TYPE
 import hep.dataforge.values.ValueType
 
@@ -29,10 +31,10 @@ import hep.dataforge.values.ValueType
         ValueDef(key = "visible", def = "true", type = arrayOf(ValueType.BOOLEAN), info = "The current visibility of this plottable")
 )
 @Type(PLOTTABLE_TYPE)
-interface Plottable : Configurable, Described {
+interface Plottable : Configurable, Described, Named {
 
     val title: String
-        get() = config.getString("title", "@anonymous")
+        get() = config.getString("title", Name.of(name).unescaped)
 
     /**
      * Add plottable state listener

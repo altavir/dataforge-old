@@ -40,110 +40,75 @@ import java.util.stream.Stream
 /**
  * A group of plottables. It could store Plots as well as other plot groups.
  */
-class PlotGroup(private var descriptor: NodeDescriptor = NodeDescriptor.empty("group"))
+class PlotGroup(name: String, private var descriptor: NodeDescriptor = NodeDescriptor.empty("group"))
     : SimpleConfigurable(), Plottable, Provider, PlotListener, Iterable<Plottable> {
 
-    private val plots = HashSet<Pair<Name, Plottable>>()
+    //auto escape names
+    override val name: String = Name.ofSingle(name).toString()
+    private val plots = LinkedHashSet<Plottable>()
     private val listeners = ReferenceRegistry<PlotListener>()
 
-    val children: Collection<Plottable>
-        get() = plots.map { it.second }
-
-
-//    constructor(name: String) {
-//        this.name = Name.ofSingle(name)
-//    }
-
-//    private fun getNameForListener(arg: Name): Name {
-//        return Name.join(name, arg)
-//    }
-
-    private fun resolveChildName(caller: Plottable): Name?{
-        return plots.find { it.second == caller }?.first
+    private fun resolveChildName(caller: Plottable): Name {
+        return Name.of(caller.name)
     }
 
 
-    override fun dataChanged(caller: Plottable, name: Name, plot: Plot) {
-        resolveChildName(caller)?.let {
-            listeners.forEach { it.dataChanged(this,it + name) }
-        }?: LoggerFactory.getLogger(javaClass).warn("Could not resolve child plottable {}", caller)
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun dataChanged(caller: Plottable, path: Name) {
+        listeners.forEach { it.dataChanged(this, resolveChildName(caller) + path) }
     }
 
-    override fun metaChanged(caller: Plottable, name: Name, laminate: Laminate) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun metaChanged(caller: Plottable, path: Name) {
+        listeners.forEach { it.metaChanged(this, resolveChildName(caller) + path) }
     }
 
-    override fun plotAdded(caller: Plottable, name: Name, plottable: Plottable) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
 
-    override fun plotRemoved(caller: Plottable, name: Name) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun dataChanged(name: Name, plot: Plot) {
-        listeners.forEach { l -> l.dataChanged(getNameForListener(name), plot) }
-    }
-
-    override fun metaChanged(name: Name, plottable: Plottable, laminate: Laminate) {
-        listeners.forEach { l -> l.metaChanged(getNameForListener(name), plottable, laminate.withLayer(config).cleanup()) }
-    }
-
-    override fun plotAdded(name: Name, plottable: Plottable) {
-        listeners.forEach { l -> l.plotAdded(getNameForListener(name), plottable) }
-    }
-
-    override fun plotRemoved(name: Name) {
-        listeners.forEach { l -> l.plotRemoved(getNameForListener(name)) }
-    }
 
     /**
      * Recursively notify listeners about all added plots
      *
      * @param plot
      */
-    private fun notifyPlotAdded(plot: Plottable) {
-        plotAdded(plot.name, plot)
-        metaChanged(plot.name, plot, Laminate(plot.config).withDescriptor(Descriptors.forType("plot", plot::class)))
+    private fun notifyPlotAdded(path: Name, plot: Plottable) {
+        plotAdded(this, name, plot)
+        metaChanged(this, name, Laminate(plot.config).withDescriptor(Descriptors.forType("plot", plot::class)))
         if (plot is PlotGroup) {
-            plot.children.forEach { plot.notifyPlotAdded(it) }
+            plot.plots.forEach { notifyPlotAdded(it.first, it.second) }
         }
     }
 
     fun add(plot: Plottable) {
+        this.plots.add(plot)
+        dataChanged(this, Name.of(plot.name))
+    }
+
+    operator fun set(path: Name, plot: Plottable) {
         synchronized(plots) {
-            this.plots[plot.name] = plot
-            plot.addListener(this)
-
-            notifyPlotAdded(plot)
-        }
-    }
-
-    operator fun Plottable.unaryPlus(){
-        this@PlotGroup.add(this)
-    }
-
-    /**
-     * Recursively create plot groups using given name
-     */
-    private fun createGroup(name: Name): PlotGroup {
-        return if (name.isEmpty) {
-            this
-        } else {
-            synchronized(this) {
-                val subGroup = get(name.first) as? PlotGroup ?: PlotGroup(name.first.toString()).also { add(it) }
-                subGroup.createGroup(name.cutFirst())
+            if (name.length == 1) {
+                this.plots.add(Pair(name, plot))
+                plot.addListener(this)
+                (name, plot)
+            } else if (name.length > 1) {
+                this[name.first] = PlotGroup().apply { set(name.cutFirst(), plot) }
             }
         }
     }
 
-    private fun notifyPlotRemoved(plot: Plottable) {
-        if (plot is PlotGroup) {
-            plot.children.forEach { plot.notifyPlotRemoved(it) }
+    operator fun set(name: String, plot: Plottable) {
+        set(Name.of(name), plot)
+    }
+
+    infix fun String.to(plot: Plottable) {
+        set(this, plot)
+    }
+
+    private fun notifyPlotRemoved(name: Name) {
+        get(name)?.let { plottable ->
+            if (plottable is PlotGroup) {
+                plottable.plots.forEach { notifyPlotRemoved(name + it.first) }
+            }
+            //remove children first
+            plotRemoved(this, name)
         }
-        //remove children first
-        plotRemoved(plot.name)
     }
 
     /**
@@ -152,18 +117,16 @@ class PlotGroup(private var descriptor: NodeDescriptor = NodeDescriptor.empty("g
      * @param name
      * @return
      */
-    @Synchronized
     fun remove(name: String): PlotGroup {
-        return remove(Name.ofSingle(name))
+        return remove(Name.of(name))
     }
 
-    @Synchronized
     fun remove(name: Name): PlotGroup {
         if (name.length == 1) {
-            val removed = plots.remove(name)
-            if (removed != null) {
-                notifyPlotRemoved(removed)
-                removed.removeListener(this)
+            plots.find { it.first == name }?.let {
+                it.second.removeListener(this)
+                plots.remove(it)
+                notifyPlotRemoved(name)
             }
         } else {
             (get(name.cutLast()) as? PlotGroup)?.remove(name.last)
@@ -172,12 +135,12 @@ class PlotGroup(private var descriptor: NodeDescriptor = NodeDescriptor.empty("g
     }
 
     fun clear() {
-        HashSet(this.plots.keys).forEach { this.remove(it) }
+        plots.map { it.first }.forEach { remove(it) }
     }
 
     @ProvidesNames(PLOT_TARGET)
     fun list(): Stream<String> {
-        return stream().map<Name> { it.key }.map { it.toString() }
+        return stream().map { it.first.toString() }
     }
 
     /**
@@ -185,12 +148,12 @@ class PlotGroup(private var descriptor: NodeDescriptor = NodeDescriptor.empty("g
      *
      * @return
      */
-    fun stream(): Stream<Pair<Name, Plottable>> {
-        return plots.values.stream().flatMap { pl ->
-            if (pl is PlotGroup) {
-                pl.stream().map { pair -> Pair<Name, Plottable>(Name.join(pl.name, pair.key), pair.value) }
+    fun stream(recursive: Boolean = true): Stream<Pair<Name, Plottable>> {
+        return plots.stream().flatMap { (name, pl) ->
+            if (recursive && pl is PlotGroup) {
+                pl.stream().map { pair -> Pair(name + pair.first, pair.second) }
             } else {
-                Stream.of<Pair<Name, Plottable>>(Pair(pl.name, pl))
+                Stream.of(Pair(name, pl))
             }
         }
     }
@@ -202,8 +165,8 @@ class PlotGroup(private var descriptor: NodeDescriptor = NodeDescriptor.empty("g
 
     operator fun get(name: Name): Plottable? {
         return when {
-            name.length == 0 -> throw RuntimeException("Zero length names are not allowed")
-            name.length == 1 -> plots[name]
+            name.length == 0 -> this
+            name.length == 1 -> plots.find { it.first == name }?.second
             else -> (get(name.cutLast()) as? PlotGroup)?.get(name.last)
         }
     }
@@ -214,7 +177,7 @@ class PlotGroup(private var descriptor: NodeDescriptor = NodeDescriptor.empty("g
      * @param listener
      */
     override fun addListener(listener: PlotListener, isStrong: Boolean) {
-        listeners.add(listener,isStrong)
+        listeners.add(listener, isStrong)
     }
 
     /**
@@ -259,7 +222,7 @@ class PlotGroup(private var descriptor: NodeDescriptor = NodeDescriptor.empty("g
         configureValue("@descriptor", "class::${type.name}")
     }
 
-    inline fun <reified T: Plottable> setType() {
+    inline fun <reified T : Plottable> setType() {
         setType(T::class.java)
     }
 
@@ -325,7 +288,7 @@ class PlotGroup(private var descriptor: NodeDescriptor = NodeDescriptor.empty("g
                     val item = internalEnvelopeType!!.reader.read(dataStream)
                     try {
                         val pl = Plottable::class.java.cast(hep.dataforge.io.envelopes.Wrapper.unwrap(item))
-                        group.add(pl)
+                        group.set(pl)
                     } catch (ex: Exception) {
                         LoggerFactory.getLogger(javaClass).error("Failed to unwrap plottable", ex)
                     }

@@ -266,7 +266,7 @@ class HeaderMarkup() : MarkupGroup() {
             return if (style.hasValue("header.level")) {
                 return style.getInt("header.level")
             } else {
-                styleStack.layers().find { it.hasValue("header.level") }?.getInt("header.level") ?: 0+1
+                styleStack.layers.find { it.hasValue("header.level") }?.getInt("header.level") ?: 0+1
             }
         }
         set(value) {

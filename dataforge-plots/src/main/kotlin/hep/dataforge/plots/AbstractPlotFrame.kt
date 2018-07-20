@@ -47,19 +47,33 @@ abstract class AbstractPlotFrame : SimpleConfigurable(), PlotFrame, PlotListener
     protected abstract fun updatePlotConfig(name: Name, config: Laminate)
 
 
-    override fun dataChanged(name: Name, plot: Plot) {
-        updatePlotData(name, plot)
-    }
-
-    override fun metaChanged(name: Name, plottable: Plottable, laminate: Laminate) {
-        if (plottable is Plot) {
-            updatePlotConfig(name, laminate)
+    /**
+     * recursively apply some action to all plottables in hierarchy starting at root
+     */
+    private fun recursiveApply(root: Name, action: (path: Name, plot: Plottable) -> Unit) {
+        plots[root]?.let {
+            action.invoke(root, it)
+            if (it is PlotGroup) {
+                it.forEach {
+                    recursiveApply(root + it.name, action)
+                }
+            }
         }
     }
 
-    override fun plotAdded(name: Name, plottable: Plottable) {
-        if (plottable is Plot) {
-            updatePlotData(name, plottable)
+    private fun resolveMeta(root: Name, path:Name, meta:La): Laminate {
+
+    }
+
+    override fun dataChanged(caller: Plottable, path: Name) {
+        recursiveApply(path) { name, plot ->
+            (plot as? Plot)?.let { updatePlotData(name, it) }
+        }
+    }
+
+    override fun metaChanged(caller: Plottable, path: Name) {
+        recursiveApply(path) { name, plot ->
+            (plot as? Plot)?.let { updatePlotConfig(name, resolveMeta(name)) }
         }
     }
 
