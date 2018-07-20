@@ -15,7 +15,6 @@
  */
 package hep.dataforge.stat.fit;
 
-import hep.dataforge.names.Names;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueFactory;
 import javafx.util.Pair;

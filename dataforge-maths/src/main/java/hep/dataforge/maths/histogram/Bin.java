@@ -1,8 +1,8 @@
 package hep.dataforge.maths.histogram;
 
 import hep.dataforge.maths.domains.Domain;
+import hep.dataforge.names.NameList;
 import hep.dataforge.names.NameSetContainer;
-import hep.dataforge.names.Names;
 import hep.dataforge.values.Values;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,9 +36,9 @@ public interface Bin extends Domain, NameSetContainer {
     long getBinID();
 
     @Nullable
-    Names getNames();
+    NameList getNames();
 
-    void setNames(Names names);
+    void setNames(NameList names);
 
     /**
      * Get the description of this bin as a set of named values

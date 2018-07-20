@@ -59,13 +59,13 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
      */
     public Name getQualifiedName() {
         if (parent == null) {
-            return Name.ofSingle(getName());
+            return Name.Companion.ofSingle(getName());
         } else {
             int index = parent.indexOf(this);
             if (index >= 0) {
-                return Name.ofSingle(String.format("%s[%d]", getName(), index));
+                return Name.Companion.ofSingle(String.format("%s[%d]", getName(), index));
             } else {
-                return Name.ofSingle(getName());
+                return Name.Companion.ofSingle(getName());
             }
         }
     }
@@ -77,9 +77,9 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
      */
     public Name getFullName() {
         if (parent == null) {
-            return Name.of(getName());
+            return Name.Companion.of(getName());
         } else {
-            return Name.join(parent.getFullName(), getQualifiedName());
+            return Name.Companion.join(parent.getFullName(), getQualifiedName());
         }
     }
 
@@ -92,7 +92,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
      */
     protected void notifyNodeChanged(Name name, List<? extends Meta> oldItem, List<? extends Meta> newItem) {
         if (parent != null) {
-            parent.notifyNodeChanged(getQualifiedName().append(name), oldItem, newItem);
+            parent.notifyNodeChanged(getQualifiedName().plus(name), oldItem, newItem);
         }
     }
 
@@ -105,7 +105,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
      */
     protected void notifyValueChanged(Name name, Value oldItem, Value newItem) {
         if (parent != null) {
-            parent.notifyValueChanged(getQualifiedName().append(name), oldItem, newItem);
+            parent.notifyValueChanged(getQualifiedName().plus(name), oldItem, newItem);
         }
     }
 
@@ -151,7 +151,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
             list.add(newNode);
         }
         if (notify) {
-            notifyNodeChanged(Name.of(node.getName()), oldList, new ArrayList<>(list));
+            notifyNodeChanged(Name.Companion.of(node.getName()), oldList, new ArrayList<>(list));
         }
         return self();
     }
@@ -217,7 +217,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
         if (!isValidElementName(name)) {
             throw new NamingException(String.format("'%s' is not a valid element name in the meta", name));
         }
-        return putValue(Name.of(name), value, notify);
+        return putValue(Name.Companion.of(name), value, notify);
     }
 
     /**
@@ -268,7 +268,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
             }
             setNodeItem(name, elements);
             if (notify) {
-                notifyNodeChanged(Name.of(name), oldNodeItem, getMetaList(name));
+                notifyNodeChanged(Name.Companion.of(name), oldNodeItem, getMetaList(name));
             }
         } else {
             removeNode(name);
@@ -318,7 +318,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
     }
 
     public T setValue(String name, Value value, boolean notify) {
-        return setValue(Name.of(name), value, notify);
+        return setValue(Name.Companion.of(name), value, notify);
     }
 
     /**
@@ -396,14 +396,14 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
             if (nodes.containsKey(path)) {
                 nodes.remove(path);
             } else {
-                Name namePath = Name.of(path);
+                Name namePath = Name.Companion.of(path);
                 if (namePath.getLength() > 1) {
                     //FIXME many path to string and string to path conversions
                     getHead(namePath).removeNode(namePath.cutFirst().toString());
                 }
             }
 
-            notifyNodeChanged(Name.of(path), oldNode, Collections.emptyList());
+            notifyNodeChanged(Name.Companion.of(path), oldNode, Collections.emptyList());
         }
         return self();
     }
@@ -424,7 +424,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
             } else {
                 nodes.get(nodeName).set(index, transformNode(child.getName(), node));
             }
-            notifyNodeChanged(Name.ofSingle(nodeName), oldNode, getMetaList(nodeName));
+            notifyNodeChanged(Name.Companion.ofSingle(nodeName), oldNode, getMetaList(nodeName));
         }
     }
 
@@ -439,14 +439,14 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
             if (path.getLength() > 1) {
                 getHead(path).removeValue(path.cutFirst().toString());
             } else {
-                this.values.remove(path.toUnescaped());
+                this.values.remove(path.getUnescaped());
             }
             notifyValueChanged(path, oldValue.get(), null);
         }
     }
 
     public void removeValue(String path) {
-        removeValue(Name.of(path));
+        removeValue(Name.Companion.of(path));
     }
 
     /**
@@ -457,7 +457,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
      */
     protected void setNodeItem(String path, List<? extends Meta> elements) {
         if (!nodes.containsKey(path)) {
-            Name namePath = Name.of(path);
+            Name namePath = Name.Companion.of(path);
             if (namePath.getLength() > 1) {
                 String headName = namePath.getFirst().entry();
                 T headNode;
@@ -492,12 +492,12 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
             headNode.setValueItem(namePath.cutFirst(), value);
         } else {
             //single token path
-            this.values.put(namePath.toUnescaped(), value);
+            this.values.put(namePath.getUnescaped(), value);
         }
     }
 
     protected void setValueItem(String path, Value value) {
-        setValueItem(Name.of(path), value);
+        setValueItem(Name.Companion.of(path), value);
     }
 
     /**
@@ -551,7 +551,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
         });
         List<T> oldList = this.nodes.get(name);
         this.nodes.put(name, nodes);
-        notifyNodeChanged(Name.ofSingle(name), oldList, nodes);
+        notifyNodeChanged(Name.Companion.ofSingle(name), oldList, nodes);
     }
 
     /**
@@ -575,7 +575,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
         }
         List<T> oldList = new ArrayList<>(list);
         list.add(node);
-        notifyNodeChanged(Name.ofSingle(nodeName), oldList, list);
+        notifyNodeChanged(Name.Companion.ofSingle(nodeName), oldList, list);
     }
 
     public void attachNode(T node) {

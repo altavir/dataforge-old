@@ -17,15 +17,15 @@ package hep.dataforge.stat.parametric;
 
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.names.AbstractNamedSet;
+import hep.dataforge.names.NameList;
 import hep.dataforge.names.NameSetContainer;
-import hep.dataforge.names.Names;
 import hep.dataforge.values.Values;
 
 
 public abstract class AbstractParametric extends AbstractNamedSet {
 
 
-    public AbstractParametric(Names names) {
+    public AbstractParametric(NameList names) {
         super(names);
     }
 

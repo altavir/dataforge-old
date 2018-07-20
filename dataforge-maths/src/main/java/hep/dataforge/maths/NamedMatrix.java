@@ -18,8 +18,8 @@ package hep.dataforge.maths;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.meta.MetaMorph;
+import hep.dataforge.names.NameList;
 import hep.dataforge.names.NameSetContainer;
-import hep.dataforge.names.Names;
 import hep.dataforge.values.Values;
 import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
@@ -36,16 +36,16 @@ import java.util.Map;
  */
 public class NamedMatrix implements NameSetContainer, MetaMorph {
 
-    private Names names;
+    private NameList names;
     private RealMatrix mat;
 
     public NamedMatrix() {
-        names = Names.of();
+        names = new NameList();
         mat = new Array2DRowRealMatrix();
     }
 
     public NamedMatrix(String[] names, RealMatrix mat) {
-        this.names = Names.of(names);
+        this.names = new NameList(names);
         if (!mat.isSquare()) {
             throw new IllegalArgumentException("Only square matrices allowed.");
         }
@@ -56,7 +56,7 @@ public class NamedMatrix implements NameSetContainer, MetaMorph {
     }
 
     public NamedMatrix(String[] names, double[][] values) {
-        this.names = Names.of(names);
+        this.names = new NameList(names);
         if (values.length != values[0].length) {
             throw new IllegalArgumentException("Only square matrices allowed.");
         }
@@ -71,7 +71,7 @@ public class NamedMatrix implements NameSetContainer, MetaMorph {
         meta.getNodeNames().forEach(name -> {
             vectors.put(name, new NamedVector(meta.getMeta(name)));
         });
-        this.names = Names.of(vectors.keySet());
+        this.names = new NameList(vectors.keySet());
         this.mat = new Array2DRowRealMatrix(names.size(), names.size());
         for (int i = 0; i < names.size(); i++) {
             mat.setRowVector(i, vectors.get(names.get(i)).getVector());
@@ -138,7 +138,7 @@ public class NamedMatrix implements NameSetContainer, MetaMorph {
      * @return
      */
     @Override
-    public Names getNames() {
+    public NameList getNames() {
         return names;
     }
 

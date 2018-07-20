@@ -125,7 +125,7 @@ interface Plot : Plottable {
     }
 
     companion object {
-        const val PLOT_TYPE = "hep.dataforge.plottable.plot"
+        const val PLOT_TYPE = Plottable.PLOTTABLE_TYPE + ".plot"
     }
 
 }

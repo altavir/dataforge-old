@@ -190,7 +190,7 @@ interface Storage : Metoid, Named, Provider, AutoCloseable, ContextAware, AutoCo
         return if (parent == root || parent == null) {
             Name.ofSingle(name)
         } else {
-            parent!!.getFullName(root).append(name)
+            parent!!.getFullName(root).plus(name)
         }
     }
 

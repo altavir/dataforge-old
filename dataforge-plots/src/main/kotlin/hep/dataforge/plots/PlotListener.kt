@@ -26,29 +26,32 @@ interface PlotListener {
 
     /**
      * Data changed for a specific plot. Data for group could not be changed
-     * @param name
-     * @param plot
+     * @param caller the plottable that sent the message
+     * @param name the name of added plot relative to callet
+     * @param plot the plot itself
      */
-    fun dataChanged(name: Name, plot: Plot)
+    fun dataChanged(caller: Plottable, name: Name, plot: Plot)
 
     /**
      * Configuration changed for node or plot
-     * @param name full name of calling plottable
-     * @param plottable a caller object
+     * @param caller the plottable that sent the message
+     * @param name full name of  plottable with changed meta relative to caller
      * @param laminate combinded meta of all layers
      */
-    fun metaChanged(name: Name, plottable: Plottable, laminate: Laminate)
+    fun metaChanged(caller: Plottable, name: Name, laminate: Laminate)
 
     /**
-     * Ne plot or node added
-     * @param name
-     * @param plottable
+     * New plot or group added
+     * @param caller the plottable that sent the message
+     * @param name name of added plottable relative to caller
+     * @param plottable the addedd plottable
      */
-    fun plotAdded(name: Name, plottable: Plottable)
+    fun plotAdded(caller: Plottable, name: Name, plottable: Plottable)
 
     /**
-     * plot or node removed
-     * @param name
+     * Plot or group removed
+     * @param caller the plottable that sent the message
+     * @param name name of removed plottable relative to caller
      */
-    fun plotRemoved(name: Name)
+    fun plotRemoved(caller: Plottable, name: Name)
 }

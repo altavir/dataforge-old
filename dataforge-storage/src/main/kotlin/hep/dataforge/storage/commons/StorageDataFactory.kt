@@ -38,7 +38,7 @@ class StorageDataFactory : DataFactory<Loader>(Loader::class.java) {
     override fun fill(builder: DataNodeEditor<Loader>, context: Context, meta: Meta) {
         //FIXME this process takes long time for large storages. Need to wrap it in process
         val storage = StorageManager.buildFrom(context).buildStorage(meta)
-        StorageUtils.loaderStream(storage).forEach { loader -> builder.putData(loader.fullName.toUnescaped(), Data.buildStatic(loader, loader.meta)) }
+        StorageUtils.loaderStream(storage).forEach { loader -> builder.putData(loader.fullName.unescaped, Data.buildStatic(loader, loader.meta)) }
     }
 
 }

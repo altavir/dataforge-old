@@ -81,7 +81,7 @@ class DataTree<T: Any> constructor(
                     NodeWrapper(nodeEntry.value, parentName.toString(), parentMeta.cleanup())
             )
 
-            val childName = parentName.append(nodeEntry.key)
+            val childName = parentName.plus(nodeEntry.key)
             val childMeta = parentMeta.withFirstLayer(nodeEntry.value.meta)
             val childStream = nodeEntry.value.nodeStream(childName, childMeta)
 
@@ -97,7 +97,7 @@ class DataTree<T: Any> constructor(
     private fun dataStream(nodeName: Name?, nodeMeta: Laminate, recursive: Boolean): Stream<NamedData<out T>> {
         val dataStream = dataMap.entries.stream()
                 .map<NamedData<out T>> { entry ->
-                    val dataName = if (nodeName == null) Name.of(entry.key) else nodeName.append(entry.key)
+                    val dataName = if (nodeName == null) Name.of(entry.key) else nodeName.plus(entry.key)
                     NamedData.wrap(dataName, entry.value, nodeMeta)
                 }
 
@@ -105,7 +105,7 @@ class DataTree<T: Any> constructor(
             // iterating over nodes including node name into dataStream
             val subStream = nodeMap.entries.stream()
                     .flatMap { nodeEntry ->
-                        val subNodeName = if (nodeName == null) Name.of(nodeEntry.key) else nodeName.append(nodeEntry.key)
+                        val subNodeName = if (nodeName == null) Name.of(nodeEntry.key) else nodeName.plus(nodeEntry.key)
                         nodeEntry.value
                                 .dataStream(subNodeName, nodeMeta.withFirstLayer(nodeEntry.value.meta), true)
                     }

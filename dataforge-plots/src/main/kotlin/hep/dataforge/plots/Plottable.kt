@@ -21,7 +21,6 @@ import hep.dataforge.description.Described
 import hep.dataforge.description.ValueDef
 import hep.dataforge.description.ValueDefs
 import hep.dataforge.meta.Configurable
-import hep.dataforge.names.Name
 import hep.dataforge.plots.Plottable.Companion.PLOTTABLE_TYPE
 import hep.dataforge.values.ValueType
 
@@ -32,10 +31,8 @@ import hep.dataforge.values.ValueType
 @Type(PLOTTABLE_TYPE)
 interface Plottable : Configurable, Described {
 
-    val name: Name
-
     val title: String
-        get() = config.getString("title", name.toUnescaped())
+        get() = config.getString("title", "@anonymous")
 
     /**
      * Add plottable state listener

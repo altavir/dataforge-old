@@ -1,6 +1,6 @@
 package hep.dataforge.maths.histogram;
 
-import hep.dataforge.names.Names;
+import hep.dataforge.names.NameList;
 import hep.dataforge.names.NamesUtils;
 import hep.dataforge.tables.ListTable;
 import hep.dataforge.tables.Table;
@@ -97,7 +97,7 @@ public abstract class Histogram implements BinFactory, Iterable<Bin> {
      *
      * @return
      */
-    public Names getNames() {
+    public NameList getNames() {
         return NamesUtils.generateNames(getDimension());
     }
 }

@@ -47,7 +47,7 @@ class DeviceManager : BasicPlugin(), DeviceHub {
     override val deviceNames: Stream<Name>
         get() = _devices.entries.stream().flatMap { entry ->
             if (entry.value is DeviceHub) {
-                (entry.value as DeviceHub).deviceNames.map { it -> entry.key.append(it) }
+                (entry.value as DeviceHub).deviceNames.map { it -> entry.key.plus(it) }
             } else {
                 Stream.of<Name>(entry.key)
             }

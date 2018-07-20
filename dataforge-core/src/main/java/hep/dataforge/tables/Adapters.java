@@ -50,7 +50,7 @@ public class Adapters {
 
 
     public static final String X_VALUE_KEY = X_AXIS;//Name.joinString(X_AXIS, VALUE_KEY);
-    public static final String X_ERROR_KEY = Name.joinString(X_AXIS, ERROR_KEY);
+    public static final String X_ERROR_KEY = Name.Companion.joinString(X_AXIS, ERROR_KEY);
     public static final String Y_VALUE_KEY = Y_AXIS;//Name.joinString(Y_AXIS, VALUE_KEY);
     public static final String Y_ERROR_KEY = Y_AXIS + "." + ERROR_KEY;
 
@@ -59,7 +59,7 @@ public class Adapters {
     }
 
     public static Optional<Value> optError(ValuesAdapter adapter, String axis, Values point) {
-        return adapter.optComponent(point, Name.joinString(axis, ERROR_KEY));
+        return adapter.optComponent(point, Name.Companion.joinString(axis, ERROR_KEY));
     }
 
     public static Value getError(ValuesAdapter adapter, String axis, Values point) {
@@ -67,7 +67,7 @@ public class Adapters {
     }
 
     public static Double getUpperBound(ValuesAdapter adapter, String axis, Values point) {
-        return adapter.optComponent(point, Name.joinString(axis, UP_KEY)).map(Value::getDouble)
+        return adapter.optComponent(point, Name.Companion.joinString(axis, UP_KEY)).map(Value::getDouble)
                 .orElseGet(() ->
                         getValue(adapter, axis, point).getDouble() +
                                 optError(adapter, axis, point).map(Value::getDouble).orElse(0d)
@@ -76,7 +76,7 @@ public class Adapters {
     }
 
     public static Double getLowerBound(ValuesAdapter adapter, String axis, Values point) {
-        return adapter.optComponent(point, Name.joinString(axis, LO_KEY)).map(Value::getDouble)
+        return adapter.optComponent(point, Name.Companion.joinString(axis, LO_KEY)).map(Value::getDouble)
                 .orElseGet(() ->
                         getValue(adapter, axis, point).getDouble() -
                                 optError(adapter, axis, point).map(Value::getDouble).orElse(0d)
@@ -91,7 +91,7 @@ public class Adapters {
      * @return
      */
     public static String getTitle(ValuesAdapter adapter, String axis) {
-        return adapter.getMeta().getString(Name.joinString(axis, TITILE_KEY), axis);
+        return adapter.getMeta().getString(Name.Companion.joinString(axis, TITILE_KEY), axis);
     }
 
     public static Value getXValue(ValuesAdapter adapter, Values point) {

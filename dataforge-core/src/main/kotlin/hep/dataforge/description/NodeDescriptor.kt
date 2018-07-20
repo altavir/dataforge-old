@@ -98,7 +98,7 @@ open class NodeDescriptor(meta: Meta) : SimpleMetaMorph(meta.sealed), Named {
 
     fun getNodeDescriptor(name: Name): NodeDescriptor? {
         return if (name.length == 1) {
-            childrenDescriptors()[name.toUnescaped()]
+            childrenDescriptors()[name.unescaped]
         } else {
             getNodeDescriptor(name.cutLast())?.getNodeDescriptor(name.last)
         }
@@ -116,7 +116,7 @@ open class NodeDescriptor(meta: Meta) : SimpleMetaMorph(meta.sealed), Named {
 
     fun getValueDescriptor(name: Name): ValueDescriptor? {
         return if (name.length == 1) {
-            valueDescriptors()[name.toUnescaped()]
+            valueDescriptors()[name.unescaped]
         } else {
             getNodeDescriptor(name.cutLast())?.getValueDescriptor(name.last)
         }

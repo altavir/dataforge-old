@@ -1,8 +1,8 @@
 package hep.dataforge.maths.histogram;
 
 import hep.dataforge.maths.domains.HyperSquareDomain;
+import hep.dataforge.names.NameList;
 import hep.dataforge.names.NameSetContainer;
-import hep.dataforge.names.Names;
 import hep.dataforge.names.NamesUtils;
 import hep.dataforge.utils.ArgumentChecker;
 import hep.dataforge.values.ValueMap;
@@ -19,7 +19,7 @@ public class SquareBin extends HyperSquareDomain implements Bin, NameSetContaine
 
     private final long binId;
     private AtomicLong counter = new AtomicLong(0);
-    private Names names; // optional names for the bin
+    private NameList names; // optional names for the bin
 
     /**
      * Create a multivariate bin
@@ -44,14 +44,14 @@ public class SquareBin extends HyperSquareDomain implements Bin, NameSetContaine
 
     @Override
     @NotNull
-    public synchronized Names getNames() {
+    public synchronized NameList getNames() {
         if (names == null) {
             names = NamesUtils.generateNames(getDimension());
         }
         return names;
     }
 
-    public void setNames(Names names) {
+    public void setNames(NameList names) {
         ArgumentChecker.checkEqualDimensions(getDimension(), names.size());
         this.names = names;
     }

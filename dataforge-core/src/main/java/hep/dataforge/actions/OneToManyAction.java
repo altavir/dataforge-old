@@ -43,7 +43,7 @@ public abstract class OneToManyAction<T, R> extends GenericAction<T, R> {
      * @return
      */
     protected String placement(String inputName, String outputName) {
-        return Name.joinString(inputName, outputName);
+        return Name.Companion.joinString(inputName, outputName);
     }
 
     //TODO add node meta

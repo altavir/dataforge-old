@@ -5,7 +5,7 @@
  */
 package hep.dataforge.tables;
 
-import hep.dataforge.names.Names;
+import hep.dataforge.names.NameList;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.Values;
 import org.jetbrains.annotations.NotNull;
@@ -23,14 +23,15 @@ public class VirtualDataPoint<S> implements Values {
 
     private final S source;
     private final BiFunction<String, S, Value> transformation;
-    private final Names names;
+    private final NameList names;
 
     public VirtualDataPoint(S source, BiFunction<String, S, Value> transformation, String... names) {
         this.source = source;
         this.transformation = transformation;
-        this.names = Names.of(names);
+        this.names = new NameList(names);
     }
 
+    @NotNull
     @Override
     public Optional<Value> optValue(@NotNull String name) {
         if (hasValue(name)) {
@@ -41,7 +42,7 @@ public class VirtualDataPoint<S> implements Values {
     }
 
     @Override
-    public Names getNames() {
+    public NameList getNames() {
         return names;
     }
 

@@ -6,7 +6,6 @@
 package hep.dataforge.stat.parametric;
 
 import hep.dataforge.names.NameSetContainer;
-import hep.dataforge.names.Names;
 
 
 public abstract class AbstractParametricValue extends AbstractParametric implements ParametricValue {

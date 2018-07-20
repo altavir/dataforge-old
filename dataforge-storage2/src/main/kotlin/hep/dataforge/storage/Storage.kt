@@ -56,7 +56,7 @@ interface StorageElement : Named, Metoid, Provider, ContextAware, AutoConnectibl
      */
     @JvmDefault
     val fullName: Name
-        get() = parent?.fullName?.append(name) ?: Name.ofSingle(name)
+        get() = parent?.fullName?.plus(name) ?: Name.ofSingle(name)
 
     companion object {
         const val STORAGE_TARGET = "storage"
@@ -94,7 +94,7 @@ interface Storage : StorageElement {
     @JvmDefault
     operator fun get(name: Name): StorageElement? {
         return if (name.length == 1) {
-            children[name.toUnescaped()]
+            children[name.unescaped]
         } else {
             (get(name.first) as Storage?)?.get(name.cutFirst())
         }

@@ -15,6 +15,7 @@
  */
 package hep.dataforge.plots
 
+import hep.dataforge.Type
 import hep.dataforge.context.Plugin
 import hep.dataforge.description.Description
 import hep.dataforge.description.NodeProperty
@@ -25,6 +26,7 @@ import hep.dataforge.io.envelopes.EnvelopeBuilder
 import hep.dataforge.io.envelopes.JavaObjectWrapper.JAVA_SERIAL_DATA
 import hep.dataforge.io.envelopes.SimpleEnvelope
 import hep.dataforge.meta.*
+import hep.dataforge.plots.PlotFrame.Companion.PLOT_FRAME_TYPE
 import hep.dataforge.utils.MetaFactory
 import hep.dataforge.values.ValueType
 import java.io.ObjectStreamException
@@ -37,6 +39,7 @@ import java.io.Serializable
  * @author Alexander Nozik
  */
 @ValueDef(key = "title", info = "The title of the plot. By default the name of the Content is taken.")
+@Type(PLOT_FRAME_TYPE)
 interface PlotFrame : Configurable, Serializable {
 
     /**
@@ -178,7 +181,7 @@ interface PlotFrame : Configurable, Serializable {
     }
 
     companion object {
-        const val PLOT_FRAME_TYPE = "hep.dataforge.plots.frame"
+        const val PLOT_FRAME_TYPE = "hep.dataforge.plotframe"
         val wrapper = Wrapper()
     }
 }

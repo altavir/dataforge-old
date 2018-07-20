@@ -72,7 +72,7 @@ public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable, Se
     protected String getResultName(String inputName, Meta actionMeta) {
         String res = inputName;
         if (actionMeta.hasValue(RESULT_GROUP_KEY)) {
-            res = Name.joinString(actionMeta.getString(RESULT_GROUP_KEY, ""), res);
+            res = Name.Companion.joinString(actionMeta.getString(RESULT_GROUP_KEY, ""), res);
         }
         return res;
     }

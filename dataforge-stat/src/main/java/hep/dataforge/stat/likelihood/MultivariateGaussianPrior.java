@@ -17,7 +17,6 @@ package hep.dataforge.stat.likelihood;
 
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.exceptions.NotDefinedException;
-import hep.dataforge.names.Names;
 import hep.dataforge.stat.fit.Param;
 import hep.dataforge.stat.fit.ParamSet;
 import hep.dataforge.stat.parametric.ParametricValue;

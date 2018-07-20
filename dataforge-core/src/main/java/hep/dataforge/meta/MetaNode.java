@@ -149,7 +149,7 @@ public abstract class MetaNode<T extends MetaNode> extends Meta implements MetaM
      */
     @Override
     public List<T> getMetaList(String name) {
-        return getMetaList(Name.of(name));
+        return getMetaList(Name.Companion.of(name));
     }
 
     @Override
@@ -159,7 +159,7 @@ public abstract class MetaNode<T extends MetaNode> extends Meta implements MetaM
 
     @Override
     public Optional<Value> optValue(@NotNull String name) {
-        return optValue(Name.of(name));
+        return optValue(Name.Companion.of(name));
     }
 
     /**

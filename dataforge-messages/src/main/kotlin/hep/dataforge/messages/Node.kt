@@ -37,7 +37,7 @@ interface Node : Named {
      */
     @JvmDefault
     val fullName: Name
-        get() = parent?.fullName?.append(name) ?: Name.ofSingle(name)
+        get() = parent?.fullName?.plus(name) ?: Name.ofSingle(name)
 
     /**
      * add interceptor to this node and return its handler

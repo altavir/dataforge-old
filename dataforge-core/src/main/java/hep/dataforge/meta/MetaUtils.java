@@ -208,9 +208,9 @@ public class MetaUtils {
             List<? extends Meta> metaList = node.getMetaList(nodeName);
             Name nodePrefix;
             if (prefix == null || prefix.isEmpty()) {
-                nodePrefix = Name.of(nodeName);
+                nodePrefix = Name.Companion.of(nodeName);
             } else {
-                nodePrefix = prefix.append(nodeName);
+                nodePrefix = prefix.plus(nodeName);
             }
             if (metaList.size() == 1) {
                 return nodeStream(nodePrefix, metaList.get(0), true);
@@ -219,7 +219,7 @@ public class MetaUtils {
                         .flatMap(i -> {
                             String subPrefix = String.format("%s[%d]", nodePrefix, i);
                             Meta subNode = metaList.get(i);
-                            return nodeStream(Name.ofSingle(subPrefix), subNode, true);
+                            return nodeStream(Name.Companion.ofSingle(subPrefix), subNode, true);
                         });
             }
         });
@@ -231,14 +231,14 @@ public class MetaUtils {
     }
 
     public static Stream<Pair<Name, Meta>> nodeStream(Meta node) {
-        return nodeStream(Name.empty(), node, false);
+        return nodeStream(Name.Companion.empty(), node, false);
     }
 
     public static Stream<Pair<Name, Value>> valueStream(Meta node) {
-        return nodeStream(Name.empty(), node, true).flatMap((Pair<Name, Meta> entry) -> {
+        return nodeStream(Name.Companion.empty(), node, true).flatMap((Pair<Name, Meta> entry) -> {
             Name key = entry.getFirst();
             Meta childMeta = entry.getSecond();
-            return childMeta.getValueNames().map((String valueName) -> new Pair<>(key.append(valueName), childMeta.getValue(valueName)));
+            return childMeta.getValueNames().map((String valueName) -> new Pair<>(key.plus(valueName), childMeta.getValue(valueName)));
         });
     }
 

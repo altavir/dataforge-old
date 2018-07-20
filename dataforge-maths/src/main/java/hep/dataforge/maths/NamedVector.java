@@ -20,7 +20,7 @@ import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.meta.MetaMorph;
-import hep.dataforge.names.Names;
+import hep.dataforge.names.NameList;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueFactory;
 import hep.dataforge.values.Values;
@@ -38,18 +38,18 @@ import java.util.Optional;
  */
 public class NamedVector implements Values, MetaMorph {
 
-    private Names nameList;
+    private NameList nameList;
     private RealVector vector;
 
     /**
      * Serialization constructor
      */
     public NamedVector() {
-        nameList = Names.of();
+        nameList = new NameList();
         vector = new ArrayRealVector();
     }
 
-    public NamedVector(Names nameList, RealVector vector) {
+    public NamedVector(NameList nameList, RealVector vector) {
         this.nameList = nameList;
         this.vector = vector;
     }
@@ -59,7 +59,7 @@ public class NamedVector implements Values, MetaMorph {
             throw new IllegalArgumentException();
         }
         vector = new ArrayRealVector(v);
-        this.nameList = Names.of(names);
+        this.nameList = new NameList(names);
     }
 
     public NamedVector(String[] names, double[] d) {
@@ -67,24 +67,24 @@ public class NamedVector implements Values, MetaMorph {
             throw new DimensionMismatchException(d.length, names.length);
         }
         vector = new ArrayRealVector(d);
-        this.nameList = Names.of(names);
+        this.nameList = new NameList(names);
     }
 
-    public NamedVector(Names names, double[] d) {
+    public NamedVector(NameList names, double[] d) {
         if (names.size() != d.length) {
             throw new DimensionMismatchException(d.length, names.size());
         }
         vector = new ArrayRealVector(d);
-        this.nameList = Names.of(names);
+        this.nameList = new NameList(names);
     }
 
     public NamedVector(Values set) {
         vector = new ArrayRealVector(MathUtils.getDoubleArray(set));
-        this.nameList = Names.of(set.getNames());
+        this.nameList = new NameList(set.getNames());
     }
 
     public NamedVector(Meta meta) {
-        nameList = Names.of(meta.getValueNames());
+        nameList = new NameList(meta.getValueNames());
         double[] values = new double[nameList.size()];
         for (int i = 0; i < nameList.size(); i++) {
             values[i] = meta.getDouble(nameList.get(i));
@@ -159,7 +159,7 @@ public class NamedVector implements Values, MetaMorph {
      * {@inheritDoc}
      */
     @Override
-    public Names getNames() {
+    public NameList getNames() {
         return nameList;
     }
 

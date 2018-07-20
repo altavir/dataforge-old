@@ -15,8 +15,8 @@
  */
 package hep.dataforge.stat.parametric;
 
+import hep.dataforge.names.NameList;
 import hep.dataforge.names.NameSetContainer;
-import hep.dataforge.names.Names;
 
 /**
  * <p>
@@ -27,7 +27,7 @@ import hep.dataforge.names.Names;
  */
 public abstract class AbstractParametricFunction extends AbstractParametric implements ParametricFunction {
 
-    public AbstractParametricFunction(Names names) {
+    public AbstractParametricFunction(NameList names) {
         super(names);
     }
 

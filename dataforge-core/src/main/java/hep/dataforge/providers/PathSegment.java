@@ -46,10 +46,10 @@ class PathSegment implements Path {
         if (path.contains(TARGET_SEPARATOR)) {
             String[] split = path.split(TARGET_SEPARATOR, 2);
             this.target = split[0];
-            this.name = Name.of(split[1]);
+            this.name = Name.Companion.of(split[1]);
         } else {
             this.target = EMPTY_TARGET;
-            this.name = Name.of(path);
+            this.name = Name.Companion.of(path);
         }
     }
 
@@ -86,9 +86,9 @@ class PathSegment implements Path {
     @Override
     public String toString() {
         if(target.isEmpty()){
-            return getName().toUnescaped();
+            return getName().getUnescaped();
         } else {
-            return target + ":" + getName().toUnescaped();
+            return target + ":" + getName().getUnescaped();
         }
     }
 }

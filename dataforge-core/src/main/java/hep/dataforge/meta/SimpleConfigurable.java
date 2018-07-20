@@ -42,12 +42,12 @@ public class SimpleConfigurable implements Configurable {
 
             @Override
             public void notifyValueChanged(Name name, Value oldItem, Value newItem) {
-                applyValueChange(name.toUnescaped(), oldItem, newItem);
+                applyValueChange(name.getUnescaped(), oldItem, newItem);
             }
 
             @Override
             public void notifyNodeChanged(Name name, @NotNull List<? extends Meta> oldItem, @NotNull List<? extends Meta> newItem) {
-                applyNodeChange(name.toUnescaped(), oldItem, newItem);
+                applyNodeChange(name.getUnescaped(), oldItem, newItem);
             }
         });
     }

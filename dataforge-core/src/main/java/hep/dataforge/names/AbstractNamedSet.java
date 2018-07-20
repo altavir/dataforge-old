@@ -23,14 +23,14 @@ package hep.dataforge.names;
  */
 public class AbstractNamedSet implements NameSetContainer {
     
-    private final Names names;
+    private final NameList names;
 
     /**
      * <p>Constructor for AbstractNamedSet.</p>
      *
-     * @param names a {@link hep.dataforge.names.Names} object.
+     * @param names a {@link hep.dataforge.names.NameList} object.
      */
-    public AbstractNamedSet(Names names) {
+    public AbstractNamedSet(NameList names) {
         this.names = names;
     }
     
@@ -54,7 +54,7 @@ public class AbstractNamedSet implements NameSetContainer {
     
     /** {@inheritDoc} */
     @Override
-    public Names getNames() {
+    public NameList getNames() {
         return names;
     }
     

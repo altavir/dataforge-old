@@ -21,7 +21,7 @@
  */
 package hep.dataforge.maths.expressions
 
-import hep.dataforge.names.Names
+import hep.dataforge.names.NameList
 import hep.dataforge.values.Values
 
 /**
@@ -49,7 +49,7 @@ class BasicExpression<T>(val function: (Values) -> T) : Expression<T> {
 /**
  * @param names A set of names for parameters of this expression
  */
-class ExpressionField<in T, R>(val names: Names, private val field: Field<T, R>) : ExtendedField<T, Expression<R>> {
+class ExpressionField<in T, R>(val names: NameList, private val field: Field<T, R>) : ExtendedField<T, Expression<R>> {
 
     override val one: Expression<R> = BasicExpression { field.one }
 

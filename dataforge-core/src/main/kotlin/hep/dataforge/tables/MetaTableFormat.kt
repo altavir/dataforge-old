@@ -23,8 +23,7 @@ import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.meta.MetaNode.DEFAULT_META_NAME
 import hep.dataforge.meta.MetaUtils
 import hep.dataforge.meta.SimpleMetaMorph
-import hep.dataforge.names.Names
-import hep.dataforge.toList
+import hep.dataforge.names.NameList
 import hep.dataforge.values.Values
 import java.util.stream.Stream
 
@@ -44,11 +43,11 @@ class MetaTableFormat(meta: Meta) : SimpleMetaMorph(meta), TableFormat {
     val isEmpty: Boolean
         get() = !meta.hasMeta("column")
 
-    private  val _names: Names by lazy {
-        Names.of(columns.map<String> { it.name }.toList())
+    private  val _names: NameList by lazy {
+        NameList(columns.map<String> { it.name })
     }
 
-    override fun getNames(): Names {
+    override fun getNames(): NameList {
         return _names
     }
 

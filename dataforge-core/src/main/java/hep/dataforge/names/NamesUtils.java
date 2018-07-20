@@ -58,11 +58,11 @@ public class NamesUtils {
      * Проверка того, что два Names содержат одинаковый набор имен, без учета
      * порядка.
      *
-     * @param named1 a {@link hep.dataforge.names.Names} object.
-     * @param named2 a {@link hep.dataforge.names.Names} object.
+     * @param named1 a {@link hep.dataforge.names.NameList} object.
+     * @param named2 a {@link hep.dataforge.names.NameList} object.
      * @return a boolean.
      */
-    public static boolean areEqual(Names named1, Names named2) {
+    public static boolean areEqual(NameList named1, NameList named2) {
         return (named1.contains(named2)) && (named2.contains(named1));
     }
 
@@ -128,11 +128,11 @@ public class NamesUtils {
      * <p>
      * exclude.</p>
      *
-     * @param named       a {@link hep.dataforge.names.Names} object.
+     * @param named       a {@link hep.dataforge.names.NameList} object.
      * @param excludeName a {@link java.lang.String} object.
      * @return an array of {@link java.lang.String} objects.
      */
-    public static String[] exclude(Names named, String excludeName) {
+    public static String[] exclude(NameList named, String excludeName) {
         List<String> names = named.asList();
         names.remove(excludeName);
         return names.toArray(new String[names.size()]);
@@ -214,7 +214,7 @@ public class NamesUtils {
      * @param dim
      * @return
      */
-    public static Names generateNames(int dim) {
+    public static NameList generateNames(int dim) {
         switch (dim) {
             case 0:
                 return new NameList();
@@ -240,7 +240,7 @@ public class NamesUtils {
      */
     public static boolean isValidToken(String token){
         try {
-            return Name.of(token).getLength() == 1;
+            return Name.Companion.of(token).getLength() == 1;
         }catch (Exception ex){
             return false;
         }

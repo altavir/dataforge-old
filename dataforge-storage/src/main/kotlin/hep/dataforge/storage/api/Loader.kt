@@ -81,7 +81,7 @@ interface Loader : Metoid, AutoCloseable, Named, AutoConnectible, ContextAware, 
         get() = Path.of("", storage.fullName).append(Path.of("", Name.ofSingle(name)))
 
     val fullName: Name
-        get() = storage.fullName.append(name)
+        get() = storage.fullName.plus(name)
 
     /**
      * Get full meta including storage layers

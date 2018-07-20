@@ -25,7 +25,7 @@ class NameTest {
     fun testNameFromString() {
         val name = Name.of("first.second[28].third\\.andahalf")
         assertEquals(3, name.length.toLong())
-        Assert.assertEquals("third.andahalf", name.last.toUnescaped())
+        Assert.assertEquals("third.andahalf", name.last.unescaped)
     }
 
     @Test
@@ -34,7 +34,7 @@ class NameTest {
         val str = name.toString()
         val reconstructed = Name.of(str)
         assertEquals(name, reconstructed)
-        assertEquals("name.with.dot", reconstructed.tokens[2].toUnescaped())
+        assertEquals("name.with.dot", reconstructed.tokens[2].unescaped)
     }
 
     @Test

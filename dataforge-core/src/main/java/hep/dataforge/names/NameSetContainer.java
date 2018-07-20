@@ -24,7 +24,7 @@ public interface NameSetContainer {
      * Get the names helper
      * @return
      */
-    Names getNames();
+    NameList getNames();
 
     default String[] namesAsArray(){
         return getNames().asArray();

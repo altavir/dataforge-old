@@ -32,34 +32,54 @@ import hep.dataforge.providers.Provider
 import hep.dataforge.providers.Provides
 import hep.dataforge.providers.ProvidesNames
 import hep.dataforge.utils.ReferenceRegistry
-import javafx.util.Pair
 import org.slf4j.LoggerFactory
 import java.io.ByteArrayOutputStream
 import java.io.IOException
-import java.util.*
 import java.util.stream.Stream
 
 /**
  * A group of plottables. It could store Plots as well as other plot groups.
  */
-class PlotGroup(name: String, private var descriptor: NodeDescriptor = NodeDescriptor.empty("group"))
+class PlotGroup(private var descriptor: NodeDescriptor = NodeDescriptor.empty("group"))
     : SimpleConfigurable(), Plottable, Provider, PlotListener, Iterable<Plottable> {
 
-    override val name: Name = Name.ofSingle(name)
-
-    private val plots = HashMap<Name, Plottable>()
+    private val plots = HashSet<Pair<Name, Plottable>>()
     private val listeners = ReferenceRegistry<PlotListener>()
 
     val children: Collection<Plottable>
-        get() = plots.values
+        get() = plots.map { it.second }
 
 
 //    constructor(name: String) {
 //        this.name = Name.ofSingle(name)
 //    }
 
-    private fun getNameForListener(arg: Name): Name {
-        return Name.join(name, arg)
+//    private fun getNameForListener(arg: Name): Name {
+//        return Name.join(name, arg)
+//    }
+
+    private fun resolveChildName(caller: Plottable): Name?{
+        return plots.find { it.second == caller }?.first
+    }
+
+
+    override fun dataChanged(caller: Plottable, name: Name, plot: Plot) {
+        resolveChildName(caller)?.let {
+            listeners.forEach { it.dataChanged(this,it + name) }
+        }?: LoggerFactory.getLogger(javaClass).warn("Could not resolve child plottable {}", caller)
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun metaChanged(caller: Plottable, name: Name, laminate: Laminate) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun plotAdded(caller: Plottable, name: Name, plottable: Plottable) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun plotRemoved(caller: Plottable, name: Name) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun dataChanged(name: Name, plot: Plot) {

@@ -16,7 +16,6 @@
 package hep.dataforge.stat.likelihood;
 
 import hep.dataforge.exceptions.NotDefinedException;
-import hep.dataforge.names.Names;
 import hep.dataforge.stat.parametric.ParametricValue;
 import hep.dataforge.values.Values;
 

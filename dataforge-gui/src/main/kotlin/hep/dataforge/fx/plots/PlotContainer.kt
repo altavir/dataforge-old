@@ -134,7 +134,7 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
                                     }
 
                                     item.config.addObserver { name, _, newItem ->
-                                        when (name.toUnescaped()) {
+                                        when (name.unescaped) {
                                             "title" -> text = if (newItem == null) {
                                                 item.title
                                             } else {

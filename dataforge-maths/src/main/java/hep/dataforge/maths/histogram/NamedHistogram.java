@@ -1,7 +1,7 @@
 package hep.dataforge.maths.histogram;
 
+import hep.dataforge.names.NameList;
 import hep.dataforge.names.NameSetContainer;
-import hep.dataforge.names.Names;
 import hep.dataforge.values.Values;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,9 +15,9 @@ import java.util.stream.Stream;
  */
 public class NamedHistogram extends Histogram implements NameSetContainer {
     private final Histogram histogram;
-    private final Names names;
+    private final NameList names;
 
-    public NamedHistogram(Histogram histogram, Names names) {
+    public NamedHistogram(Histogram histogram, NameList names) {
         this.histogram = histogram;
         this.names = names;
     }
@@ -76,7 +76,7 @@ public class NamedHistogram extends Histogram implements NameSetContainer {
     }
 
     @Override
-    public Names getNames() {
+    public NameList getNames() {
         return names;
     }
 

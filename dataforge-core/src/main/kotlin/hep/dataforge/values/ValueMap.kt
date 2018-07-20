@@ -19,7 +19,7 @@ import hep.dataforge.exceptions.NameNotFoundException
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.meta.MetaMorph
-import hep.dataforge.names.Names
+import hep.dataforge.names.NameList
 import hep.dataforge.utils.GenericBuilder
 import java.util.*
 
@@ -55,8 +55,8 @@ class ValueMap : Values, MetaMorph {
     /**
      * {@inheritDoc}
      */
-    override fun getNames(): Names {
-        return Names.of(this.valueMap.keys)
+    override fun getNames(): NameList {
+        return NameList(this.valueMap.keys)
     }
 
     /**

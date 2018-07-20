@@ -11,7 +11,6 @@ import hep.dataforge.goals.Goal
 import hep.dataforge.goals.StaticGoal
 import hep.dataforge.goals.pipe
 import hep.dataforge.meta.*
-import hep.dataforge.names.Names
 import hep.dataforge.values.NamedValue
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueProvider
@@ -233,7 +232,3 @@ inline fun <T, reified R> Data<T>.pipe(dispatcher: CoroutineContext, noinline tr
 
 inline fun <T, reified R> NamedData<T>.pipe(dispatcher: CoroutineContext, noinline transform: suspend (T) -> R): NamedData<R> =
         NamedData(this.name, R::class.java, this.goal.pipe(dispatcher, transform), this.meta)
-
-operator fun Names.plus(other: Names): Names {
-    return this.plus(*other.asArray())
-}

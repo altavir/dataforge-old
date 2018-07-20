@@ -99,11 +99,11 @@ class DescriptorBuilder(name: String, override val meta: Configuration = Configu
         return when (name.length) {
             0 -> this
             1 -> {
-                val existingChild = meta.getMetaList("node").find { it.getString("name") == name.first.toUnescaped() }
+                val existingChild = meta.getMetaList("node").find { it.getString("name") == name.first.unescaped }
                 return if(existingChild == null){
-                    DescriptorBuilder(name.first.toUnescaped()).also { this.meta.attachNode(it.meta) }
+                    DescriptorBuilder(name.first.unescaped).also { this.meta.attachNode(it.meta) }
                 } else{
-                    DescriptorBuilder(name.first.toUnescaped(),existingChild)
+                    DescriptorBuilder(name.first.unescaped,existingChild)
                 }
             }
             else -> {
@@ -136,8 +136,8 @@ class DescriptorBuilder(name: String, override val meta: Configuration = Configu
             buildChild(name.cutLast())
         }
 
-        if (!parent.hasValueDescriptor(name.last.toUnescaped())) {
-            parent.meta.putNode(descriptor.toMeta().builder.apply { this["name"] = name.last.toUnescaped() })
+        if (!parent.hasValueDescriptor(name.last.unescaped)) {
+            parent.meta.putNode(descriptor.toMeta().builder.apply { this["name"] = name.last.unescaped })
         } else {
             LoggerFactory.getLogger(javaClass).warn("Trying to replace existing value descriptor ${descriptor.name}")
         }

@@ -20,7 +20,6 @@ import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.maths.NamedVector;
 import hep.dataforge.maths.functions.UniFunction;
-import hep.dataforge.names.Names;
 import hep.dataforge.values.Values;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 

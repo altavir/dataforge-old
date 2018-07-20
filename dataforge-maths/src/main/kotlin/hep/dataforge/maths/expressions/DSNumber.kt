@@ -1,6 +1,6 @@
 package hep.dataforge.maths.expressions
 
-import hep.dataforge.names.Names
+import hep.dataforge.names.NameList
 import org.apache.commons.math3.analysis.differentiation.DerivativeStructure
 
 class DSNumber(val ds: DerivativeStructure, nc: DSField) : FieldCompat<Number, DSNumber, DSField>(nc) {
@@ -36,13 +36,13 @@ class DSNumber(val ds: DerivativeStructure, nc: DSField) : FieldCompat<Number, D
     }
 }
 
-class DSField(val order: Int, val names: Names) : VariableField<Number, DSNumber>, ExtendedField<Number, DSNumber> {
+class DSField(val order: Int, val names: NameList) : VariableField<Number, DSNumber>, ExtendedField<Number, DSNumber> {
 
     override val one: DSNumber = transform(1.0)
 
     override val zero: DSNumber = transform( 0.0)
 
-    constructor(order: Int, vararg names: String) : this(order, Names.of(*names))
+    constructor(order: Int, vararg names: String) : this(order, NameList(*names))
 
     override fun transform(n: Number): DSNumber {
         return if (n is DSNumber) {

@@ -115,7 +115,7 @@ public abstract class MergeRule implements Collector<Meta, MetaBuilder, Meta> {
                             builder,
                             valueName,
                             mergeValues(
-                                    Name.join(builder.getFullName(), Name.of(valueName)),
+                                    Name.Companion.join(builder.getFullName(), Name.Companion.of(valueName)),
                                     main.optValue(valueName).orElse(ValueFactory.NULL),
                                     builder.optValue(valueName).orElse(ValueFactory.NULL)
                             )
@@ -130,8 +130,8 @@ public abstract class MergeRule implements Collector<Meta, MetaBuilder, Meta> {
                     if (mainNodes.size() == 1 && secondNodes.size() == 1) {
                         writeNode(builder, nodeName, Collections.singletonList(merge(mainNodes.get(0), secondNodes.get(0))));
                     } else {
-                        List<? extends Meta> item = mergeNodes(Name.join(builder.getFullName(),
-                                Name.of(nodeName)), mainNodes, secondNodes);
+                        List<? extends Meta> item = mergeNodes(Name.Companion.join(builder.getFullName(),
+                                Name.Companion.of(nodeName)), mainNodes, secondNodes);
                         writeNode(builder, nodeName, item);
                     }
                 });

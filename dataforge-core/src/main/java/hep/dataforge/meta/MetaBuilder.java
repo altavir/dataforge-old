@@ -119,7 +119,7 @@ public class MetaBuilder extends MutableMetaNode<MetaBuilder> implements Generic
         if (!hasMeta(name)) {
             MetaBuilder.this.setNode(name, elements);
         } else {
-            Name n = Name.of(name);
+            Name n = Name.Companion.of(name);
             if (n.getLength() == 1) {
                 optChildNodeItem(name).ifPresent(list -> {
                     if (list.size() != elements.length) {

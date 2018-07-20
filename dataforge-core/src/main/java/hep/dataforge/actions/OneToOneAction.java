@@ -82,7 +82,7 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
 
         PipeGoal<? extends T, R> goal = new PipeGoal<>(getExecutorService(context, meta), data.getGoal(),
                 input -> {
-                    Thread.currentThread().setName(Name.joinString(getThreadName(actionMeta), resultName));
+                    Thread.currentThread().setName(Name.Companion.joinString(getThreadName(actionMeta), resultName));
                     return transform(context, resultName, input, meta);
                 }
         );
@@ -90,7 +90,7 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
     }
 
     protected Chronicle getLog(Context context, String dataName) {
-        return context.getHistory().getChronicle(Name.joinString(dataName, getName()));
+        return context.getHistory().getChronicle(Name.Companion.joinString(dataName, getName()));
     }
 
     /**

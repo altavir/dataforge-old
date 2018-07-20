@@ -16,8 +16,8 @@
 package hep.dataforge.stat.parametric;
 
 import hep.dataforge.exceptions.NotDefinedException;
+import hep.dataforge.names.NameList;
 import hep.dataforge.names.NameSetContainer;
-import hep.dataforge.names.Names;
 import hep.dataforge.values.Values;
 
 /**
@@ -58,7 +58,7 @@ public interface ParametricFunction extends NameSetContainer {
                 }
 
                 @Override
-                public Names getNames() {
+                public NameList getNames() {
                     return ParametricFunction.this.getNames();
                 }
             };

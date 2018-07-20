@@ -7,7 +7,6 @@ package hep.dataforge.stat.parametric;
 
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.names.NameSetContainer;
-import hep.dataforge.names.Names;
 import hep.dataforge.values.Values;
 
 public abstract class AbstractParametricBiFunction extends AbstractParametric implements ParametricBiFunction {

@@ -16,7 +16,7 @@
 package hep.dataforge.tables;
 
 import hep.dataforge.exceptions.NameNotFoundException;
-import hep.dataforge.names.Names;
+import hep.dataforge.names.NameList;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.Values;
 import org.jetbrains.annotations.NotNull;
@@ -35,16 +35,16 @@ public class MaskPoint implements Values {
 
     private final Map<String, String> nameMap;
     private final Values source;
-    private final Names names;
+    private final NameList names;
 
     public MaskPoint(Values source, Map<String, String> nameMap) {
         this.source = source;
         this.nameMap = nameMap;
-        names = Names.of(nameMap.keySet());
+        names = new NameList(nameMap.keySet());
     }
 
     @Override
-    public boolean hasValue(String path) {
+    public boolean hasValue(@NotNull String path) {
         return nameMap.containsKey(path);
     }
 
@@ -54,13 +54,14 @@ public class MaskPoint implements Values {
      * @return
      */
     @Override
-    public Names getNames() {
+    public NameList getNames() {
         return names;
     }
 
     /**
      * {@inheritDoc}
      */
+    @NotNull
     @Override
     public Optional<Value> optValue(@NotNull String name) throws NameNotFoundException {
         return source.optValue(nameMap.get(name));

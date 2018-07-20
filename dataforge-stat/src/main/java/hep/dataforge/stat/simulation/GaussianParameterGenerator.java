@@ -18,7 +18,6 @@ package hep.dataforge.stat.simulation;
 import hep.dataforge.maths.MathUtils;
 import hep.dataforge.maths.NamedMatrix;
 import hep.dataforge.maths.NamedVector;
-import hep.dataforge.names.Names;
 import hep.dataforge.stat.fit.ParamSet;
 import hep.dataforge.values.Values;
 import org.apache.commons.math3.distribution.MultivariateNormalDistribution;

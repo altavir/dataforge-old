@@ -21,7 +21,6 @@ import hep.dataforge.maths.integration.DistributionSampler;
 import hep.dataforge.maths.integration.MonteCarloIntegrand;
 import hep.dataforge.maths.integration.MonteCarloIntegrator;
 import hep.dataforge.maths.integration.Sampler;
-import hep.dataforge.names.Names;
 import hep.dataforge.stat.fit.FitResult;
 import hep.dataforge.stat.parametric.AbstractParametricValue;
 import hep.dataforge.stat.parametric.ParametricValue;
