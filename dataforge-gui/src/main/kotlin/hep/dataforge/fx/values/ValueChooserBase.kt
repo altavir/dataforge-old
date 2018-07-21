@@ -7,7 +7,6 @@ package hep.dataforge.fx.values
 
 import hep.dataforge.description.ValueDescriptor
 import hep.dataforge.values.Value
-import hep.dataforge.values.ValueType
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.Node
 import org.slf4j.LoggerFactory
@@ -21,9 +20,11 @@ import tornadofx.*
 abstract class ValueChooserBase<out T : Node> : ValueChooser {
 
     override val node by lazy { buildNode() }
-    override val valueProperty = SimpleObjectProperty<Value>(Value.NULL)
-    override val descriptorProperty = SimpleObjectProperty<ValueDescriptor>()
+    final override val valueProperty = SimpleObjectProperty<Value>(Value.NULL)
+    final override val descriptorProperty = SimpleObjectProperty<ValueDescriptor>()
 
+    override var descriptor: ValueDescriptor? by descriptorProperty
+    override var value: Value? by valueProperty
 
     fun resetValue() {
         setDisplayValue(currentValue())
@@ -34,13 +35,7 @@ abstract class ValueChooserBase<out T : Node> : ValueChooser {
      * @return
      */
     protected fun currentValue(): Value {
-        val value = valueProperty.get()
-        return if (value == null || value.type == ValueType.NULL) {
-            val descriptor = descriptor
-            descriptor?.default ?: Value.NULL
-        } else {
-            value
-        }
+        return value ?: descriptor?.default ?: Value.NULL
     }
 
     /**

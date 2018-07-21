@@ -304,7 +304,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
      * @param value
      */
     public T setValue(Name name, Value value, boolean notify) {
-        if (value == null || value.isNull()) {
+        if (value == null ) {
             removeValue(name);
         } else {
             Optional<Value> oldValueItem = optValue(name);

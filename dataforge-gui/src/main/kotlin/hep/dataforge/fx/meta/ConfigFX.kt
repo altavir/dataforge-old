@@ -140,11 +140,11 @@ open class ConfigFXNode(
                 }
             }
         }
-        return list;
+        return list.sortedBy { it.name };
     }
 
     fun addValue(name: String) {
-        getOrBuildNode().setValue(name, "not defined")
+        getOrBuildNode().setValue(name, Value.NULL)
     }
 
     fun setValue(name: String, value: Value) {

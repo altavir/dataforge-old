@@ -308,10 +308,9 @@ class JFreeChartFrame : XYPlotFrame(), FXObject, Serializable {
             render.setLegendItemLabelGenerator { dataset, series -> it.string }
         }
 
-        val index = index[name]?.index
-        if(index!= null) {
-            runLater {
-                xyPlot.setRenderer(index, render)
+        runLater {
+            index[name]?.index?.let {
+                xyPlot.setRenderer(it, render)
 
                 // update cache to default colors
                 val paint = render.lookupSeriesPaint(0)
@@ -321,6 +320,7 @@ class JFreeChartFrame : XYPlotFrame(), FXObject, Serializable {
                 shapeCache[name] = render.lookupSeriesShape(0)
             }
         }
+
     }
 
     /**
@@ -344,14 +344,14 @@ class JFreeChartFrame : XYPlotFrame(), FXObject, Serializable {
         return Optional.ofNullable(colorCache[name]).map { color -> ValueFactory.of(PlotUtils.awtColorToString(color)) }
     }
 
-    //    @Override
-    //    public synchronized void clear() {
-    //        super.clear();
-    //        index.values().forEach(wr -> {
-    //            xyPlot.setDataset(wr.getIndex(), null);
-    //        });
-    //        this.index.clear();
-    //    }
+//    @Override
+//    public synchronized void clear() {
+//        super.clear();
+//        index.values().forEach(wr -> {
+//            xyPlot.setDataset(wr.getIndex(), null);
+//        });
+//        this.index.clear();
+//    }
 
     @Throws(ObjectStreamException::class)
     private fun writeReplace(): Any {

@@ -32,9 +32,11 @@ class ConfigEditor(val configuration: Configuration, title: String = "Configurat
 
     private fun TreeItem<ConfigFX>.update(): TreeItem<ConfigFX> {
         (value as? ConfigFXNode)?.let {
-            children.setAll(it.children.filter(filter).map { TreeItem(it).update() })
-            it.children.onChange {
-                update()
+            runLater {
+                children.setAll(it.children.filter(filter).map { TreeItem(it).update() })
+                it.children.onChange {
+                    update()
+                }
             }
         }
         return this
@@ -42,22 +44,10 @@ class ConfigEditor(val configuration: Configuration, title: String = "Configurat
 
     override val root = borderpane {
         center = treetableview<ConfigFX> {
-            //            stylesheet {
-//                Stylesheet.treeTableRowCell {
-//                    borderColor += box(Color.BLACK)
-//                    borderStyle += BorderStrokeStyle.SOLID
-//                    and(Stylesheet.even) {
-//                        backgroundColor += Color.WHITE
-//                    }
-//                    and(Stylesheet.odd) {
-//                        backgroundColor += Color.LIGHTGRAY
-//                    }
-//                }
-//            }
+
             root = TreeItem(ConfigFXRoot(configuration, descriptor))
             runAsync {
                 root.update()
-                refresh()
             }
             root.isExpanded = true
             sortMode = TreeSortMode.ALL_DESCENDANTS

@@ -32,16 +32,11 @@ interface ValueChooser {
      * @return
      */
     val descriptorProperty: ObjectProperty<ValueDescriptor?>
-
     var descriptor: ValueDescriptor?
-        get() = descriptorProperty.get()
-        set(desc) = descriptorProperty.set(desc)
 
     val valueProperty: ObjectProperty<Value?>
-
     var value: Value?
-        get() = valueProperty.get()
-        set(v) = valueProperty.set(v)
+
 
 
     /**
@@ -80,8 +75,8 @@ object ValueChooserFactory{
 
     fun build(initialValue: Value, descriptor: ValueDescriptor? = null, callback: ValueCallback): ValueChooser {
         val chooser = build(descriptor)
-        if (initialValue !== Value.NULL) {
-            chooser.value = initialValue
+        if (initialValue != Value.NULL) {
+            chooser.setDisplayValue(initialValue)
         }
         chooser.setCallback(callback)
         return chooser
