@@ -308,15 +308,18 @@ class JFreeChartFrame : XYPlotFrame(), FXObject, Serializable {
             render.setLegendItemLabelGenerator { dataset, series -> it.string }
         }
 
-        runLater {
-            xyPlot.setRenderer(index[name]!!.index, render)
+        val index = index[name]?.index
+        if(index!= null) {
+            runLater {
+                xyPlot.setRenderer(index, render)
 
-            // update cache to default colors
-            val paint = render.lookupSeriesPaint(0)
-            if (paint is Color) {
-                colorCache[name] = paint
+                // update cache to default colors
+                val paint = render.lookupSeriesPaint(0)
+                if (paint is Color) {
+                    colorCache[name] = paint
+                }
+                shapeCache[name] = render.lookupSeriesShape(0)
             }
-            shapeCache[name] = render.lookupSeriesShape(0)
         }
     }
 

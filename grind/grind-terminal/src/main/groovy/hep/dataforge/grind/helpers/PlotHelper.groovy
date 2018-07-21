@@ -21,8 +21,8 @@ import hep.dataforge.context.Global
 import hep.dataforge.io.output.TextOutput
 import hep.dataforge.meta.Meta
 import hep.dataforge.plots.PlotFrame
-import hep.dataforge.plots.XYFunctionPlot
 import hep.dataforge.plots.data.DataPlot
+import hep.dataforge.plots.data.XYFunctionPlot
 import hep.dataforge.plots.data.XYPlot
 import hep.dataforge.plots.output.PlotOutputKt
 import hep.dataforge.tables.Adapters

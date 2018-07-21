@@ -13,12 +13,11 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package hep.dataforge.plots
+package hep.dataforge.plots.data
 
 import hep.dataforge.description.ValueDef
 import hep.dataforge.description.ValueDefs
 import hep.dataforge.meta.*
-import hep.dataforge.plots.data.XYPlot
 import hep.dataforge.tables.Adapters
 import hep.dataforge.tables.Adapters.DEFAULT_XY_ADAPTER
 import hep.dataforge.tables.Adapters.buildXYDataPoint
@@ -42,7 +41,7 @@ import kotlin.collections.set
         ValueDef(key = "range.from", type = arrayOf(NUMBER), def = "0.0", info = "Lower boundary for calculation range"),
         ValueDef(key = "range.to", type = arrayOf(NUMBER), def = "1.0", info = "Upper boundary for calculation range"),
         ValueDef(key = "density", type = arrayOf(NUMBER), def = "200", info = "Minimal number of points per plot"),
-        ValueDef(key = "connectionType", def = "spline")
+        ValueDef(key = "connectionType", def = "SPLINE", enumeration = XYPlot.ConnectionType::class, info = "Connection line type")
 )
 class XYFunctionPlot(name: String, meta: Meta = Meta.empty(), val function: (Double) -> Double) : XYPlot(name, meta, Adapters.DEFAULT_XY_ADAPTER) {
 

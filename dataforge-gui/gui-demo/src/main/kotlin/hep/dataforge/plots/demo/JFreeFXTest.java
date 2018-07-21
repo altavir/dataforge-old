@@ -16,8 +16,8 @@
 package hep.dataforge.plots.demo;
 
 import hep.dataforge.meta.MetaBuilder;
-import hep.dataforge.plots.XYFunctionPlot;
 import hep.dataforge.plots.data.DataPlot;
+import hep.dataforge.plots.data.XYFunctionPlot;
 import hep.dataforge.plots.jfreechart.JFreeChartFrame;
 import hep.dataforge.tables.Adapters;
 import hep.dataforge.tables.ListTable;

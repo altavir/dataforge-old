@@ -97,9 +97,9 @@ class FXPlotOutput(context: Context, meta: Meta = Meta.empty()) : FXOutput(conte
             when (obj) {
                 is PlotFrame -> {
                     frame.configure(obj.config)
+                    frame.addAll(obj.plots)
                     frame.plots.configure(obj.plots.config)
                     frame.plots.descriptor = obj.plots.descriptor
-                    frame.addAll(obj.plots)
 
                     obj.plots.addListener(object: PlotListener{
                         override fun dataChanged(caller: Plottable, path: Name) {
@@ -107,7 +107,7 @@ class FXPlotOutput(context: Context, meta: Meta = Meta.empty()) : FXOutput(conte
                         }
 
                         override fun metaChanged(caller: Plottable, path: Name) {
-                            //do nothing
+                            //frame.plots.metaChanged(caller,path)
                         }
                     })
                 }

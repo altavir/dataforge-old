@@ -2,8 +2,8 @@ package hep.dataforge.plots.demo
 
 import hep.dataforge.buildContext
 import hep.dataforge.fx.output.FXOutputManager
-import hep.dataforge.plots.XYFunctionPlot
 import hep.dataforge.plots.data.DataPlot
+import hep.dataforge.plots.data.XYFunctionPlot
 import hep.dataforge.plots.jfreechart.JFreeChartPlugin
 import hep.dataforge.plots.output.plot
 import hep.dataforge.tables.Adapters

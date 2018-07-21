@@ -53,23 +53,32 @@ class PlotGroup(name: String, descriptor: NodeDescriptor = NodeDescriptor.empty(
             metaChanged(this, Name.empty())
         }
 
-    private fun resolveChildName(caller: Plottable): Name {
-        return Name.of(caller.name)
+    private fun resolvePlotName(caller: Plottable): Name {
+        return when {
+            caller == this -> Name.empty()
+            plots.contains(caller) -> Name.of(caller.name)
+            else -> error("Could not find $caller in $this")
+        }
     }
 
 
     override fun dataChanged(caller: Plottable, path: Name) {
-        listeners.forEach { it.dataChanged(this, resolveChildName(caller) + path) }
+        listeners.forEach { it.dataChanged(this, resolvePlotName(caller) + path) }
     }
 
     override fun metaChanged(caller: Plottable, path: Name) {
-        listeners.forEach { it.metaChanged(this, resolveChildName(caller) + path) }
+        listeners.forEach { it.metaChanged(this, resolvePlotName(caller) + path) }
     }
 
 
     fun add(plot: Plottable) {
         this.plots.add(plot)
+        plot.addListener(this)
         dataChanged(this, Name.of(plot.name))
+    }
+
+    operator fun Plottable.unaryPlus(){
+        this@PlotGroup.add(this)
     }
 
     /**
@@ -96,6 +105,7 @@ class PlotGroup(name: String, descriptor: NodeDescriptor = NodeDescriptor.empty(
     }
 
     fun clear() {
+        plots.forEach { it.removeListener(this) }
         plots.clear()
         dataChanged(this, Name.empty())
     }

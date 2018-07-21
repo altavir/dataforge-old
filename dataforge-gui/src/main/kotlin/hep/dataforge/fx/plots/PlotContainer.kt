@@ -264,7 +264,7 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
 
     private inner class ContainerChangeListener(val item: TreeItem<Plottable>) : PlotListener {
         override fun metaChanged(caller: Plottable, path: Name) {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            //do nothing
         }
 
         override fun dataChanged(caller: Plottable, path: Name) {

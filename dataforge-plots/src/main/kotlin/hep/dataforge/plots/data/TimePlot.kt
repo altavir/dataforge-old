@@ -40,9 +40,9 @@ import java.util.*
  * @author Alexander Nozik
  */
 @ValueDefs(
-        ValueDef(key = MAX_AGE_KEY, type = arrayOf(ValueType.NUMBER), def = "-1", info = "The maximum age of items in milliseconds. Negative means no limit"),
-        ValueDef(key = MAX_ITEMS_KEY, type = arrayOf(ValueType.NUMBER), def = "1000", info = "The maximum number of items. Negative means no limit"),
-        ValueDef(key = PREF_ITEMS_KEY, type = arrayOf(ValueType.NUMBER), def = "400", info = "The preferred number of items to leave after cleanup.")
+        ValueDef(key = MAX_AGE_KEY, type = [ValueType.NUMBER], def = "-1", info = "The maximum age of items in milliseconds. Negative means no limit"),
+        ValueDef(key = MAX_ITEMS_KEY, type = [ValueType.NUMBER], def = "1000", info = "The maximum number of items. Negative means no limit"),
+        ValueDef(key = PREF_ITEMS_KEY, type = [ValueType.NUMBER], def = "400", info = "The preferred number of items to leave after cleanup.")
 )
 class TimePlot(name: String, val yKey: String = Adapters.Y_AXIS, meta: Meta = Meta.empty(), private val timestampKey: String = TIMESTAMP_KEY) :
         XYPlot(name, meta, Adapters.buildXYAdapter(timestampKey, yKey)) {
