@@ -7,7 +7,7 @@ import hep.dataforge.fx.dfIconView
 import hep.dataforge.fx.display
 import hep.dataforge.fx.meta.ConfigEditor
 import hep.dataforge.fx.table.TableDisplay
-import hep.dataforge.meta.Laminate
+import hep.dataforge.io.envelopes.JavaObjectWrapper.name
 import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name
 import hep.dataforge.plots.*
@@ -183,7 +183,7 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
                                 button("...") {
                                     minWidth = 0.0
                                     action {
-                                        displayConfigurator(item.title + " configuration", item, Descriptors.forType("plot",item::class))
+                                        displayConfigurator(item.title + " configuration", item, Descriptors.forType("plot", item::class))
                                     }
                                 }
 
@@ -263,31 +263,27 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
     }
 
     private inner class ContainerChangeListener(val item: TreeItem<Plottable>) : PlotListener {
-        override fun dataChanged(name: Name, plot: Plot) {
+        override fun metaChanged(caller: Plottable, path: Name) {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
-        override fun metaChanged(name: Name, plottable: Plottable, laminate: Laminate) {
-        }
-
-        override fun plotAdded(name: Name, plottable: Plottable) {
-            if (name.length == 1) {
-                item.children.add(fillTree(plottable))
+        override fun dataChanged(caller: Plottable, path: Name) {
+            if (path.length == 1) {
+                val plot = (caller as? PlotGroup)?.get(path)
+                if(plot == null){
+                    item.children.removeIf { it.value.name == name }
+                }else {
+                    item.children.add(fillTree(plot))
+                }
             }
         }
-
-        override fun plotRemoved(name: Name) {
-            if (name.length == 1) {
-                item.children.removeIf { it.value.name == name }
-            }
-        }
-
     }
 
     private fun fillTree(plot: Plottable): TreeItem<Plottable> {
         val item = TreeItem(plot)
         plot.addListener(ContainerChangeListener(item))
         if (plot is PlotGroup) {
-            item.children.setAll(plot.children.map { fillTree(it) })
+            item.children.setAll(plot.map { fillTree(it) })
         }
         item.isExpanded = true
         return item
@@ -295,9 +291,9 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
 
     private fun getFullName(item: TreeItem<Plottable>): Name {
         return if (item.parent == null || item.parent.value.name.isEmpty()) {
-            item.value.name;
+            Name.of(item.value.name);
         } else {
-            Name.join(getFullName(item.parent), item.value.name)
+            getFullName(item.parent) + item.value.name
         }
     }
 

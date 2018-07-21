@@ -37,18 +37,8 @@ import java.util.*
  */
 open class MetaHolder(override val meta: Meta) : Metoid, Described, ValueProvider {
 
-    private val _descriptor: NodeDescriptor by lazy {
-        super.getDescriptor()
-    }
-
-
-    /**
-     * Get descriptor for contetn of this metaholder
-     *
-     * @return
-     */
-    override fun getDescriptor(): NodeDescriptor {
-        return _descriptor
+    override val descriptor: NodeDescriptor by lazy {
+        super.descriptor
     }
 
     /**
@@ -61,7 +51,7 @@ open class MetaHolder(override val meta: Meta) : Metoid, Described, ValueProvide
     override fun optValue(path: String): Optional<Value> {
         return Optionals
                 .either(meta.optValue(path))
-                .or { getDescriptor().getValueDescriptor(path)?.default.optional }
+                .or { descriptor.getValueDescriptor(path)?.default.optional }
                 .opt()
     }
 
@@ -72,7 +62,7 @@ open class MetaHolder(override val meta: Meta) : Metoid, Described, ValueProvide
      * @return
      */
     override fun hasValue(path: String): Boolean {
-        return meta.hasValue(path) || getDescriptor().hasDefaultForValue(path)
+        return meta.hasValue(path) || descriptor.hasDefaultForValue(path)
     }
 
 }

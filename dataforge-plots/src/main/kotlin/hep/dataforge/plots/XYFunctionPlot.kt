@@ -18,7 +18,6 @@ package hep.dataforge.plots
 import hep.dataforge.description.ValueDef
 import hep.dataforge.description.ValueDefs
 import hep.dataforge.meta.*
-import hep.dataforge.names.Name
 import hep.dataforge.plots.data.XYPlot
 import hep.dataforge.tables.Adapters
 import hep.dataforge.tables.Adapters.DEFAULT_XY_ADAPTER
@@ -45,7 +44,7 @@ import kotlin.collections.set
         ValueDef(key = "density", type = arrayOf(NUMBER), def = "200", info = "Minimal number of points per plot"),
         ValueDef(key = "connectionType", def = "spline")
 )
-class XYFunctionPlot(name: String, meta: Meta = Meta.empty(), val function: (Double) -> Double) : XYPlot(Name.ofSingle(name), meta, Adapters.DEFAULT_XY_ADAPTER) {
+class XYFunctionPlot(name: String, meta: Meta = Meta.empty(), val function: (Double) -> Double) : XYPlot(name, meta, Adapters.DEFAULT_XY_ADAPTER) {
 
     private val cache = TreeMap<Double, Double>()
 

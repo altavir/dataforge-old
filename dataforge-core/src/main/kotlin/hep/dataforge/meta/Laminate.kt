@@ -33,9 +33,24 @@ import java.util.stream.Stream
  *
  * @author darksnake
  */
-class Laminate(layers: List<Meta>, private val descriptor: NodeDescriptor? = null) : Meta(), Described {
+class Laminate(layers: List<Meta?>, descriptor: NodeDescriptor? = null) : Meta(), Described {
 
-    val layers: List<Meta> = layers.flatMap {
+    //TODO consider descriptor merging
+    override val descriptor: NodeDescriptor = descriptor ?: layers.stream()
+            .filter { it -> it is Laminate }.map { Laminate::class.java.cast(it) }
+            .map { it.descriptor }
+            .findFirst().orElse(NodeDescriptor(Meta.empty()))
+
+
+    /**
+     * Create laminate from layers. Deepest first.
+     *
+     * @param layers
+     */
+    constructor(vararg layers: Meta?) : this(Arrays.asList<Meta>(*layers)) {}
+
+
+    val layers: List<Meta> = layers.filterNotNull().flatMap {
         when {
             it.isEmpty -> emptyList()
             it is Laminate -> it.layers // no need to check deeper since laminate is always has only direct members
@@ -49,13 +64,6 @@ class Laminate(layers: List<Meta>, private val descriptor: NodeDescriptor? = nul
 
     override val name: String
         get() = layers.stream().map { it.name }.findFirst().orElse(MetaNode.DEFAULT_META_NAME)
-
-    /**
-     * Create laminate from layers. Deepest first.
-     *
-     * @param layers
-     */
-    constructor(vararg layers: Meta) : this(Arrays.asList<Meta>(*layers)) {}
 
 
     @Contract(pure = true)
@@ -93,6 +101,13 @@ class Laminate(layers: List<Meta>, private val descriptor: NodeDescriptor? = nul
      */
     fun withLayer(vararg layers: Meta): Laminate {
         return Laminate(this.layers + layers, descriptor)
+    }
+
+    /**
+     * Add layer to the end of laminate
+     */
+    operator fun plus(layer: Meta): Laminate {
+        return withLayer(layer)
     }
 
     /**
@@ -190,19 +205,6 @@ class Laminate(layers: List<Meta>, private val descriptor: NodeDescriptor? = nul
             descriptorLayer!!.optValue(path).map { it -> MetaUtils.transformValue(it) }
         } else Optional.empty()
 
-    }
-
-    override fun getDescriptor(): NodeDescriptor {
-        return if (descriptor != null) {
-            descriptor
-        } else {
-            //TODO consider descriptor merging
-            layers.stream()
-                    .filter { it -> it is Laminate }.map { Laminate::class.java.cast(it) }
-                    .map { it.getDescriptor() }
-                    .findFirst().orElse(NodeDescriptor(Meta.empty()))
-
-        }
     }
 
     override fun isEmpty(): Boolean {

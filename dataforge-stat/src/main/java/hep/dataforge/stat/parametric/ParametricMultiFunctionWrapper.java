@@ -19,6 +19,7 @@ import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.maths.MathUtils;
 import hep.dataforge.maths.NamedVector;
 import hep.dataforge.maths.functions.MultiFunction;
+import hep.dataforge.names.NameList;
 import hep.dataforge.values.Values;
 
 /**
@@ -31,9 +32,9 @@ public class ParametricMultiFunctionWrapper implements ParametricValue, MultiFun
 
     private final MultiFunction multiFunc;
     private final ParametricValue nFunc;
-    private final Names names;
+    private final NameList names;
 
-    public ParametricMultiFunctionWrapper(Names names, MultiFunction multiFunc) {
+    public ParametricMultiFunctionWrapper(NameList names, MultiFunction multiFunc) {
         this.names = names;
         this.nFunc = null;
         this.multiFunc = multiFunc;
@@ -86,7 +87,7 @@ public class ParametricMultiFunctionWrapper implements ParametricValue, MultiFun
      * {@inheritDoc}
      */
     @Override
-    public Names getNames() {
+    public NameList getNames() {
         return names;
     }
 

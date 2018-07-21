@@ -177,10 +177,7 @@ open class NodeDescriptor(meta: Meta) : SimpleMetaMorph(meta.sealed), Named {
         return meta
     }
 
-    override fun getDescriptor(): NodeDescriptor {
-        //TODO add descriptor for descriptor
-        return empty("descriptor")
-    }
+    //override val descriptor: NodeDescriptor =  empty("descriptor")
 
     companion object {
 

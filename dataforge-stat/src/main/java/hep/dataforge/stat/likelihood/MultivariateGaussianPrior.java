@@ -17,6 +17,7 @@ package hep.dataforge.stat.likelihood;
 
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.exceptions.NotDefinedException;
+import hep.dataforge.names.NameList;
 import hep.dataforge.stat.fit.Param;
 import hep.dataforge.stat.fit.ParamSet;
 import hep.dataforge.stat.parametric.ParametricValue;
@@ -58,7 +59,7 @@ public class MultivariateGaussianPrior implements ParametricValue {
 
     /** {@inheritDoc} */
     @Override
-    public Names getNames() {
+    public NameList getNames() {
         return set.getNames();
     }
 

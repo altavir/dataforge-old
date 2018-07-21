@@ -78,7 +78,7 @@ class DataTree<T: Any> constructor(
     private fun nodeStream(parentName: Name, parentMeta: Laminate): Stream<DataNode<out T>> {
         return nodeMap.entries.stream().flatMap { nodeEntry ->
             val nodeItself = Stream.of<DataNode<T>>(
-                    NodeWrapper(nodeEntry.value, parentName.toString(), parentMeta.cleanup())
+                    NodeWrapper(nodeEntry.value, parentName.toString(), parentMeta)
             )
 
             val childName = parentName.plus(nodeEntry.key)

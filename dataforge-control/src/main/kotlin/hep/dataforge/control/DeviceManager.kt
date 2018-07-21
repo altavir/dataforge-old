@@ -88,7 +88,7 @@ class DeviceManager : BasicPlugin(), DeviceHub {
 
     override fun optDevice(name: Name): Optional<Device> {
         return when {
-            name.isEmpty -> throw IllegalArgumentException("Can't provide a device with zero name")
+            name.isEmpty() -> throw IllegalArgumentException("Can't provide a device with zero name")
             name.length == 1 -> Optional.ofNullable(_devices[name])
             else -> Optional.ofNullable(_devices[name.first]).flatMap { hub ->
                 if (hub is DeviceHub) {

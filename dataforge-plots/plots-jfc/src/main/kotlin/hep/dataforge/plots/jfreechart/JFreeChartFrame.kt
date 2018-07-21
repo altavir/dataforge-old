@@ -19,10 +19,7 @@ import hep.dataforge.exceptions.NameNotFoundException
 import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name
-import hep.dataforge.plots.Plot
-import hep.dataforge.plots.PlotFrame
-import hep.dataforge.plots.PlotUtils
-import hep.dataforge.plots.XYPlotFrame
+import hep.dataforge.plots.*
 import hep.dataforge.useValue
 import hep.dataforge.utils.FXObject
 import hep.dataforge.values.Value
@@ -49,7 +46,6 @@ import org.jfree.data.Range
 import org.jfree.data.general.DatasetChangeEvent
 import org.jfree.data.xy.XYDataset
 import org.slf4j.LoggerFactory
-import tornadofx.*
 import java.awt.BasicStroke
 import java.awt.Color
 import java.awt.Shape
@@ -82,9 +78,10 @@ class JFreeChartFrame : XYPlotFrame(), FXObject, Serializable {
     private val shapeCache = HashMap<Name, Shape>()
 
     private fun runLater(runnable: () -> Unit) {
-        if(FX.initialized.value){
+        try {
             Platform.runLater(runnable)
-        } else{
+        } catch (ex: IllegalStateException) {
+            //if toolkit is not initialized
             runnable.invoke()
         }
     }
@@ -243,26 +240,27 @@ class JFreeChartFrame : XYPlotFrame(), FXObject, Serializable {
         runLater { this.chart.setTitle(annotation.getString("title", "")) }
     }
 
-    override fun plotRemoved(name: Name) {
-        val num = Optional.ofNullable(index[name]).map<Int> { it.index }.orElse(-1)
-        if (num >= 0) {
-            runLater { xyPlot.setDataset(num, null) }
-        }
-        index.remove(name)
-    }
-
     @Synchronized
-    override fun updatePlotData(name: Name, plot: Plot) {
-        if (!index.containsKey(name)) {
-            val wrapper = JFCDataWrapper(plot)
-            wrapper.index = index.values.stream().mapToInt { it.index }.max().orElse(-1) + 1
-            index[name] = wrapper
-            runLater { this.xyPlot.setDataset(wrapper.index, wrapper) }
-        } else {
-            val wrapper = index[name]
-            wrapper!!.setPlot(plot)
-            wrapper.invalidateData()
-            runLater { this.xyPlot.datasetChanged(DatasetChangeEvent(this.xyPlot, wrapper)) }
+    override fun updatePlotData(name: Name, plot: Plottable?) {
+        if (plot == null) {
+            val num = Optional.ofNullable(index[name]).map<Int> { it.index }.orElse(-1)
+            if (num >= 0) {
+                runLater { xyPlot.setDataset(num, null) }
+            }
+            index.remove(name)
+        } else if (plot is Plot) {
+            //ignore groups
+            if (!index.containsKey(name)) {
+                val wrapper = JFCDataWrapper(plot)
+                wrapper.index = index.values.stream().mapToInt { it.index }.max().orElse(-1) + 1
+                index[name] = wrapper
+                runLater { this.xyPlot.setDataset(wrapper.index, wrapper) }
+            } else {
+                val wrapper = index[name]
+                wrapper!!.setPlot(plot)
+                wrapper.invalidateData()
+                runLater { this.xyPlot.datasetChanged(DatasetChangeEvent(this.xyPlot, wrapper)) }
+            }
         }
     }
 

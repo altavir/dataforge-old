@@ -15,6 +15,7 @@
  */
 package hep.dataforge.plots
 
+import hep.dataforge.exceptions.NameNotFoundException
 import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.SimpleConfigurable
 import hep.dataforge.names.Name
@@ -37,7 +38,7 @@ abstract class AbstractPlotFrame : SimpleConfigurable(), PlotFrame, PlotListener
      *
      * @param name
      */
-    protected abstract fun updatePlotData(name: Name, plot: Plot)
+    protected abstract fun updatePlotData(name: Name, plot: Plottable?)
 
     /**
      * Reload an annotation for given plottable.
@@ -61,19 +62,28 @@ abstract class AbstractPlotFrame : SimpleConfigurable(), PlotFrame, PlotListener
         }
     }
 
-    private fun resolveMeta(root: Name, path:Name, meta:La): Laminate {
-
+    private fun resolveMeta(plottable: Plottable, path: Name): Laminate {
+        if (path.isEmpty()) {
+            return Laminate(listOf(plottable.config), plottable.descriptor)
+        } else {
+            val plot = (plottable as? PlotGroup)?.get(path.first)
+            if (plot == null) {
+                throw NameNotFoundException("Can't resolve plottable with name $path in $plottable")
+            } else {
+                return resolveMeta(plot, path.cutFirst()) + plot.config
+            }
+        }
     }
 
     override fun dataChanged(caller: Plottable, path: Name) {
         recursiveApply(path) { name, plot ->
-            (plot as? Plot)?.let { updatePlotData(name, it) }
+            updatePlotData(name, plot)
         }
     }
 
     override fun metaChanged(caller: Plottable, path: Name) {
-        recursiveApply(path) { name, plot ->
-            (plot as? Plot)?.let { updatePlotConfig(name, resolveMeta(name)) }
+        recursiveApply(path) { name, _ ->
+            updatePlotConfig(name, resolveMeta(plots,name))
         }
     }
 

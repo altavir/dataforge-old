@@ -18,6 +18,7 @@ package hep.dataforge.stat.simulation;
 import hep.dataforge.maths.MathUtils;
 import hep.dataforge.maths.NamedMatrix;
 import hep.dataforge.maths.NamedVector;
+import hep.dataforge.names.NameList;
 import hep.dataforge.stat.fit.ParamSet;
 import hep.dataforge.values.Values;
 import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
@@ -30,9 +31,9 @@ import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
 public class GaussianParameterGenerator implements ParameterGenerator {
 
     private final MultivariateNormalDistribution distribution;
-    private final Names names;
+    private final NameList names;
 
-    public GaussianParameterGenerator(MultivariateNormalDistribution distribution, Names names) {
+    public GaussianParameterGenerator(MultivariateNormalDistribution distribution, NameList names) {
         this.distribution = distribution;
         this.names = names;
     }

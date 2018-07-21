@@ -18,6 +18,7 @@ package hep.dataforge.stat.likelihood;
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.maths.NamedVector;
 import hep.dataforge.maths.domains.Domain;
+import hep.dataforge.names.NameList;
 import hep.dataforge.stat.parametric.AbstractParametricValue;
 import hep.dataforge.values.Values;
 import org.apache.commons.math3.exception.DimensionMismatchException;
@@ -50,9 +51,9 @@ public class MultivariateDomainPrior extends AbstractParametricValue{
      * <p>Constructor for MultivariateDomainPrior.</p>
      *
      * @param dom a {@link Domain} object.
-     * @param named a {@link hep.dataforge.names.Names} object.
+     * @param named
      */
-    public MultivariateDomainPrior(Domain dom, Names named) {
+    public MultivariateDomainPrior(Domain dom, NameList named) {
         super(named);
         if(dom.getDimension()!=named.size()) {
             throw new DimensionMismatchException(dom.getDimension(), named.size());

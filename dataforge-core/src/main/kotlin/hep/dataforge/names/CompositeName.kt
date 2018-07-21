@@ -39,8 +39,7 @@ internal class CompositeName(private val names: LinkedList<NameToken>) : Name {
     override val length: Int
         get() = names.size
 
-    override val isEmpty: Boolean
-        get() = false
+    override fun isEmpty(): Boolean = false
 
     override val tokens: List<Name>
         get() = Collections.unmodifiableList<Name>(names)
@@ -92,7 +91,6 @@ internal class CompositeName(private val names: LinkedList<NameToken>) : Name {
     }
 
     override fun asArray(): Array<String> {
-        val res = arrayOfNulls<String>(length)
         return names.stream().map<String> { it.toString() }.toList().toTypedArray()
     }
 

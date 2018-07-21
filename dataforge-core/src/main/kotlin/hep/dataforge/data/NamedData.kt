@@ -67,7 +67,7 @@ open class NamedData<T>(final override val name: String, type: Class<T>, goal: G
         }
 
         fun <T> wrap(name: Name, data: Data<T>, externalMeta: Laminate): NamedData<T> {
-            val newMeta = externalMeta.withFirstLayer(data.meta).cleanup()
+            val newMeta = externalMeta.withFirstLayer(data.meta)
             return NamedData(name.toString(), data.type, data.goal, newMeta)
         }
     }

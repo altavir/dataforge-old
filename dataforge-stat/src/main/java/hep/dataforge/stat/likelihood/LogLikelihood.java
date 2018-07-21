@@ -17,6 +17,7 @@ package hep.dataforge.stat.likelihood;
 
 import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.exceptions.NotDefinedException;
+import hep.dataforge.names.NameList;
 import hep.dataforge.stat.fit.FitState;
 import hep.dataforge.stat.fit.ParamSet;
 import hep.dataforge.stat.parametric.AbstractParametricValue;
@@ -57,7 +58,7 @@ public class LogLikelihood implements ParametricValue {
     }
 
     @Override
-    public Names getNames() {
+    public NameList getNames() {
         return source.getModel().getNames();
     }
 

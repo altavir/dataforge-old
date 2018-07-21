@@ -1,7 +1,0 @@
-description = 'GnuPlot backendfor plots'
-
-dependencies {
-    // https://mvnrepository.com/artifact/com.panayotis.javaplot/javaplot
-    compile group: 'com.panayotis.javaplot', name: 'javaplot', version: '0.5.0'
-    compile project(":dataforge-plots")
-}

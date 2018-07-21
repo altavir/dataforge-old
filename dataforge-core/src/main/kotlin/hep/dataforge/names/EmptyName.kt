@@ -38,8 +38,7 @@ internal class EmptyName : Name {
     override val tokens: List<Name>
         get() = emptyList()
 
-    override val isEmpty: Boolean
-        get() = true
+    override fun isEmpty(): Boolean = true
 
     override fun hasQuery(): Boolean {
         return false

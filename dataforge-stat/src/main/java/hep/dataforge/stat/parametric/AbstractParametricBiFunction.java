@@ -6,12 +6,13 @@
 package hep.dataforge.stat.parametric;
 
 import hep.dataforge.exceptions.NotDefinedException;
+import hep.dataforge.names.NameList;
 import hep.dataforge.names.NameSetContainer;
 import hep.dataforge.values.Values;
 
 public abstract class AbstractParametricBiFunction extends AbstractParametric implements ParametricBiFunction {
 
-    public AbstractParametricBiFunction(Names names) {
+    public AbstractParametricBiFunction(NameList names) {
         super(names);
     }
 

@@ -81,15 +81,6 @@ operator fun Value.times(other: Any): Value = this * Value.of(other)
 
 //Value comparison
 
-operator fun Value.compareTo(other: Value): Int = when (this.type) {
-    ValueType.NUMBER -> this.number.compareTo(other.number);
-    ValueType.STRING -> this.string.compareTo(other.string)
-    ValueType.TIME -> this.time.compareTo(other.time)
-    ValueType.BOOLEAN -> this.boolean.compareTo(other.boolean)
-    ValueType.NULL -> if (other.isNull) 0 else 1
-    ValueType.BINARY -> this.binary.compareTo(other.binary)
-}
-
 fun Value?.isNull(): Boolean = this == null || this.isNull
 
 

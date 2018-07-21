@@ -6,6 +6,7 @@
 package hep.dataforge.plots.jfreechart
 
 import hep.dataforge.meta.Meta
+import hep.dataforge.names.Name
 import hep.dataforge.plots.Plot
 import hep.dataforge.tables.Adapters
 import hep.dataforge.tables.ValuesAdapter
@@ -53,9 +54,9 @@ internal class JFCDataWrapper(private var plot: Plot, private val query: Meta = 
 
     override fun getSeriesKey(i: Int): Comparable<*> {
         return if (seriesCount == 1) {
-            plot.name.toUnescaped()
+            plot.name
         } else {
-            plot.name.append(Adapters.getTitle(adapter, Adapters.Y_AXIS)).toUnescaped()
+            Name.joinString(plot.name,Adapters.getTitle(adapter, Adapters.Y_AXIS))
         }
     }
 

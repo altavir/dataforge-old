@@ -19,7 +19,6 @@ import hep.dataforge.description.ValueDef
 import hep.dataforge.description.ValueDefs
 import hep.dataforge.meta.KMetaBuilder
 import hep.dataforge.meta.Meta
-import hep.dataforge.names.Name
 import hep.dataforge.tables.Adapters
 import hep.dataforge.tables.Adapters.*
 import hep.dataforge.tables.ValuesAdapter
@@ -37,7 +36,7 @@ import java.util.stream.Stream
         ValueDef(key = "showSymbol", type = [ValueType.BOOLEAN], def = "true", info = "Show symbols for data point."),
         ValueDef(key = "showErrors", type = [ValueType.BOOLEAN], def = "true", info = "Show errors for points.")
 )
-class DataPlot(name: String, meta: Meta = Meta.empty(), adapter: ValuesAdapter? = null, data: Iterable<Values> = emptyList()) : XYPlot(Name.ofSingle(name), meta, adapter) {
+class DataPlot(name: String, meta: Meta = Meta.empty(), adapter: ValuesAdapter? = null, data: Iterable<Values> = emptyList()) : XYPlot(name, meta, adapter) {
 
     /**
      *

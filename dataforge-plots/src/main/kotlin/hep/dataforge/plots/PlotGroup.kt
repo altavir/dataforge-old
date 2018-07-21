@@ -23,7 +23,6 @@ import hep.dataforge.io.envelopes.Envelope
 import hep.dataforge.io.envelopes.EnvelopeBuilder
 import hep.dataforge.io.envelopes.EnvelopeType
 import hep.dataforge.io.envelopes.JavaObjectWrapper.JAVA_SERIAL_DATA
-import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaNode.DEFAULT_META_NAME
 import hep.dataforge.meta.SimpleConfigurable
@@ -40,13 +39,19 @@ import java.util.stream.Stream
 /**
  * A group of plottables. It could store Plots as well as other plot groups.
  */
-class PlotGroup(name: String, private var descriptor: NodeDescriptor = NodeDescriptor.empty("group"))
+class PlotGroup(name: String, descriptor: NodeDescriptor = NodeDescriptor.empty("group"))
     : SimpleConfigurable(), Plottable, Provider, PlotListener, Iterable<Plottable> {
 
     //auto escape names
     override val name: String = Name.ofSingle(name).toString()
     private val plots = LinkedHashSet<Plottable>()
     private val listeners = ReferenceRegistry<PlotListener>()
+
+    override var descriptor = descriptor
+        set(value) {
+            field = value
+            metaChanged(this, Name.empty())
+        }
 
     private fun resolveChildName(caller: Plottable): Name {
         return Name.of(caller.name)
@@ -62,53 +67,9 @@ class PlotGroup(name: String, private var descriptor: NodeDescriptor = NodeDescr
     }
 
 
-
-    /**
-     * Recursively notify listeners about all added plots
-     *
-     * @param plot
-     */
-    private fun notifyPlotAdded(path: Name, plot: Plottable) {
-        plotAdded(this, name, plot)
-        metaChanged(this, name, Laminate(plot.config).withDescriptor(Descriptors.forType("plot", plot::class)))
-        if (plot is PlotGroup) {
-            plot.plots.forEach { notifyPlotAdded(it.first, it.second) }
-        }
-    }
-
     fun add(plot: Plottable) {
         this.plots.add(plot)
         dataChanged(this, Name.of(plot.name))
-    }
-
-    operator fun set(path: Name, plot: Plottable) {
-        synchronized(plots) {
-            if (name.length == 1) {
-                this.plots.add(Pair(name, plot))
-                plot.addListener(this)
-                (name, plot)
-            } else if (name.length > 1) {
-                this[name.first] = PlotGroup().apply { set(name.cutFirst(), plot) }
-            }
-        }
-    }
-
-    operator fun set(name: String, plot: Plottable) {
-        set(Name.of(name), plot)
-    }
-
-    infix fun String.to(plot: Plottable) {
-        set(this, plot)
-    }
-
-    private fun notifyPlotRemoved(name: Name) {
-        get(name)?.let { plottable ->
-            if (plottable is PlotGroup) {
-                plottable.plots.forEach { notifyPlotRemoved(name + it.first) }
-            }
-            //remove children first
-            plotRemoved(this, name)
-        }
     }
 
     /**
@@ -123,10 +84,10 @@ class PlotGroup(name: String, private var descriptor: NodeDescriptor = NodeDescr
 
     fun remove(name: Name): PlotGroup {
         if (name.length == 1) {
-            plots.find { it.first == name }?.let {
-                it.second.removeListener(this)
+            plots.find { it.name == name.toString() }?.let {
+                it.removeListener(this)
                 plots.remove(it)
-                notifyPlotRemoved(name)
+                dataChanged(this, name)
             }
         } else {
             (get(name.cutLast()) as? PlotGroup)?.remove(name.last)
@@ -135,7 +96,8 @@ class PlotGroup(name: String, private var descriptor: NodeDescriptor = NodeDescr
     }
 
     fun clear() {
-        plots.map { it.first }.forEach { remove(it) }
+        plots.clear()
+        dataChanged(this, Name.empty())
     }
 
     @ProvidesNames(PLOT_TARGET)
@@ -149,11 +111,11 @@ class PlotGroup(name: String, private var descriptor: NodeDescriptor = NodeDescr
      * @return
      */
     fun stream(recursive: Boolean = true): Stream<Pair<Name, Plottable>> {
-        return plots.stream().flatMap { (name, pl) ->
-            if (recursive && pl is PlotGroup) {
-                pl.stream().map { pair -> Pair(name + pair.first, pair.second) }
+        return plots.stream().flatMap {
+            if (recursive && it is PlotGroup) {
+                it.stream().map { pair -> Pair(Name.of(it.name) + pair.first, pair.second) }
             } else {
-                Stream.of(Pair(name, pl))
+                Stream.of(Pair(Name.of(it.name), it))
             }
         }
     }
@@ -166,8 +128,28 @@ class PlotGroup(name: String, private var descriptor: NodeDescriptor = NodeDescr
     operator fun get(name: Name): Plottable? {
         return when {
             name.length == 0 -> this
-            name.length == 1 -> plots.find { it.first == name }?.second
+            name.length == 1 -> plots.find { it.name == name.toString() }
             else -> (get(name.cutLast()) as? PlotGroup)?.get(name.last)
+        }
+    }
+
+    /**
+     * * Add plottable if it is absent,
+     * * Remove it if null,
+     * * Replace if present and not same,
+     * * Do nothing if present and same
+     */
+    operator fun set(name: Name, plot: Plottable?) {
+        if(plot == null){
+            remove(name)
+        } else{
+            val current = get(name)
+            if(current == null){
+                (get(name.cutLast()) as? PlotGroup)?.add(plot)
+            }  else if(current !== plot){
+                remove(name)
+                (get(name.cutLast()) as? PlotGroup)?.add(plot)
+            }
         }
     }
 
@@ -189,36 +171,15 @@ class PlotGroup(name: String, private var descriptor: NodeDescriptor = NodeDescr
         listeners.remove(listener)
     }
 
-    /**
-     * Notify that config for this element and children is changed
-     */
-    private fun notifyConfigChanged() {
-        metaChanged(Name.EMPTY, this, Laminate(config).withDescriptor(descriptor))
-        children.forEach { pl ->
-            if (pl is PlotGroup) {
-                pl.notifyConfigChanged()
-            } else {
-                metaChanged(pl.name, pl, Laminate(pl.config).withDescriptor(pl.descriptor))
-            }
-        }
-    }
 
     override fun applyConfig(config: Meta) {
         super.applyConfig(config)
-        notifyConfigChanged()
+        metaChanged(this, Name.empty())
     }
 
-    override fun getDescriptor(): NodeDescriptor {
-        return descriptor
-    }
-
-    fun setDescriptor(descriptor: NodeDescriptor) {
-        this.descriptor = descriptor
-        notifyConfigChanged()
-    }
 
     fun setType(type: Class<out Plottable>) {
-        setDescriptor(Descriptors.forType("plot", type.kotlin))
+        descriptor = Descriptors.forType("plot", type.kotlin)
         configureValue("@descriptor", "class::${type.name}")
     }
 
@@ -232,7 +193,7 @@ class PlotGroup(name: String, private var descriptor: NodeDescriptor = NodeDescr
      * @return
      */
     override fun iterator(): Iterator<Plottable> {
-        return this.plots.values.iterator()
+        return this.plots.iterator()
     }
 
     class Wrapper : hep.dataforge.io.envelopes.Wrapper<PlotGroup> {
@@ -247,7 +208,7 @@ class PlotGroup(name: String, private var descriptor: NodeDescriptor = NodeDescr
             val baos = ByteArrayOutputStream()
             val writer = DefaultEnvelopeType.INSTANCE.writer
 
-            for (plot in obj.plots.values) {
+            for (plot in obj.plots) {
                 try {
                     val env: Envelope = when (plot) {
                         is PlotGroup -> wrap(plot)
@@ -268,7 +229,7 @@ class PlotGroup(name: String, private var descriptor: NodeDescriptor = NodeDescr
                     .setDataType(JAVA_SERIAL_DATA)
                     .setData(baos.toByteArray())
 
-            builder.putMetaNode("descriptor", obj.getDescriptor().toMeta())
+            builder.putMetaNode("descriptor", obj.descriptor.toMeta())
             return builder.build()
         }
 
@@ -288,7 +249,7 @@ class PlotGroup(name: String, private var descriptor: NodeDescriptor = NodeDescr
                     val item = internalEnvelopeType!!.reader.read(dataStream)
                     try {
                         val pl = Plottable::class.java.cast(hep.dataforge.io.envelopes.Wrapper.unwrap(item))
-                        group.set(pl)
+                        group.add(pl)
                     } catch (ex: Exception) {
                         LoggerFactory.getLogger(javaClass).error("Failed to unwrap plottable", ex)
                     }

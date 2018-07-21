@@ -1,6 +1,7 @@
 package hep.dataforge.stat.fit;
 
 import hep.dataforge.exceptions.NotDefinedException;
+import hep.dataforge.names.NameList;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueFactory;
 import javafx.util.Pair;
@@ -33,8 +34,8 @@ public class BasicIntervalEstimate implements IntervalEstimate {
 
 
     @Override
-    public Names getNames() {
-        return Names.of(ranges.stream().map(range -> range.parName).distinct().toArray(String[]::new));
+    public NameList getNames() {
+        return new NameList(ranges.stream().map(range -> range.parName).distinct().toArray(String[]::new));
     }
 
     @Override

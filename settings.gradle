@@ -4,11 +4,8 @@ include ':dataforge-core:dataforge-json' // json meta converter
 //include ':dataforge-core:osgi' // osgi framework for easy plugin delivery
 
 include ':dataforge-plots' // plot library
-include ':dataforge-plots:plots-fx'
 include ':dataforge-plots:plots-viewer' // Viewer application for exported plots
 include ':dataforge-plots:plots-jfc'
-//include ':dataforge-plots:plots-gnuplot'
-//include ':dataforge-plots:plots-jzy3d'
 
 include ':dataforge-maths' // mathematical tools
 

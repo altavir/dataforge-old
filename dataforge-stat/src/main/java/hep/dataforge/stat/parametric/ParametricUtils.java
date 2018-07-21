@@ -20,6 +20,7 @@ import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.maths.NamedVector;
 import hep.dataforge.maths.functions.UniFunction;
+import hep.dataforge.names.NameList;
 import hep.dataforge.values.Values;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 
@@ -98,9 +99,9 @@ public class ParametricUtils {
         if (!initPars.getNames().contains(func.namesAsArray())) {
             throw new IllegalArgumentException("InitPars does not cover all of func parameters.");
         }
-        Names names;
+        NameList names;
         if (freePars.length > 0) {
-            names = Names.of(freePars);
+            names = new NameList(freePars);
         } else {
             names = initPars.getNames();
         }

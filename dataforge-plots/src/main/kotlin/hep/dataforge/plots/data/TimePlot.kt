@@ -18,7 +18,6 @@ package hep.dataforge.plots.data
 import hep.dataforge.description.ValueDef
 import hep.dataforge.description.ValueDefs
 import hep.dataforge.meta.Meta
-import hep.dataforge.names.Name
 import hep.dataforge.plots.Plottable
 import hep.dataforge.plots.data.TimePlot.Companion.MAX_AGE_KEY
 import hep.dataforge.plots.data.TimePlot.Companion.MAX_ITEMS_KEY
@@ -46,7 +45,7 @@ import java.util.*
         ValueDef(key = PREF_ITEMS_KEY, type = arrayOf(ValueType.NUMBER), def = "400", info = "The preferred number of items to leave after cleanup.")
 )
 class TimePlot(name: String, val yKey: String = Adapters.Y_AXIS, meta: Meta = Meta.empty(), private val timestampKey: String = TIMESTAMP_KEY) :
-        XYPlot(Name.ofSingle(name), meta, Adapters.buildXYAdapter(timestampKey, yKey)) {
+        XYPlot(name, meta, Adapters.buildXYAdapter(timestampKey, yKey)) {
 
     private var map = TreeMap<Instant, Values>()
 

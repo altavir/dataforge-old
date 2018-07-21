@@ -21,7 +21,6 @@ import hep.dataforge.description.ValueDefs
 import hep.dataforge.meta.Configuration.FINAL_TAG
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
-import hep.dataforge.names.Name
 import hep.dataforge.tables.Adapters
 import hep.dataforge.tables.ValuesAdapter
 import hep.dataforge.tables.ValuesAdapter.ADAPTER_KEY
@@ -44,7 +43,7 @@ import java.util.stream.Stream
         ValueDef(key = "thickness", type = [ValueType.NUMBER], def = "1", info = "Thickness of the line if it is present")
 )
 @NodeDef(key = ADAPTER_KEY, info = "An adapter to interpret the dataset", tags = arrayOf(FINAL_TAG))
-abstract class XYPlot(name: Name, meta: Meta, adapter: ValuesAdapter?) : AbstractPlot(name, meta, adapter) {
+abstract class XYPlot(name: String, meta: Meta, adapter: ValuesAdapter?) : AbstractPlot(name, meta, adapter) {
 
     fun getData(from: Value, to: Value): List<Values> {
         return getData(MetaBuilder("").putValue("xRange.from", from).putValue("xRange.to", to))

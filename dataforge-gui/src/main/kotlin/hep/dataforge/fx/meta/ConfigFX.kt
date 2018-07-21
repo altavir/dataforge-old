@@ -184,7 +184,7 @@ open class ConfigFXNode(
 
     override fun invalidateNode(path: Name) {
         when {
-            path.isEmpty -> invalidate()
+            path.isEmpty() -> invalidate()
             path.length == 1 -> children.find { it is ConfigFXNode && it.name == path.first.toString() }?.invalidate()
             else -> children.find { it is ConfigFXNode && it.name == path.first.toString() }?.invalidateNode(path.cutFirst())
         }
@@ -268,7 +268,7 @@ class ConfigFXValue(name: String, parent: ConfigFXNode) : ConfigFX(name, parent)
     }
 
     override fun invalidateValue(path: Name) {
-        if (path.isEmpty) {
+        if (path.isEmpty()) {
             invalidate()
         }
     }

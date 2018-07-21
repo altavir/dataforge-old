@@ -45,8 +45,7 @@ internal class NameToken(singlet: String) : Name {
     override val tokens: List<Name>
         get() = listOf<Name>(this)
 
-    override val isEmpty: Boolean
-        get() = false
+    override fun isEmpty(): Boolean = false
 
     init {
         //unescape string

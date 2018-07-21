@@ -142,7 +142,7 @@ class NameList(list: Iterable<String>) : MetaMorph, Iterable<String> {
      * @param minusNames
      * @return
      */
-    internal fun minus(vararg minusNames: String): NameList {
+    fun minus(vararg minusNames: String): NameList {
         val newNames = ArrayList(asList())
         newNames.removeAll(Arrays.asList(*minusNames))
         return NameList(newNames)

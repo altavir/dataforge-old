@@ -16,6 +16,7 @@
 package hep.dataforge.stat.likelihood;
 
 import hep.dataforge.exceptions.NotDefinedException;
+import hep.dataforge.names.NameList;
 import hep.dataforge.stat.parametric.ParametricValue;
 import hep.dataforge.values.Values;
 
@@ -28,7 +29,7 @@ import hep.dataforge.values.Values;
 public class TwoSidedUniformPrior implements ParametricValue {
 
     private final String parName;
-    private final Names names;
+    private final NameList names;
     private double lowerBorder;
     private double norm;
     private double upperBorder;
@@ -41,7 +42,7 @@ public class TwoSidedUniformPrior implements ParametricValue {
      * @param upperBorder a double.
      */
     public TwoSidedUniformPrior(String parName, double lowerBorder, double upperBorder) {
-        this.names = Names.of(parName);
+        this.names = new NameList(parName);
         this.parName = parName;
         if (upperBorder <= lowerBorder) {
             throw new IllegalArgumentException("Wrong interval borders.");
@@ -70,7 +71,7 @@ public class TwoSidedUniformPrior implements ParametricValue {
 
     /** {@inheritDoc} */
     @Override
-    public Names getNames() {
+    public NameList getNames() {
         return names;
     }
 

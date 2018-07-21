@@ -29,11 +29,10 @@ import hep.dataforge.workspace.Workspace
  * @param descriptor the descriptor override for this task. If null, construct descriptor from annotations.
  * Created by darksnake on 21-Aug-16.
  */
-abstract class AbstractTask<R : Any>(override val type: Class<R>, private val descriptor: NodeDescriptor? = null) : Task<R> {
+abstract class AbstractTask<R : Any>(override val type: Class<R>, descriptor: NodeDescriptor? = null) : Task<R> {
 
-    override fun getDescriptor(): NodeDescriptor {
-        return descriptor?: super.getDescriptor()
-    }
+    override val descriptor = descriptor?:super.descriptor
+
 
     protected open fun gather(model: TaskModel): DataNode<Any> {
         val builder: DataNodeEditor<Any> = DataTree.edit()

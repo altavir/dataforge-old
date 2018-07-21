@@ -15,6 +15,7 @@
  */
 package hep.dataforge.stat.fit;
 
+import hep.dataforge.names.NameList;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueFactory;
 import javafx.util.Pair;
@@ -46,8 +47,8 @@ public class MINOSResult implements IntervalEstimate {
     }
 
     @Override
-    public Names getNames() {
-        return Names.of(names);
+    public NameList getNames() {
+        return new NameList(names);
     }
 
     @Override

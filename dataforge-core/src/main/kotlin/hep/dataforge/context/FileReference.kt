@@ -145,7 +145,7 @@ class FileReference private constructor(override val context: Context, val path:
          * Create a reference for a file in a work directory. File itself is not created
          */
         fun newWorkFile(context: Context, prefix: String, suffix: String, path: Name = Name.EMPTY): FileReference {
-            val dir = if (path.isEmpty) {
+            val dir = if (path.isEmpty()) {
                 context.workDir
             } else {
                 val relativeDir = path.tokens.joinToString(File.separator) { it.toString() }

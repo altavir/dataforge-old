@@ -21,6 +21,7 @@ import hep.dataforge.maths.integration.DistributionSampler;
 import hep.dataforge.maths.integration.MonteCarloIntegrand;
 import hep.dataforge.maths.integration.MonteCarloIntegrator;
 import hep.dataforge.maths.integration.Sampler;
+import hep.dataforge.names.NameList;
 import hep.dataforge.stat.fit.FitResult;
 import hep.dataforge.stat.parametric.AbstractParametricValue;
 import hep.dataforge.stat.parametric.ParametricValue;
@@ -55,7 +56,7 @@ public class MarginalFunctionBuilder implements GenericBuilder<ParametricValue, 
     private String[] nuisancePars;
     private ParametricValue function;
 
-    private Names allNames() {
+    private NameList allNames() {
         return function.getNames();
     }
 
@@ -180,7 +181,7 @@ public class MarginalFunctionBuilder implements GenericBuilder<ParametricValue, 
         }
 
         ArgumentChecker.checkEqualDimensions(sampler.getDimension(), nuisancePars.length);
-        Names remaining = allNames().minus(nuisancePars);
+        NameList remaining = allNames().minus(nuisancePars);
 
         double divider;
         if (startingPoint != null) {
@@ -239,7 +240,7 @@ public class MarginalFunctionBuilder implements GenericBuilder<ParametricValue, 
             }
 
             @Override
-            public Names getNames() {
+            public NameList getNames() {
                 return startingPoint.getNames();
             }
 

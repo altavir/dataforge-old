@@ -16,6 +16,7 @@
 package hep.dataforge.stat.likelihood;
 
 import hep.dataforge.exceptions.NotDefinedException;
+import hep.dataforge.names.NameList;
 import hep.dataforge.stat.parametric.ParametricValue;
 import hep.dataforge.values.Values;
 
@@ -28,7 +29,7 @@ import hep.dataforge.values.Values;
 public class OneSidedUniformPrior implements ParametricValue {
 
     private final String parName;
-    private final Names names;
+    private final NameList names;
     double border;
     boolean isLower;
 
@@ -43,7 +44,7 @@ public class OneSidedUniformPrior implements ParametricValue {
         this.parName = parName;
         this.isLower = isLower;
         this.border = border;
-        names = Names.of(parName);
+        names = new NameList(parName);
     }
 
     /** {@inheritDoc} */
@@ -68,7 +69,7 @@ public class OneSidedUniformPrior implements ParametricValue {
 
     /** {@inheritDoc} */
     @Override
-    public Names getNames() {
+    public NameList getNames() {
         return names;
     }
 

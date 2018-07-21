@@ -76,7 +76,7 @@ interface Name : Comparable<Name> {
      *
      * @return
      */
-    val isEmpty: Boolean
+    fun isEmpty(): Boolean
 
 
     /**
@@ -230,7 +230,7 @@ interface Name : Comparable<Name> {
                 return segments[0]
             }
 
-            return of(Stream.of(*segments).filter { it -> !it.isEmpty }.toList())
+            return of(Stream.of(*segments).filter { it -> !it.isEmpty() }.toList())
         }
 
         fun of(tokens: Iterable<String>): Name {

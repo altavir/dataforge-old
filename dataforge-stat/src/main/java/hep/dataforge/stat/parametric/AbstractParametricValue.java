@@ -5,12 +5,13 @@
  */
 package hep.dataforge.stat.parametric;
 
+import hep.dataforge.names.NameList;
 import hep.dataforge.names.NameSetContainer;
 
 
 public abstract class AbstractParametricValue extends AbstractParametric implements ParametricValue {
 
-    public AbstractParametricValue(Names names) {
+    public AbstractParametricValue(NameList names) {
         super(names);
     }
 

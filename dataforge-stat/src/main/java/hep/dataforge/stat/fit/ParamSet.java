@@ -22,6 +22,7 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.meta.MetaMorph;
 import hep.dataforge.meta.MetaUtils;
+import hep.dataforge.names.NameList;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueFactory;
 import hep.dataforge.values.Values;
@@ -175,8 +176,8 @@ public class ParamSet implements Values, MetaMorph {
      * @return
      */
     @Override
-    public Names getNames() {
-        return Names.of(this.params.keySet());
+    public NameList getNames() {
+        return new NameList(this.params.keySet());
     }
 
     /**

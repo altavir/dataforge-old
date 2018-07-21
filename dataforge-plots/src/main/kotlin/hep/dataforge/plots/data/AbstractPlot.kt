@@ -15,7 +15,6 @@
  */
 package hep.dataforge.plots.data
 
-import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.SimpleConfigurable
 import hep.dataforge.names.Name
@@ -56,7 +55,7 @@ abstract class AbstractPlot(
      */
     @Synchronized
     override fun applyConfig(config: Meta) {
-        listeners.forEach { l -> l.metaChanged(this, Name.of(name), Laminate(getConfig())) }
+        listeners.forEach { l -> l.metaChanged(this, Name.of(name)) }
     }
 
     /**
@@ -64,6 +63,6 @@ abstract class AbstractPlot(
      */
     @Synchronized
     fun notifyDataChanged() {
-        listeners.forEach { l -> l.dataChanged(this, Name.of(name), this) }
+        listeners.forEach { l -> l.dataChanged(this, Name.of(name)) }
     }
 }

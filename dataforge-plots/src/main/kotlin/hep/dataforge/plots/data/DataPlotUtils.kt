@@ -27,8 +27,7 @@ object DataPlotUtils {
         val names = ArrayList<String>()
         names.add("x")
 
-        frame.plots.stream()
-                .map { it.value }
+        frame.plots.stream().map { it.second }
                 .filter {!visibleOnly || it.config.getBoolean("visible", true) }
                 .forEach {
                     (it as? Plot)?.let {plot->

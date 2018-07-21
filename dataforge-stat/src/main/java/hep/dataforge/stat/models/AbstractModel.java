@@ -19,6 +19,7 @@ import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaHolder;
+import hep.dataforge.names.NameList;
 import hep.dataforge.stat.parametric.AbstractParametricValue;
 import hep.dataforge.stat.parametric.ParametricValue;
 import hep.dataforge.tables.ValuesAdapter;
@@ -32,14 +33,14 @@ import hep.dataforge.values.Values;
 public abstract class AbstractModel extends MetaHolder implements Model {
 //TODO add default parameters to model
 
-    private final Names names;
+    private final NameList names;
 
     /**
      *
      */
     protected ValuesAdapter adapter;
 
-    protected AbstractModel(Meta meta, Names names, ValuesAdapter adapter) {
+    protected AbstractModel(Meta meta, NameList names, ValuesAdapter adapter) {
         super(meta);
         this.adapter = adapter;
         this.names = names;
@@ -119,7 +120,7 @@ public abstract class AbstractModel extends MetaHolder implements Model {
      * {@inheritDoc}
      */
     @Override
-    public Names getNames() {
+    public NameList getNames() {
         return names;
     }
 }
