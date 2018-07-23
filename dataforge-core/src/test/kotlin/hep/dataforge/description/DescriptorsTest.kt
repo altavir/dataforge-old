@@ -32,7 +32,7 @@ class DescriptorsTest{
 
     @Test
     fun testClassDescriptors(){
-        val descriptor = Descriptors.forType(DescribedTestClass::class)
+        val descriptor = Descriptors.forType("plot",DescribedTestClass::class)
         val valueDescriptor = descriptor.getValueDescriptor("title")
         assertEquals("aaa", valueDescriptor?.default?.string)
     }

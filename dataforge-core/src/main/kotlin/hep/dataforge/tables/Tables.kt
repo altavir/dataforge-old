@@ -189,7 +189,7 @@ fun Table.sumByStep(key: String, step: Double, customizer: (RowReducer) -> Unit 
     }.apply(customizer)
 
     val rows = this.groupBy {
-        kotlin.math.floor(it.optValue(key).map { it.double }.nullable ?: 0 / step)
+        kotlin.math.floor((it.optValue(key).nullable?.double ?: 0.0) / step)
     }.map { (_, value) ->
         reducer.reduce(format.names, value)
     }

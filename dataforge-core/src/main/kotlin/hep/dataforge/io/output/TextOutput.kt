@@ -257,12 +257,14 @@ class FileOutput(val file: FileReference) : Output, AutoCloseable {
     override fun render(obj: Any, meta: Meta) {
         when (obj) {
             is Table -> {
-                buildEnvelope {
-                    meta(meta)
-                    data {
-                        ColumnedDataWriter.writeTable(it, obj, "")
-                    }
-                }
+                streamOutput.render(
+                        buildEnvelope {
+                            meta(meta)
+                            data {
+                                ColumnedDataWriter.writeTable(it, obj, "")
+                            }
+                        }
+                )
             }
             else -> streamOutput.render(obj, meta)
         }

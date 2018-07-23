@@ -19,8 +19,8 @@ import hep.dataforge.exceptions.NameNotFoundException
 import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name
+import hep.dataforge.nullable
 import hep.dataforge.plots.*
-import hep.dataforge.useValue
 import hep.dataforge.utils.FXObject
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueFactory
@@ -304,8 +304,9 @@ class JFreeChartFrame : XYPlotFrame(), FXObject, Serializable {
                 .boolean
 
         render.setSeriesVisible(0, visible)
-        config.useValue("title") {
-            render.setLegendItemLabelGenerator { dataset, series -> it.string }
+        render.setLegendItemLabelGenerator { dataset, series ->
+            config.optString("title").nullable ?: name.unescaped
+
         }
 
         runLater {
