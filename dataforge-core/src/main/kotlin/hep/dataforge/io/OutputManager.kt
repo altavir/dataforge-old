@@ -24,6 +24,7 @@ import hep.dataforge.description.ValueDefs
 import hep.dataforge.io.OutputManager.Companion.OUTPUT_NAME_KEY
 import hep.dataforge.io.OutputManager.Companion.OUTPUT_STAGE_KEY
 import hep.dataforge.io.OutputManager.Companion.OUTPUT_TYPE_KEY
+import hep.dataforge.io.OutputManager.Companion.split
 import hep.dataforge.io.output.Output
 import hep.dataforge.io.output.Output.Companion.splitOutput
 import hep.dataforge.meta.KMetaBuilder
@@ -83,7 +84,7 @@ interface OutputManager : Plugin {
         /**
          * Produce a split [OutputManager]
          */
-        fun split(vararg channels: OutputManager): OutputManager = SplitOutputManager().apply { this.managers.addAll(channels) }
+        fun split(vararg channels: OutputManager): OutputManager = SplitOutputManager(setOf(*channels))
     }
 }
 
@@ -118,7 +119,7 @@ fun OutputManager.render(obj: Any, stage: String? = null, name: String? = null, 
 /**
  * An [OutputManager] that supports multiple outputs simultaneously
  */
-class SplitOutputManager(val managers: MutableSet<OutputManager> = HashSet(), meta: Meta = Meta.empty()) : OutputManager, BasicPlugin(meta) {
+class SplitOutputManager(val managers: Set<OutputManager> = HashSet(), meta: Meta = Meta.empty()) : OutputManager, BasicPlugin(meta) {
 
     override fun get(meta: Meta): Output = splitOutput(*managers.map { it.get(meta) }.toTypedArray())
 
@@ -134,30 +135,12 @@ class SplitOutputManager(val managers: MutableSet<OutputManager> = HashSet(), me
         super.detach()
         managers.forEach { it.detach() }
     }
-
-    companion object {
-        /**
-         * Convenience method to build split output manager
-         */
-        @JvmStatic
-        fun build(vararg managers: OutputManager): SplitOutputManager {
-            return SplitOutputManager(hashSetOf(*managers))
-        }
-    }
 }
 
 operator fun OutputManager.plus(other: OutputManager): OutputManager {
-    return when (this) {
-        is SplitOutputManager -> {
-            managers.add(other)// add to current output managers
-            this
-        }
-        else -> {
-            val split = SplitOutputManager.build(this, other)
-            context.pluginManager.remove(this)
-            context.pluginManager.load(split)
-            split
-        }
+    return when {
+        this is SplitOutputManager -> SplitOutputManager(managers + other)
+        else -> split(this, other)
     }
 }
 

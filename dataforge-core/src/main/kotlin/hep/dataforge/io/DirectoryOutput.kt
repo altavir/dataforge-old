@@ -23,7 +23,7 @@ import java.io.File
  * A directory based IO manager. Any named output is redirected to file in corresponding directory inside work directory
  */
 @PluginDef(name = "output.dir", group = "hep.dataforge", info = "Directory based output plugin")
-class DirectoryOutput : DefaultOutputManager() {
+class DirectoryOutput : AbstractOutputManager() {
 
     //internal var registry = ReferenceRegistry<OutputStream>()
     //    FileAppender<ILoggingEvent> appender;

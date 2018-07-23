@@ -170,6 +170,7 @@ class ValueMap : Values, MetaMorph {
 
     companion object {
 
+        @JvmStatic
         fun ofMap(map: Map<String, Any>): ValueMap {
             return ValueMap(map.mapValues { Value.of(it.value) })
         }
@@ -183,10 +184,12 @@ class ValueMap : Values, MetaMorph {
             return builder.build()
         }
 
+        @JvmStatic
         fun of(values: Iterable<NamedValue>): ValueMap{
             return ValueMap(values.associateBy(keySelector = {it.name}, valueTransform = {it.anonymous}))
         }
 
+        @JvmStatic
         fun of(vararg values: NamedValue): ValueMap{
             return ValueMap(values.associateBy(keySelector = {it.name}, valueTransform = {it.anonymous}))
         }

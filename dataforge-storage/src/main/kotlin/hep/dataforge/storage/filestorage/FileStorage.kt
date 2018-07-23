@@ -272,7 +272,7 @@ open class FileStorage : AbstractStorage {
                 Files.newOutputStream(dataFile, WRITE, CREATE_NEW).use { stream ->
                     val emptyEnvelope = EnvelopeBuilder()
                             .setDataType(FILE_STORAGE_ENVELOPE_TYPE)
-                            .setMeta(meta)
+                            .meta(meta)
                             .build()
                     FileStorageEnvelopeType.writer.write(stream, emptyEnvelope)
                 }

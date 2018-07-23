@@ -27,10 +27,12 @@ import hep.dataforge.context.Context
 import hep.dataforge.context.FileReference
 import hep.dataforge.description.NodeDescriptor
 import hep.dataforge.description.ValueDescriptor
+import hep.dataforge.io.ColumnedDataWriter
 import hep.dataforge.io.IOUtils
 import hep.dataforge.io.envelopes.Envelope
 import hep.dataforge.io.envelopes.EnvelopeType
 import hep.dataforge.io.envelopes.TaglessEnvelopeType
+import hep.dataforge.io.envelopes.buildEnvelope
 import hep.dataforge.io.history.Record
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.Metoid
@@ -253,7 +255,17 @@ class FileOutput(val file: FileReference) : Output, AutoCloseable {
     }
 
     override fun render(obj: Any, meta: Meta) {
-        streamOutput.render(obj, meta)
+        when (obj) {
+            is Table -> {
+                buildEnvelope {
+                    meta(meta)
+                    data {
+                        ColumnedDataWriter.writeTable(it, obj, "")
+                    }
+                }
+            }
+            else -> streamOutput.render(obj, meta)
+        }
     }
 
     override fun close() {

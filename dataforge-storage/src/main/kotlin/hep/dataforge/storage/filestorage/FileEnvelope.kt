@@ -277,7 +277,7 @@ open class FileEnvelope protected constructor(val file: Path, val isReadOnly: Bo
         @Deprecated("")
         @Throws(IOException::class)
         fun createEmpty(path: Path, meta: Meta): FileEnvelope {
-            Files.newOutputStream(path, CREATE, WRITE).use { stream -> DefaultEnvelopeType.INSTANCE.writer.write(stream, EnvelopeBuilder().setMeta(meta)) }
+            Files.newOutputStream(path, CREATE, WRITE).use { stream -> DefaultEnvelopeType.INSTANCE.writer.write(stream, EnvelopeBuilder().meta(meta)) }
             return FileEnvelope(path, false)
         }
 

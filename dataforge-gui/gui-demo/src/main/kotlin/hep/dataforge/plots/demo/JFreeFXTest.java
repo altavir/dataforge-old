@@ -20,8 +20,8 @@ import hep.dataforge.plots.data.DataPlot;
 import hep.dataforge.plots.data.XYFunctionPlot;
 import hep.dataforge.plots.jfreechart.JFreeChartFrame;
 import hep.dataforge.tables.Adapters;
-import hep.dataforge.tables.ListTable;
 import hep.dataforge.tables.Table;
+import hep.dataforge.tables.Tables;
 import hep.dataforge.values.ValueMap;
 import hep.dataforge.values.Values;
 import javafx.application.Application;
@@ -61,7 +61,7 @@ public class JFreeFXTest extends Application {
         data.add(ValueMap.of(names, 0.5d, 0.2, 0.1, 0.1));
         data.add(ValueMap.of(names, 1d, 1d, 0.2, 0.5));
         data.add(ValueMap.of(names, 3d, 7d, 0, 0.5));
-        Table ds = ListTable.infer(data);
+        Table ds = Tables.infer(data);
 
         DataPlot dataPlot = DataPlot.plot("dataPlot", ds, Adapters.buildXYAdapter("myX", "myY", "myXErr", "myYErr"));
 

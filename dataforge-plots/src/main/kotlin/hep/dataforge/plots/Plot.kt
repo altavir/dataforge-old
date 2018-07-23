@@ -94,7 +94,7 @@ interface Plot : Plottable {
                 throw RuntimeException(e)
             }
 
-            builder.setData(baos.toByteArray())
+            builder.data(baos.toByteArray())
             return builder
         }
 

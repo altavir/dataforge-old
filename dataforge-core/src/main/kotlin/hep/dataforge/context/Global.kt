@@ -15,7 +15,7 @@
  */
 package hep.dataforge.context
 
-import hep.dataforge.exceptions.ContextLockException
+import hep.dataforge.io.SimpleOutputManager
 import hep.dataforge.io.output.Output
 import hep.dataforge.io.output.StreamOutput
 import hep.dataforge.meta.buildMeta
@@ -41,14 +41,12 @@ object Global : Context("GLOBAL", null, Thread.currentThread().contextClassLoade
     /**
      * System console output
      */
-    var console: Output = StreamOutput(this, System.out)
-        set(value) {
-            if (isLocked) {
-                throw ContextLockException("Can't change console output because Global is locked")
-            } else {
-                field = value
-            }
-        }
+    val console: Output = StreamOutput(this, System.out)
+
+    /**
+     * The default output manager based on console output. Attached to global but not registered in plugin manager
+     */
+    val consoleOutputManager = SimpleOutputManager(console).apply { attach(this@Global) }
 
     /**
      * The global context independent temporary user directory. This directory

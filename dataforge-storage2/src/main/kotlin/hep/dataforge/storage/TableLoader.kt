@@ -274,7 +274,7 @@ object TableLoaderType : FileStorageElementType<EnvelopeLoader<Values>> {
 
         val envelope = EnvelopeBuilder()
                 .setEnvelopeType(TABLE_ENVELOPE_TYPE)
-                .setMeta(meta)
+                .meta(meta)
                 .build()
 
         return Files.newOutputStream(path, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE).use {

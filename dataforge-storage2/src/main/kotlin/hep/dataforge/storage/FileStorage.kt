@@ -129,7 +129,7 @@ open class FileStorage protected constructor(
         }
 
         private fun createMetaEnvelope(meta: Meta): Envelope {
-            return EnvelopeBuilder().setMeta(meta).setEnvelopeType(META_ENVELOPE_TYPE).build()
+            return EnvelopeBuilder().meta(meta).setEnvelopeType(META_ENVELOPE_TYPE).build()
         }
 
         override fun create(parent: FileStorage, meta: Meta): FileStorageElement {

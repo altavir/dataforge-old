@@ -21,8 +21,10 @@ import hep.dataforge.io.envelopes.Envelope.Companion.ENVELOPE_DATA_TYPE_KEY
 import hep.dataforge.io.envelopes.Envelope.Companion.ENVELOPE_DESCRIPTION_KEY
 import hep.dataforge.io.envelopes.Envelope.Companion.ENVELOPE_TIME_KEY
 import hep.dataforge.io.envelopes.Envelope.Companion.ENVELOPE_TYPE_KEY
+import hep.dataforge.meta.KMetaBuilder
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
+import hep.dataforge.meta.buildMeta
 
 import java.io.ByteArrayOutputStream
 import java.io.ObjectStreamException
@@ -57,9 +59,13 @@ class EnvelopeBuilder : Envelope {
 
     }
 
-    fun setMeta(annotation: Meta): EnvelopeBuilder {
+    fun meta(annotation: Meta): EnvelopeBuilder {
         this.meta = annotation.builder
         return this
+    }
+
+    fun meta(builder: KMetaBuilder.()->Unit) : EnvelopeBuilder{
+        return meta(buildMeta("meta", builder))
     }
 
     /**
@@ -90,26 +96,28 @@ class EnvelopeBuilder : Envelope {
         return this
     }
 
-    fun setData(data: Binary): EnvelopeBuilder {
+    fun data(data: Binary): EnvelopeBuilder {
         this.data = data
         return this
     }
 
-    fun setData(data: ByteBuffer): EnvelopeBuilder {
+    fun data(data: ByteBuffer): EnvelopeBuilder {
         this.data = BufferedBinary(data)
         return this
     }
 
-    fun setData(data: ByteArray): EnvelopeBuilder {
+    fun data(data: ByteArray): EnvelopeBuilder {
         this.data = BufferedBinary(data)
         return this
     }
 
-    fun setData(consumer: (OutputStream) -> Unit): EnvelopeBuilder {
+    fun data(consumer: (OutputStream) -> Unit): EnvelopeBuilder {
         val baos = ByteArrayOutputStream()
         consumer(baos)
-        return setData(baos.toByteArray())
+        return data(baos.toByteArray())
     }
+
+    //TODO kotlinize
 
     fun setEnvelopeType(type: String): EnvelopeBuilder {
         setMetaValue(ENVELOPE_TYPE_KEY, type)
@@ -136,3 +144,5 @@ class EnvelopeBuilder : Envelope {
         return SimpleEnvelope(this.meta, data)
     }
 }
+
+fun buildEnvelope(action: EnvelopeBuilder.()-> Unit): Envelope = EnvelopeBuilder().apply(action).build()

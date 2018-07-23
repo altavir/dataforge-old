@@ -10,6 +10,14 @@ import hep.dataforge.values.Values;
 public interface NavigableValuesSource extends ValuesSource {
     Values getRow(int i);
 
+    /**
+     *
+     * Get a specific value
+     * @param name
+     * @param index
+     * @return
+     * @throws NameNotFoundException
+     */
     default Value get(String name, int index) throws NameNotFoundException {
         return getRow(index).getValue(name);
     }

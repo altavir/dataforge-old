@@ -26,9 +26,9 @@ import java.nio.charset.Charset
 
 class TaglessEnvelopeTest {
     private val envelope = EnvelopeBuilder()
-            .setMeta(MetaBuilder()
+            .meta(MetaBuilder()
                     .putValue("myValue", 12)
-            ).setData("Всем привет!".toByteArray(Charset.forName("UTF-8")))
+            ).data("Всем привет!".toByteArray(Charset.forName("UTF-8")))
 
     private val envelopeType = TaglessEnvelopeType.INSTANCE
 

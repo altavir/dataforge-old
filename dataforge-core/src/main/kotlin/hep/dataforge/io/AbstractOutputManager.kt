@@ -21,28 +21,16 @@ import ch.qos.logback.core.Appender
 import ch.qos.logback.core.UnsynchronizedAppenderBase
 import hep.dataforge.context.BasicPlugin
 import hep.dataforge.context.Context
-import hep.dataforge.context.Global
-import hep.dataforge.context.PluginDef
 import hep.dataforge.io.OutputManager.Companion.LOGGER_APPENDER_NAME
 import hep.dataforge.io.output.Output
 import hep.dataforge.meta.Meta
 
 /**
  *
- *
- * Default console base output providing only text-based output
- *
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-@PluginDef(name = "output", group = "hep.dataforge", info = "Basic input and output plugin")
-open class DefaultOutputManager(meta: Meta = Meta.empty()) : OutputManager, BasicPlugin(meta) {
-
-    val default: Output
-        get() = Global.console
-
-    override fun get(meta: Meta): Output  = default
-
+abstract class AbstractOutputManager(meta: Meta = Meta.empty()) : OutputManager, BasicPlugin(meta) {
     /**
      * Create logger appender for this manager
      *
@@ -51,7 +39,7 @@ open class DefaultOutputManager(meta: Meta = Meta.empty()) : OutputManager, Basi
     open fun createLoggerAppender(): Appender<ILoggingEvent> {
         return object : UnsynchronizedAppenderBase<ILoggingEvent>() {
             override fun append(eventObject: ILoggingEvent) {
-                default.render(eventObject)
+                get("@log").render(eventObject)
             }
         }
     }
@@ -87,3 +75,11 @@ open class DefaultOutputManager(meta: Meta = Meta.empty()) : OutputManager, Basi
         super.detach()
     }
 }
+
+/**
+ * The simple output manager, which redirects everything to a single output stream
+ */
+class SimpleOutputManager(val default: Output) : AbstractOutputManager() {
+    override fun get(meta: Meta): Output = default
+}
+

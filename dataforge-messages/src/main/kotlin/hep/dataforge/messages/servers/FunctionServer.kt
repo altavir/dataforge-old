@@ -46,6 +46,6 @@ abstract class BinaryServer(override val context: Context) : Responder, ContextA
 
             } while (bytesRead != 0)
         }
-        return okResponseBase(message).setData(out.toByteArray()).build()
+        return okResponseBase(message).data(out.toByteArray()).build()
     }
 }

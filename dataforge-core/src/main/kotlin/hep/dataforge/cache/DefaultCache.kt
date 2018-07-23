@@ -157,7 +157,7 @@ class DefaultCache<K, V>(
                     val baos = ByteArrayOutputStream()
                     val oos = ObjectOutputStream(baos)
                     oos.writeObject(data)
-                    val builder = EnvelopeBuilder().setMeta(id).setData(baos.toByteArray())
+                    val builder = EnvelopeBuilder().meta(id).data(baos.toByteArray())
                     baos.close()
                     writer.write(fos, builder.build())
                     hardCache.put(id, file)

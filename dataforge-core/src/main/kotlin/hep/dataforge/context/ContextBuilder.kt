@@ -18,7 +18,6 @@ package hep.dataforge.context
 
 import hep.dataforge.context.Context.Companion.DATA_DIRECTORY_CONTEXT_KEY
 import hep.dataforge.context.Context.Companion.ROOT_DIRECTORY_CONTEXT_KEY
-import hep.dataforge.io.DefaultOutputManager
 import hep.dataforge.io.OutputManager
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
@@ -191,12 +190,12 @@ class ContextBuilder(val name: String, val parent: Context = Global) {
                 pluginManager.load(it)
             }
 
-            //If custom paths are defined, use new plugin to direct to them
-            if (properties.containsKey(ROOT_DIRECTORY_CONTEXT_KEY) || properties.containsKey(DATA_DIRECTORY_CONTEXT_KEY)) {
-                if (pluginManager.find { it is OutputManager } == null) {
-                    pluginManager.load(DefaultOutputManager())
-                }
-            }
+//            //If custom paths are defined, use new plugin to direct to them
+//            if (properties.containsKey(ROOT_DIRECTORY_CONTEXT_KEY) || properties.containsKey(DATA_DIRECTORY_CONTEXT_KEY)) {
+//                if (pluginManager.get<OutputManager>(false) == null) {
+//                    pluginManager.load(SimpleOutputManager(Global.console))
+//                }
+//            }
 
         }
 

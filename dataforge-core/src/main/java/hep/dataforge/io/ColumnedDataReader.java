@@ -15,11 +15,12 @@
  */
 package hep.dataforge.io;
 
-import hep.dataforge.tables.ListTable;
 import hep.dataforge.tables.Table;
+import hep.dataforge.tables.Tables;
 import hep.dataforge.tables.ValuesParser;
 import hep.dataforge.tables.ValuesReader;
 import hep.dataforge.values.Values;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -66,6 +67,7 @@ public class ColumnedDataReader implements Iterable<Values> {
         reader.skip(n);
     }
 
+    @NotNull
     @Override
     public Iterator<Values> iterator() {
         return reader;
@@ -78,7 +80,7 @@ public class ColumnedDataReader implements Iterable<Values> {
                 points.add(p);
             }
         }
-        return ListTable.Companion.infer(points);
+        return Tables.infer(points);
     }
 
 }

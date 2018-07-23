@@ -144,8 +144,8 @@ interface PlotFrame : Configurable, Serializable {
             val rootEnv = PlotGroup.WRAPPER.wrap(obj.plots)
 
             val builder = EnvelopeBuilder()
-                    .setMeta(rootEnv.meta)
-                    .setData(rootEnv.data)
+                    .meta(rootEnv.meta)
+                    .data(rootEnv.data)
                     .setDataType(JAVA_SERIAL_DATA)
                     .setEnvelopeType(PLOT_FRAME_TYPE)
                     .setMetaValue(PLOT_FRAME_CLASS_KEY, obj.javaClass.name)

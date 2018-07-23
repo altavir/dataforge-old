@@ -7,7 +7,7 @@ import hep.dataforge.plots.data.XYFunctionPlot
 import hep.dataforge.plots.jfreechart.JFreeChartPlugin
 import hep.dataforge.plots.output.plot
 import hep.dataforge.tables.Adapters
-import hep.dataforge.tables.ListTable
+import hep.dataforge.tables.Tables
 import hep.dataforge.values.ValueMap
 import hep.dataforge.values.Values
 import java.io.ByteArrayInputStream
@@ -37,7 +37,7 @@ fun main(args: Array<String>) {
     data.add(ValueMap.of(names, 0.5, 0.2, 0.1, 0.1))
     data.add(ValueMap.of(names, 1.0, 1.0, 0.2, 0.5))
     data.add(ValueMap.of(names, 3.0, 7.0, 0, 0.5))
-    val ds = ListTable.infer(data)
+    val ds = Tables.infer(data)
 
     val dataPlot = DataPlot.plot("dataPlot", ds, Adapters.buildXYAdapter("myX", "myXErr", "myY", "myYErr"))
 

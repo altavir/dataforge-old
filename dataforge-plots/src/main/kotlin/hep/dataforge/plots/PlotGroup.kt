@@ -237,7 +237,7 @@ class PlotGroup(name: String, descriptor: NodeDescriptor = NodeDescriptor.empty(
                     .putMetaNode(DEFAULT_META_NAME, obj.config)
                     .setEnvelopeType(PLOT_GROUP_WRAPPER_TYPE)
                     .setDataType(JAVA_SERIAL_DATA)
-                    .setData(baos.toByteArray())
+                    .data(baos.toByteArray())
 
             builder.putMetaNode("descriptor", obj.descriptor.toMeta())
             return builder.build()

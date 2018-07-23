@@ -19,7 +19,6 @@ import hep.dataforge.Named
 import hep.dataforge.context.Plugin.Companion.PLUGIN_TARGET
 import hep.dataforge.data.binary.Binary
 import hep.dataforge.data.binary.StreamBinary
-import hep.dataforge.io.DefaultOutputManager
 import hep.dataforge.io.IOUtils
 import hep.dataforge.io.OutputManager
 import hep.dataforge.meta.KMetaBuilder
@@ -101,16 +100,22 @@ open class Context(
      *
      * @return the io
      */
-    open var output: OutputManager
+    var output: OutputManager
         get() {
             val thisOutput = pluginManager[OutputManager::class, false]
-            return if (thisOutput == null) {
-                parent?.output ?: pluginManager.load(DefaultOutputManager())
-            } else if (parent == null || !inheritOutput) {
-                thisOutput
-            } else {
-                //TODO ignore default Global output?
-                OutputManager.split(thisOutput, parent.output)
+            return when {
+                parent == null -> thisOutput ?: Global.consoleOutputManager // default console for Global
+                thisOutput == null -> parent.output// return parent output manager if not defined for this one
+                !inheritOutput -> thisOutput // do not inherit parent output
+                else -> {
+                    val prentOutput = parent.output
+                    if (prentOutput === Global.consoleOutputManager) {
+                        thisOutput
+                    } else {
+                        OutputManager.split(thisOutput, parent.output)
+                    }
+
+                }
             }
         }
         set(newOutput) {

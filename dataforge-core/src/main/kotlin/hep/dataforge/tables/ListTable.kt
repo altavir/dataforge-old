@@ -94,8 +94,8 @@ class ListTable @JvmOverloads constructor(override val format: TableFormat, poin
         format.names.map { getColumn(it) }
     }
 
-    override fun get(columnName: String, rowNumber: Int): Value {
-        return getRow(rowNumber).getValue(columnName)
+    override fun get(name: String, index: Int): Value {
+        return getRow(index).getValue(name)
     }
 
     override fun toMeta(): Meta {
@@ -188,17 +188,6 @@ class ListTable @JvmOverloads constructor(override val format: TableFormat, poin
 
         fun copy(table: Table): ListTable {
             return table as? ListTable ?: ListTable(table.format, table.rows.toList())
-        }
-
-        /**
-         * Infer format from the first oint
-         */
-        @JvmStatic
-        fun infer(points: List<Values>): ListTable {
-            if (points.isEmpty()) {
-                throw IllegalArgumentException("Can't create ListTable from the empty list. Format required.")
-            }
-            return ListTable(MetaTableFormat.forValues(points[0]), points)
         }
     }
 

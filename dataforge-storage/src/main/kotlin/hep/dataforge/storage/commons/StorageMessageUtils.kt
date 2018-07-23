@@ -45,7 +45,7 @@ object StorageMessageUtils {
                 .build()
 
         return EnvelopeBuilder(request)
-                .setMeta(meta)
+                .meta(meta)
                 .build()
 
     }
@@ -62,7 +62,7 @@ object StorageMessageUtils {
         }
 
         return EnvelopeBuilder(request)
-                .setMeta(meta.build())
+                .meta(meta.build())
                 .build()
     }
 

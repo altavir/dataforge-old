@@ -48,7 +48,7 @@ object JavaObjectWrapper : Wrapper<Any> {
         try {
             ObjectOutputStream(baos).use { stream ->
                 stream.writeObject(obj)
-                builder.setData(baos.toByteArray())
+                builder.data(baos.toByteArray())
                 return builder.build()
             }
         } catch (ex: IOException) {
