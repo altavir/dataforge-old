@@ -100,10 +100,10 @@ class DescriptorBuilder(name: String, override val meta: Configuration = Configu
             0 -> this
             1 -> {
                 val existingChild = meta.getMetaList("node").find { it.getString("name") == name.first.unescaped }
-                return if(existingChild == null){
+                return if (existingChild == null) {
                     DescriptorBuilder(name.first.unescaped).also { this.meta.attachNode(it.meta) }
-                } else{
-                    DescriptorBuilder(name.first.unescaped,existingChild)
+                } else {
+                    DescriptorBuilder(name.first.unescaped, existingChild)
                 }
             }
             else -> {

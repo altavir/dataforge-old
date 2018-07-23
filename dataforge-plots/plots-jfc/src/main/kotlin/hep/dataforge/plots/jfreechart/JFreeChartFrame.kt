@@ -243,9 +243,8 @@ class JFreeChartFrame : XYPlotFrame(), FXObject, Serializable {
     @Synchronized
     override fun updatePlotData(name: Name, plot: Plottable?) {
         if (plot == null) {
-            val num = Optional.ofNullable(index[name]).map<Int> { it.index }.orElse(-1)
-            if (num >= 0) {
-                runLater { xyPlot.setDataset(num, null) }
+            index[name]?.index?.let {
+                runLater { xyPlot.setDataset(it, null) }
             }
             index.remove(name)
         } else if (plot is Plot) {
@@ -264,8 +263,7 @@ class JFreeChartFrame : XYPlotFrame(), FXObject, Serializable {
         }
     }
 
-    @Synchronized
-    override fun updatePlotConfig(name: Name, config: Laminate) {
+    private fun createRenderer(name: Name, config: Laminate): XYLineAndShapeRenderer{
         val render: XYLineAndShapeRenderer = if (config.getBoolean("showErrors", true)) {
             XYErrorRenderer()
         } else {
@@ -308,9 +306,14 @@ class JFreeChartFrame : XYPlotFrame(), FXObject, Serializable {
             config.optString("title").nullable ?: name.unescaped
 
         }
+        return render
+    }
 
-        runLater {
-            index[name]?.index?.let {
+    @Synchronized
+    override fun updatePlotConfig(name: Name, config: Laminate) {
+        index[name]?.index?.let {
+            val render = createRenderer(name,config)
+            runLater {
                 xyPlot.setRenderer(it, render)
 
                 // update cache to default colors
