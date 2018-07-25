@@ -29,6 +29,7 @@ import javafx.scene.text.TextAlignment
 import javafx.stage.Stage
 import tornadofx.*
 import java.util.*
+import kotlin.collections.HashMap
 
 
 internal val defaultDisplay: (PlotFrame) -> Node = {
@@ -263,6 +264,8 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
     }
 
     private inner class ContainerChangeListener(val item: TreeItem<Plottable>) : PlotListener {
+        private val referenceCache: MutableMap<Name, Plottable> = HashMap()
+
         override fun metaChanged(caller: Plottable, path: Name) {
             //do nothing
         }
@@ -270,10 +273,14 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
         override fun dataChanged(caller: Plottable, path: Name) {
             if (path.length == 1) {
                 val plot = (caller as? PlotGroup)?.get(path)
-                if(plot == null){
-                    item.children.removeIf { it.value.name == name }
-                }else {
-                    item.children.add(fillTree(plot))
+                when {
+                    plot == null -> item.children.removeIf { it.value.name == name }
+                    referenceCache.containsKey(path) -> {
+                    }
+                    else -> {
+                            referenceCache[path] = plot
+                            item.children.add(fillTree(plot))
+                    }
                 }
             }
         }

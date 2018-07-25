@@ -20,6 +20,7 @@ import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name
 import hep.dataforge.nullable
+import hep.dataforge.orElse
 import hep.dataforge.plots.*
 import hep.dataforge.utils.FXObject
 import hep.dataforge.values.Value
@@ -55,6 +56,7 @@ import java.io.OutputStream
 import java.io.Serializable
 import java.util.*
 import java.util.stream.Collectors
+import kotlin.math.abs
 
 /**
  * @author Alexander Nozik
@@ -244,21 +246,26 @@ class JFreeChartFrame : XYPlotFrame(), FXObject, Serializable {
     override fun updatePlotData(name: Name, plot: Plottable?) {
         if (plot == null) {
             index[name]?.index?.let {
-                runLater { xyPlot.setDataset(it, null) }
+                runLater {
+                    xyPlot.setDataset(it, null)
+                }
             }
             index.remove(name)
         } else if (plot is Plot) {
             //ignore groups
-            if (!index.containsKey(name)) {
-                val wrapper = JFCDataWrapper(plot)
-                wrapper.index = index.values.stream().mapToInt { it.index }.max().orElse(-1) + 1
+            index[name]?.let {wrapper->
+                //TODO move data calculation off the UI thread somehow
+                wrapper.setPlot(plot)
+                runLater {
+                    this.xyPlot.datasetChanged(DatasetChangeEvent(this.xyPlot, wrapper))
+                }
+            }.orElse {
+                val wrapper = JFCDataWrapper(abs(name.hashCode()),plot)
                 index[name] = wrapper
-                runLater { this.xyPlot.setDataset(wrapper.index, wrapper) }
-            } else {
-                val wrapper = index[name]
-                wrapper!!.setPlot(plot)
-                wrapper.invalidateData()
-                runLater { this.xyPlot.datasetChanged(DatasetChangeEvent(this.xyPlot, wrapper)) }
+                runLater {
+                    this.xyPlot.setDataset(wrapper.index, wrapper)
+                }
+                metaChanged(this.plots,name)
             }
         }
     }

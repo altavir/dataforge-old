@@ -241,6 +241,10 @@ fun Iterable<Value>.asValue(): Value {
     }
 }
 
+val Value?.nullableDouble: Double?
+    get() = this?.let { if (isNull) null else double }
+
+
 //fun asValue(list: Collection<Any>): Value {
 //    return when {
 //        list.isEmpty() -> Value.NULL

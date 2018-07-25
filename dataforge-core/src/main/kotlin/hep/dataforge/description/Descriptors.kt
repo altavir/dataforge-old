@@ -134,10 +134,13 @@ object Descriptors {
     }
 
     fun forDef(def: NodeDef): NodeDescriptor? {
-        val element = if (def.type == Any::class) {
-            findAnnotatedElement(Path.of(def.descriptor))
-        } else {
-            def.type
+        val element = when {
+            def.type == Any::class -> if(def.descriptor.isEmpty()) {
+                null
+            } else{
+                findAnnotatedElement(Path.of(def.descriptor))
+            }
+            else -> def.type
         }
         return element?.let {
             describe(def.key, it).apply {
