@@ -68,7 +68,7 @@ class FXTableOutput(context: Context) : FXOutput(context) {
 
 class FXPlotOutput(context: Context, meta: Meta = Meta.empty()) : FXOutput(context), PlotOutput, Configurable {
 
-    override val frame: PlotFrame  by lazy { context.get<PlotFactory>().build(meta) }
+    override val frame: PlotFrame  by lazy { context.get<PlotFactory>().build(meta.getMetaOrEmpty("frame")) }
 
     val container: PlotContainer by lazy { PlotContainer(frame) }
 
