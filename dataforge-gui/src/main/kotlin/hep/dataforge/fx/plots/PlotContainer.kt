@@ -1,10 +1,8 @@
 package hep.dataforge.fx.plots
 
-import hep.dataforge.context.Context
 import hep.dataforge.description.Descriptors
 import hep.dataforge.description.NodeDescriptor
 import hep.dataforge.fx.dfIconView
-import hep.dataforge.fx.display
 import hep.dataforge.fx.meta.ConfigEditor
 import hep.dataforge.fx.table.TableDisplay
 import hep.dataforge.io.envelopes.JavaObjectWrapper.name
@@ -304,9 +302,4 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
         }
     }
 
-}
-
-@Deprecated("To be replaced by outputs")
-fun Context.displayPlot(width: Double = 800.0, height: Double = 600.0, frame: () -> PlotFrame) {
-    display(width, height) { PlotContainer(frame()) }
 }

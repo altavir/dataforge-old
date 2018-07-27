@@ -31,11 +31,11 @@ interface PlotOutput : Output, Configurable {
     val frame: PlotFrame
 }
 
-fun Context.plot(plottable: Plottable, stage: String? = null, name: String? = null, transform: KMetaBuilder.() -> Unit = {}) {
+fun Context.plot(plottable: Plottable, name: String? = null, stage: String? = null, transform: KMetaBuilder.() -> Unit = {}) {
     output.render(plottable, stage, name, Plot.PLOT_TYPE, transform)
 }
 
-fun Context.plot(plottables: Iterable<Plottable>, stage: String? = null, name: String? = null, transform: KMetaBuilder.() -> Unit = {}) {
+fun Context.plot(plottables: Iterable<Plottable>, name: String? = null, stage: String? = null, transform: KMetaBuilder.() -> Unit = {}) {
     output.render(plottables, stage, name, Plot.PLOT_TYPE, transform)
 }
 

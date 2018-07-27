@@ -36,7 +36,6 @@ import org.jfree.chart.axis.NumberAxis
 import org.jfree.chart.axis.ValueAxis
 import org.jfree.chart.encoders.SunPNGEncoderAdapter
 import org.jfree.chart.fx.ChartViewer
-import org.jfree.chart.labels.XYSeriesLabelGenerator
 import org.jfree.chart.plot.XYPlot
 import org.jfree.chart.renderer.xy.XYErrorRenderer
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer
@@ -45,7 +44,6 @@ import org.jfree.chart.renderer.xy.XYStepRenderer
 import org.jfree.chart.title.LegendTitle
 import org.jfree.data.Range
 import org.jfree.data.general.DatasetChangeEvent
-import org.jfree.data.xy.XYDataset
 import org.slf4j.LoggerFactory
 import java.awt.BasicStroke
 import java.awt.Color
@@ -63,7 +61,7 @@ import kotlin.math.abs
  */
 class JFreeChartFrame : XYPlotFrame(), FXObject, Serializable {
 
-    private val xyPlot: XYPlot = XYPlot()
+    private val xyPlot: XYPlot = XYPlot(null, NumberAxis(), NumberAxis(), XYLineAndShapeRenderer())
     val chart: JFreeChart = JFreeChart(xyPlot)
 
     /**
@@ -79,6 +77,11 @@ class JFreeChartFrame : XYPlotFrame(), FXObject, Serializable {
     @Transient
     private val shapeCache = HashMap<Name, Shape>()
 
+//    init {
+//        //pre-configure axis using default values
+//        configure(Meta.empty())
+//    }
+
     private fun runLater(runnable: () -> Unit) {
         try {
             Platform.runLater(runnable)
@@ -89,7 +92,7 @@ class JFreeChartFrame : XYPlotFrame(), FXObject, Serializable {
     }
 
     override fun getFXNode(): Node {
-        val viewer = ChartViewer(chart)
+        val viewer = ChartViewer(chart,true)
         addExportPlotAction(viewer.contextMenu, this)
         return viewer
     }
@@ -157,7 +160,6 @@ class JFreeChartFrame : XYPlotFrame(), FXObject, Serializable {
 
     @Synchronized
     override fun updateAxis(axisName: String, axisMeta: Meta, plotMeta: Meta) {
-        runLater {
             val axis = getAxis(axisMeta)
 
             val crosshair = axisMeta.getString("crosshair") { plotMeta.getString("crosshair", "none") }
@@ -219,8 +221,6 @@ class JFreeChartFrame : XYPlotFrame(), FXObject, Serializable {
                 }
                 axis.label = label
             }
-
-        }
     }
 
     @Synchronized
@@ -253,24 +253,24 @@ class JFreeChartFrame : XYPlotFrame(), FXObject, Serializable {
             index.remove(name)
         } else if (plot is Plot) {
             //ignore groups
-            index[name]?.let {wrapper->
+            index[name]?.let { wrapper ->
                 //TODO move data calculation off the UI thread somehow
                 wrapper.setPlot(plot)
                 runLater {
                     this.xyPlot.datasetChanged(DatasetChangeEvent(this.xyPlot, wrapper))
                 }
             }.orElse {
-                val wrapper = JFCDataWrapper(abs(name.hashCode()),plot)
+                val wrapper = JFCDataWrapper(abs(name.hashCode()), plot)
                 index[name] = wrapper
                 runLater {
                     this.xyPlot.setDataset(wrapper.index, wrapper)
                 }
-                metaChanged(this.plots,name)
+                metaChanged(this.plots, name)
             }
         }
     }
 
-    private fun createRenderer(name: Name, config: Laminate): XYLineAndShapeRenderer{
+    private fun createRenderer(name: Name, config: Laminate): XYLineAndShapeRenderer {
         val render: XYLineAndShapeRenderer = if (config.getBoolean("showErrors", true)) {
             XYErrorRenderer()
         } else {
@@ -319,7 +319,7 @@ class JFreeChartFrame : XYPlotFrame(), FXObject, Serializable {
     @Synchronized
     override fun updatePlotConfig(name: Name, config: Laminate) {
         index[name]?.index?.let {
-            val render = createRenderer(name,config)
+            val render = createRenderer(name, config)
             runLater {
                 xyPlot.setRenderer(it, render)
 
@@ -355,25 +355,8 @@ class JFreeChartFrame : XYPlotFrame(), FXObject, Serializable {
         return Optional.ofNullable(colorCache[name]).map { color -> ValueFactory.of(PlotUtils.awtColorToString(color)) }
     }
 
-//    @Override
-//    public synchronized void clear() {
-//        super.clear();
-//        index.values().forEach(wr -> {
-//            xyPlot.setDataset(wr.getIndex(), null);
-//        });
-//        this.index.clear();
-//    }
-
     @Throws(ObjectStreamException::class)
     private fun writeReplace(): Any {
         return PlotFrame.PlotFrameEnvelope(PlotFrame.wrapper.wrap(this))
-    }
-
-    private class LabelGenerator(private val titleMap: Map<String, String>) : XYSeriesLabelGenerator, Serializable {
-
-        override fun generateLabel(dataset: XYDataset, series: Int): String {
-            return titleMap[dataset.getSeriesKey(series).toString()] ?: dataset.getSeriesKey(series).toString()
-        }
-
     }
 }

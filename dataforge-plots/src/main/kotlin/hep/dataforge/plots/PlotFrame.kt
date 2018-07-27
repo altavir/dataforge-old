@@ -59,7 +59,7 @@ interface PlotFrame : Configurable, Serializable {
     }
 
 
-    operator fun Plottable.unaryPlus(){
+    operator fun Plottable.unaryPlus() {
         this@PlotFrame.add(this)
     }
 
@@ -191,7 +191,7 @@ interface PlotFactory : Plugin, MetaFactory<PlotFrame>
 /**
  * Range for single numberic axis
  */
-class Range(meta:Meta): ConfigMorph(meta){
+class Range(meta: Meta) : ConfigMorph(meta) {
 
     @Description("Lower boundary for fixed range")
     val from: Number by configDouble()
@@ -203,34 +203,34 @@ class Range(meta:Meta): ConfigMorph(meta){
 /**
  * Axis definition
  */
-class Axis(meta:Meta): ConfigMorph(meta){
+class Axis(meta: Meta) : ConfigMorph(meta) {
 
-    enum class Type{
+    enum class Type {
         NUMBER,
         LOG,
         TIME
     }
 
-    enum class Crosshair{
+    enum class Crosshair {
         NONE,
         FREE,
         DATA
     }
 
     @Description("The type of axis. By default number axis is used")
-    @ValueProperty(enumeration = Type::class)
+    @ValueProperty(enumeration = Type::class, def = "NUMBER")
     val type: Type by configEnum(def = Type.NUMBER)
 
     @Description("The title of the axis")
-    @ValueProperty(type = [ValueType.STRING])
+    @ValueProperty(type = [ValueType.STRING], def = "")
     val title: String by configString()
 
     @Description("The units of the axis")
-    @ValueProperty(type = [ValueType.STRING])
+    @ValueProperty(type = [ValueType.STRING], def = "")
     val units: String by configString(def = "")
 
     @Description("Appearance and type of the crosshair")
-    @ValueProperty(enumeration = Crosshair::class)
+    @ValueProperty(enumeration = Crosshair::class, def = "NONE")
     val crosshair: Crosshair by configEnum(def = Crosshair.NONE)
 
     @Description("The definition of range for given axis")

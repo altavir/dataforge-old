@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,6 +34,7 @@ public class SimpleConfigurable implements Configurable {
 
     /**
      * Create a pre-configured instance
+     *
      * @param configuration
      */
     public SimpleConfigurable(Configuration configuration) {
@@ -78,7 +79,7 @@ public class SimpleConfigurable implements Configurable {
      *
      * @param config
      */
-    protected void applyConfig(Meta config){
+    protected void applyConfig(Meta config) {
         //does nothing by default
     }
 
@@ -143,7 +144,7 @@ public class SimpleConfigurable implements Configurable {
     @Override
     public Configurable configure(Meta config) {
         //Check and correct input configuration
-        getConfig().update(config);
+        getConfig().update(config, false);
         applyConfig(getConfig());
         return this;
     }

@@ -80,7 +80,7 @@ class PlotDataAction : OneToOneAction<Table, Table>() {
         val plottableData = DataPlot.plot(name, input, adapter)
         plottableData.configure(meta)
 
-        context.plot(plottableData, this.name, frameName)
+        context.plot(plottableData, frameName, this.name)
 
         //        if (meta.hasMeta("snapshot")) {
         //            snapshot(name, frame, meta.getMeta("snapshot"));
