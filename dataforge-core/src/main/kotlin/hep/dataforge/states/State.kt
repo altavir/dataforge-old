@@ -17,10 +17,7 @@
 package hep.dataforge.states
 
 import hep.dataforge.Named
-import hep.dataforge.description.NodeDef
-import hep.dataforge.description.NodeDescriptor
-import hep.dataforge.description.ValueDef
-import hep.dataforge.description.ValueDescriptor
+import hep.dataforge.description.*
 import hep.dataforge.meta.*
 import hep.dataforge.values.Value
 import hep.dataforge.values.parseValue
@@ -362,7 +359,7 @@ class MetaState(
             owner: Stateful? = null,
             getter: (suspend () -> Meta)? = null,
             setter: (suspend State<Meta>.(Meta?, Meta) -> Unit)? = null
-    ) : this(def.key, NodeDescriptor.build(def), Meta.empty(), owner, getter, setter)
+    ) : this(def.key, Descriptors.forDef(def), Meta.empty(), owner, getter, setter)
 
     override fun transform(value: Any): Meta {
         return (value as? MetaID)?.toMeta()

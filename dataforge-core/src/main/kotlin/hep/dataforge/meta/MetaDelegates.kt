@@ -72,8 +72,6 @@ open class ValueDelegate<T : Any>(
         return cached ?: getValueInternal(thisRef, property)
     }
 
-    val defaultValue: Any
-        get() = def?.let { write(it) } ?: Value.NULL
 }
 
 class EnumValueDelegate<T : Enum<T>>(

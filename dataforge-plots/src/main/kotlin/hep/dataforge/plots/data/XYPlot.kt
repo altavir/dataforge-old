@@ -39,7 +39,7 @@ import java.util.stream.Stream
 //@ValueDef(name = "symbolSize", type = "NUMBER", info = "The size of the symbols for scatterplot.")
 //@ValueDef(name = "lineType", info = "The type of the line fill.")
 @ValueDefs(
-        ValueDef(key = "color", info = "The color of line or symbol.", tags = ["color"]),
+        ValueDef(key = "color", info = "The color of line or symbol.", tags = ["widget:color"]),
         ValueDef(key = "thickness", type = [ValueType.NUMBER], def = "1", info = "Thickness of the line if it is present"),
         ValueDef(key = "connectionType", def = "DEFAULT", enumeration = XYPlot.ConnectionType::class, info = "Connection line type")
 )

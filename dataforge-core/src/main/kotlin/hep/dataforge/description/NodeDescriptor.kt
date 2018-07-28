@@ -183,15 +183,6 @@ open class NodeDescriptor(meta: Meta) : SimpleMetaMorph(meta.sealed), Named {
 
     companion object {
 
-        fun build(nodeDef: NodeDef): NodeDescriptor {
-            return DescriptorBuilder(nodeDef.key).apply {
-                info = nodeDef.info
-                required = nodeDef.required
-                multiple = nodeDef.multiple
-                tags = nodeDef.tags.asList()
-            }.build()
-        }
-
         fun empty(nodeName: String): NodeDescriptor {
             return NodeDescriptor(Meta.buildEmpty(nodeName))
         }

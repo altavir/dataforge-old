@@ -49,6 +49,7 @@ internal class JFCDataWrapper(val index: Int, private var plot: Plot) : Abstract
     private val data: List<JFCValuesWrapper>
         get() {
             synchronized(this) {
+
                 if (cache == null) {
                     cache = plot.data.map { JFCValuesWrapper(it) }
                 }

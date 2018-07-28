@@ -82,8 +82,8 @@ annotation class ValueProperty(
         val type: Array<ValueType> = [ValueType.STRING],
         val multiple: Boolean = false,
         val def: String = "",
-        val enumeration: KClass<*> = Any::class
-//        val tags: Array<String> = []
+        val enumeration: KClass<*> = Any::class,
+        val tags: Array<String> = []
 )
 
 

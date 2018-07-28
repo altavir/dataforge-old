@@ -17,10 +17,7 @@ package hep.dataforge.plots
 
 import hep.dataforge.Type
 import hep.dataforge.context.Plugin
-import hep.dataforge.description.Description
-import hep.dataforge.description.NodeProperty
-import hep.dataforge.description.ValueDef
-import hep.dataforge.description.ValueProperty
+import hep.dataforge.description.*
 import hep.dataforge.io.envelopes.Envelope
 import hep.dataforge.io.envelopes.EnvelopeBuilder
 import hep.dataforge.io.envelopes.JavaObjectWrapper.JAVA_SERIAL_DATA
@@ -174,8 +171,8 @@ interface PlotFrame : Configurable, Serializable {
 
         companion object {
 
-            val PLOT_FRAME_CLASS_KEY = "frame.class"
-            val PLOT_FRAME_META_KEY = "frame.meta"
+            const val PLOT_FRAME_CLASS_KEY = "frame.class"
+            const val PLOT_FRAME_META_KEY = "frame.meta"
         }
 
     }
@@ -235,5 +232,9 @@ class Axis(meta: Meta) : ConfigMorph(meta) {
 
     @Description("The definition of range for given axis")
     @NodeProperty
+    @ValueDefs(
+            ValueDef(key = "from", info = "Upper border for range"),
+            ValueDef(key = "to", info = "Lower border for range")
+    )
     val range: Range by morphConfigNode()
 }

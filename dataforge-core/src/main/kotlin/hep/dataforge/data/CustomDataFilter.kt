@@ -112,7 +112,7 @@ class CustomDataFilter(meta: Meta) : SimpleMetaMorph(meta), DataFilter {
     }
 
     private fun excludeNode(namePattern: String) {
-        excludeNode(BiPredicate<String, DataNode<*>> { name, node -> name.matches(namePattern.toRegex()) })
+        excludeNode(BiPredicate { name, _ -> name.matches(namePattern.toRegex()) })
     }
 
     private fun getPattern(node: Meta): String {

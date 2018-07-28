@@ -59,15 +59,11 @@ object ValueChooserFactory{
         if(descriptor == null){
             return TextValueChooser();
         }
-        val types = descriptor.type
-        val chooser: ValueChooser = if (types.size != 1) {
-            TextValueChooser()
-        } else if (!descriptor.allowedValues.isEmpty()) {
-            ComboBoxValueChooser()
-        } else if (descriptor.tags.contains("color")) {
-            ColorValueChooser()
-        } else {
-            TextValueChooser()
+        //val types = descriptor.type
+        val chooser: ValueChooser = when {
+            descriptor.allowedValues.isNotEmpty() -> ComboBoxValueChooser()
+            descriptor.tags.contains("widget:color") -> ColorValueChooser()
+            else -> TextValueChooser()
         }
         chooser.descriptor = descriptor
         return chooser

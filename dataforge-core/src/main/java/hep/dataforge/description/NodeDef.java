@@ -24,7 +24,6 @@ import java.lang.annotation.*;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-@Target({ElementType.TYPE, ElementType.METHOD, ElementType.PARAMETER, ElementType.CONSTRUCTOR,ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
@@ -34,6 +33,17 @@ public @interface NodeDef {
     String key();
 
     String info() default "";
+
+    boolean multiple() default false;
+
+    boolean required() default false;
+
+    String[] tags() default {};
+
+    /**
+     * A list of child value descriptors
+     */
+    ValueDef[] values() default {};
 
     /**
      * A target class for this node to describe
@@ -56,10 +66,4 @@ public @interface NodeDef {
      * @return
      */
     String descriptor() default "";
-
-    boolean multiple() default false;
-
-    boolean required() default false;
-
-    String[] tags() default {};
 }

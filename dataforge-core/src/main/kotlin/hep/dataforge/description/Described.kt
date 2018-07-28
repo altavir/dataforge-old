@@ -34,5 +34,5 @@ interface Described {
      */
     @JvmDefault
     val descriptor: NodeDescriptor
-        get() = Descriptors.forType("node", this.javaClass)
+        get() = Descriptors.forJavaType("node", this.javaClass)
 }

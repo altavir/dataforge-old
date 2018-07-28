@@ -116,13 +116,7 @@ class DescriptorBuilder(name: String, override val meta: Configuration = Configu
      * Add node from annotation
      */
     fun node(nodeDef: NodeDef): DescriptorBuilder {
-        return node(nodeDef.key) {
-            info = nodeDef.info
-            required = nodeDef.required
-            multiple = nodeDef.multiple
-            tags = nodeDef.tags.asList()
-            Descriptors.forDef(nodeDef)?.let { update(it) }
-        }
+        return node(Descriptors.forDef(nodeDef))
     }
 
     /**
