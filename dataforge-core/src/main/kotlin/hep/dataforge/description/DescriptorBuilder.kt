@@ -21,6 +21,7 @@
  */
 package hep.dataforge.description
 
+import hep.dataforge.findNode
 import hep.dataforge.meta.*
 import hep.dataforge.names.Name
 import hep.dataforge.set
@@ -168,8 +169,37 @@ class DescriptorBuilder(name: String, override val meta: Configuration = Configu
         return this
     }
 
+    /**
+     * Get existing node descriptor with given name
+     */
+    fun findNode(name: Name): DescriptorBuilder? {
+        return when {
+            name.length == 0 -> this
+            name.length == 1 -> meta.findNode("node") { getString("name") == name.unescaped }?.let { DescriptorBuilder(name.unescaped, it.self()) }
+            else -> findNode(name.first)?.findNode(name.cutFirst())
+        }
+    }
+
+    /**
+     * Get existing value descriptor configuration with given name
+     */
+    fun findValue(name: Name): Configuration? {
+        return findNode(name.cutLast())?.meta?.findNode("value") { getString("name") == name.last.unescaped }?.self()
+    }
+
+    /**
+     * Override default for value descriptor if it is present
+     */
+    fun setDefault(name: Name, def: Any) {
+        findValue(name)?.setValue("default", def)?: logger.warn("Can't set a default for value $name. Descriptor does not exist.")
+    }
+
     fun build(): NodeDescriptor {
         return NodeDescriptor(meta)
+    }
+
+    companion object {
+        val logger = LoggerFactory.getLogger(DescriptorBuilder::class.java)
     }
 
 }

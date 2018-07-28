@@ -105,6 +105,14 @@ object Descriptors {
         }
     }
 
+    private fun KAnnotatedElement.listNodeDefs(): Iterable<NodeDef>{
+            return (listAnnotations<NodeDefs>(true).flatMap { it.value.asIterable() } + listAnnotations<NodeDef>(true)).distinctBy { it.key }
+    }
+
+    private fun KAnnotatedElement.listValueDefs(): Iterable<ValueDef>{
+        return (listAnnotations<ValueDefs>(true).flatMap { it.value.asIterable() } + listAnnotations<ValueDef>(true)).distinctBy { it.key }
+    }
+
     private fun describe(name: String, element: KAnnotatedElement): DescriptorBuilder {
         val reference = element.findAnnotation<Descriptor>()
 
@@ -112,18 +120,17 @@ object Descriptors {
             return forReference(name, reference.value).builder()
         }
 
-
         val builder = DescriptorBuilder(name)
 
         //Taking a group annotation if it is present and individual annotations if not
-        (element.findAnnotation<NodeDefs>()?.value?.toList() ?: element.listAnnotations<NodeDef>(true))
+        element.listNodeDefs()
                 .filter { it -> !it.key.startsWith("@") }
-                .forEach { nodeDef ->
-                    builder.node(nodeDef)
+                .forEach {
+                    builder.node(it)
                 }
 
         //Filtering hidden values
-        (element.findAnnotation<ValueDefs>()?.value?.toList() ?: element.listAnnotations<ValueDef>(true))
+        element.listValueDefs()
                 .filter { it -> !it.key.startsWith("@") }
                 .forEach { valueDef ->
                     builder.value(ValueDescriptor.build(valueDef))

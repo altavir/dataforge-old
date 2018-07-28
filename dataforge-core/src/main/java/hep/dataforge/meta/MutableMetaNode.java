@@ -109,13 +109,6 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
         }
     }
 
-    /**
-     * Return type checked state of this node
-     *
-     * @return
-     */
-    protected abstract T self();
-
     @Nullable
     protected T getParent() {
         return parent;
@@ -334,7 +327,12 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
 
 
     public T setValue(String name, Object object) {
-        return setValue(name, ValueFactory.of(object));
+        if(object ==null){
+            removeValue(name);
+            return self();
+        } else {
+            return setValue(name, ValueFactory.of(object));
+        }
     }
 
     /**

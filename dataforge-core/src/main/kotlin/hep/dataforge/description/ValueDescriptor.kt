@@ -39,18 +39,34 @@ import hep.dataforge.values.ValueType
 class ValueDescriptor(meta: Meta) : SimpleMetaMorph(meta.sealed), Named {
 
     /**
+     * Check if there is default for this value
+     *
+     * @return
+     */
+    fun hasDefault(): Boolean {
+        return meta.hasValue("default")
+    }
+
+    /**
+     * The default for this value. Null if there is no default.
+     *
+     * @return
+     */
+    val default: Value by value(def = Value.NULL)
+
+    /**
      * True if multiple values with this name are allowed.
      *
      * @return
      */
-    val multiple: Boolean by booleanValue(def = true)
+    val multiple: Boolean by booleanValue(def = false)
 
     /**
      * True if the value is required
      *
      * @return
      */
-    val required: Boolean by booleanValue(def = false)
+    val required: Boolean by booleanValue(def = !hasDefault())
 
     /**
      * Value name
@@ -91,22 +107,6 @@ class ValueDescriptor(meta: Meta) : SimpleMetaMorph(meta.sealed), Named {
     }
 
     /**
-     * Check if there is default for this value
-     *
-     * @return
-     */
-    fun hasDefault(): Boolean {
-        return meta.hasValue("default")
-    }
-
-    /**
-     * The default for this value. Null if there is no default.
-     *
-     * @return
-     */
-    val default: Value by value(def = Value.NULL)
-
-    /**
      * A list of allowed values with descriptions. If empty than any value is
      * allowed.
      *
@@ -128,14 +128,12 @@ class ValueDescriptor(meta: Meta) : SimpleMetaMorph(meta.sealed), Named {
         fun build(def: ValueDef): ValueDescriptor {
             val builder = MetaBuilder("value")
                     .setValue("name", def.key)
-                    .setValue("type", def.type)
-                    .setValue("tags", def.tags)
 
-            if (!def.required) {
-                builder.setValue("required", def.required)
+            if (def.type.isNotEmpty()) {
+                builder.setValue("type", def.type)
             }
 
-            if (!def.multiple) {
+            if (def.multiple) {
                 builder.setValue("multiple", def.multiple)
             }
 
@@ -154,9 +152,14 @@ class ValueDescriptor(meta: Meta) : SimpleMetaMorph(meta.sealed), Named {
                 }
             }
 
-
-            if (!def.def.isEmpty()) {
+            if (def.def.isNotEmpty()) {
                 builder.setValue("default", def.def)
+            } else if(!def.required){
+                builder.setValue("required", def.required)
+            }
+
+            if (def.tags.isNotEmpty()) {
+                builder.setValue("tags", def.tags)
             }
             return ValueDescriptor(builder)
         }

@@ -15,6 +15,9 @@
  */
 package hep.dataforge.plots.data
 
+import hep.dataforge.asName
+import hep.dataforge.description.Descriptors
+import hep.dataforge.description.NodeDescriptor
 import hep.dataforge.description.ValueDef
 import hep.dataforge.description.ValueDefs
 import hep.dataforge.meta.*
@@ -40,8 +43,7 @@ import kotlin.collections.set
         ValueDef(key = "showErrors", type = arrayOf(BOOLEAN), def = "false", info = "Show errors for points."),
         ValueDef(key = "range.from", type = arrayOf(NUMBER), def = "0.0", info = "Lower boundary for calculation range"),
         ValueDef(key = "range.to", type = arrayOf(NUMBER), def = "1.0", info = "Upper boundary for calculation range"),
-        ValueDef(key = "density", type = arrayOf(NUMBER), def = "200", info = "Minimal number of points per plot"),
-        ValueDef(key = "connectionType", def = "SPLINE", enumeration = XYPlot.ConnectionType::class, info = "Connection line type")
+        ValueDef(key = "density", type = arrayOf(NUMBER), def = "200", info = "Minimal number of points per plot")
 )
 class XYFunctionPlot(name: String, meta: Meta = Meta.empty(), val function: (Double) -> Double) : XYPlot(name, meta, Adapters.DEFAULT_XY_ADAPTER) {
 
@@ -136,6 +138,13 @@ class XYFunctionPlot(name: String, meta: Meta = Meta.empty(), val function: (Dou
             this.to = x
         }
         return eval(x)
+    }
+
+    override val descriptor: NodeDescriptor by lazy {
+        Descriptors.forType("plot", this::class)
+                .builder()
+                .apply { setDefault("connectionType".asName(), ConnectionType.SPLINE) }
+                .build()
     }
 
     override fun getRawData(query: Meta): List<Values> {

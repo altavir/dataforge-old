@@ -17,7 +17,6 @@ package hep.dataforge.plots.demo
 
 import hep.dataforge.buildContext
 import hep.dataforge.configure
-import hep.dataforge.description.Descriptors
 import hep.dataforge.fx.output.FXOutputManager
 import hep.dataforge.fx.plots.group
 import hep.dataforge.plots.data.DataPlot
@@ -66,7 +65,6 @@ fun main(args: Array<String>) {
         thread {
             Thread.sleep(5000)
             +dataPlot
-            Descriptors.printDescriptors()
         }
         +funcPlot
         group("sub") {

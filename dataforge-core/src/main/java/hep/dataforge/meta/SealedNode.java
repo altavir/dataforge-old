@@ -32,4 +32,9 @@ public final class SealedNode extends MetaNode<SealedNode> {
     protected SealedNode cloneNode(Meta node) {
         return new SealedNode(node);
     }
+
+    @Override
+    public SealedNode self() {
+        return this;
+    }
 }

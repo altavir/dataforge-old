@@ -42,7 +42,7 @@ public @interface ValueDef {
 
     String info() default "";
 
-    boolean required() default false;
+    boolean required() default true;
 
     String[] allowed() default {};
 

@@ -236,6 +236,13 @@ public abstract class MetaNode<T extends MetaNode> extends Meta implements MetaM
      */
     protected abstract T cloneNode(Meta node);
 
+    /**
+     * Return type checked variant of this node. The operation does not create new node, just exposes generic-free variant of the node.
+     *
+     * @return
+     */
+    public abstract T self();
+
 
     @Override
     public boolean isEmpty() {
