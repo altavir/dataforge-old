@@ -2,8 +2,6 @@ package hep.dataforge.fx.meta
 
 import hep.dataforge.description.NodeDescriptor
 import hep.dataforge.description.ValueDescriptor
-import hep.dataforge.fx.values.ValueCallbackResponse
-import hep.dataforge.fx.values.ValueChooserFactory
 import hep.dataforge.meta.ConfigChangeListener
 import hep.dataforge.meta.Configuration
 import hep.dataforge.meta.Meta
@@ -266,7 +264,6 @@ class ConfigFXValue(name: String, parent: ConfigFXNode) : ConfigFX(name) {
         parent.configuration?.optValue(name).nullable ?: descriptor?.default
     }
 
-
     var value: Value
         set(value) {
             parent?.setValue(name, value)
@@ -283,17 +280,4 @@ class ConfigFXValue(name: String, parent: ConfigFXNode) : ConfigFX(name) {
         valueProperty.invalidate()
         hasValueProperty.invalidate()
     }
-
-    //TODO move to editor
-    val valueChooser
-        get() = ValueChooserFactory.build(valueProperty, descriptor) { result ->
-            if (descriptor?.isValueAllowed(result) != false) {
-                this.value = result
-                ValueCallbackResponse(true, value, "")
-            } else {
-                ValueCallbackResponse(false, value, "Not allowed")
-            }
-        }
-
-
 }

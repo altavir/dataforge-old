@@ -7,6 +7,7 @@ package hep.dataforge.fx.meta
 
 import hep.dataforge.description.NodeDescriptor
 import hep.dataforge.fx.dfIconView
+import hep.dataforge.fx.values.ValueChooserFactory
 import hep.dataforge.meta.Configuration
 import javafx.scene.control.*
 import javafx.scene.control.cell.TextFieldTreeTableCell
@@ -113,7 +114,9 @@ class ConfigEditor(val configuration: Configuration, title: String = "Configurat
                     when (item) {
                         is ConfigFXValue -> {
                             text = null
-                            val chooser = item.valueChooser
+                            val chooser = ValueChooserFactory.build(item.valueProperty, item.descriptor) {
+                                item.value = it
+                            }
                             graphic = chooser.node
                         }
                         is ConfigFXNode -> {

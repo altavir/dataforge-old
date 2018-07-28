@@ -70,13 +70,20 @@ object ValueChooserFactory {
         return chooser
     }
 
-    fun build(value: ObservableValue<Value?>, descriptor: ValueDescriptor? = null, callback: ValueCallback): ValueChooser {
+    fun build(value: ObservableValue<Value?>, descriptor: ValueDescriptor? = null, setter: (Value) -> Unit): ValueChooser {
         val chooser = build(descriptor)
         chooser.setDisplayValue(value.value ?: Value.NULL)
         value.onChange {
             chooser.setDisplayValue(it ?: Value.NULL)
         }
-        chooser.setCallback(callback)
+        chooser.setCallback { result ->
+            if (descriptor?.isValueAllowed(result) != false) {
+                setter(result)
+                ValueCallbackResponse(true, result, "OK")
+            } else {
+                ValueCallbackResponse(false, value.value?: Value.NULL, "Not allowed")
+            }
+        }
         return chooser
     }
 }
