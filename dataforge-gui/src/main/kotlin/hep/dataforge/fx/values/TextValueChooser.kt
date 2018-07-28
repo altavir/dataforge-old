@@ -47,11 +47,13 @@ class TextValueChooser : ValueChooserBase<TextField>() {
 
         // changing text color while editing
         node.textProperty().onChange { newValue ->
-            val value = Value.of(newValue)
-            if (!validate(value)) {
-                node.style = String.format("-fx-text-fill: %s;", "red")
-            } else {
-                node.style = String.format("-fx-text-fill: %s;", textColor(value))
+            if(newValue!= null) {
+                val value = ValueFactory.parse(newValue)
+                if (!validate(value)) {
+                    node.style = String.format("-fx-text-fill: %s;", "red")
+                } else {
+                    node.style = String.format("-fx-text-fill: %s;", textColor(value))
+                }
             }
         }
 
@@ -76,7 +78,7 @@ class TextValueChooser : ValueChooserBase<TextField>() {
             } else {
                 "salmon"
             }
-            ValueType.STRING -> "brown"
+            ValueType.STRING -> "magenta"
             else -> "black"
         }
     }

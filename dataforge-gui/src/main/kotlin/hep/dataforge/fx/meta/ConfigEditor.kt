@@ -30,25 +30,9 @@ class ConfigEditor(val configuration: Configuration, title: String = "Configurat
         }
     }
 
-    private fun TreeItem<ConfigFX>.update(): TreeItem<ConfigFX> {
-        (value as? ConfigFXNode)?.let {
-            runLater {
-                children.setAll(it.children.filter(filter).map { TreeItem(it).update() })
-                it.children.onChange {
-                    update()
-                }
-            }
-        }
-        return this
-    }
-
     override val root = borderpane {
         center = treetableview<ConfigFX> {
-
-            root = TreeItem(ConfigFXRoot(configuration, descriptor))
-            runAsync {
-                root.update()
-            }
+            root = ConfigTreeItem(ConfigFXRoot(configuration, descriptor))
             root.isExpanded = true
             sortMode = TreeSortMode.ALL_DESCENDANTS
             columnResizePolicy = TreeTableView.CONSTRAINED_RESIZE_POLICY
@@ -60,14 +44,14 @@ class ConfigEditor(val configuration: Configuration, title: String = "Configurat
                                 contextMenu?.items?.removeIf { it.text == "Remove" }
                                 if (!empty) {
                                     if (treeTableRow.item != null) {
-                                        textFillProperty().bind(treeTableRow.item.isEmpty.objectBinding {
+                                        textFillProperty().bind(treeTableRow.item.hasValueProperty.objectBinding {
                                             if (it == true) {
-                                                Color.GRAY
-                                            } else {
                                                 Color.BLACK
+                                            } else {
+                                                Color.GRAY
                                             }
                                         })
-                                        if (!treeTableRow.treeItem.value.isEmpty.get()) {
+                                        if (treeTableRow.treeItem.value.hasValueProperty.get()) {
                                             contextmenu {
                                                 item("Remove") {
                                                     action {
@@ -157,6 +141,9 @@ class ConfigEditor(val configuration: Configuration, title: String = "Configurat
                         }
                     }
 
+                } else{
+                    text = null
+                    graphic = null
                 }
             } else {
                 text = null

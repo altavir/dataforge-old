@@ -103,11 +103,11 @@ public class Configuration extends MutableMetaNode<Configuration> {
     /**
      * Add new observer for this configuration
      *
-     * @param observer
      * @param strongReference if true, then configuration prevents observer from
      *                        being recycled by GC
+     * @param observer
      */
-    public void addObserver(ConfigChangeListener observer, boolean strongReference) {
+    public void addListener(boolean strongReference, ConfigChangeListener observer) {
         this.observers.add(observer, strongReference);
     }
 
@@ -116,8 +116,8 @@ public class Configuration extends MutableMetaNode<Configuration> {
      *
      * @param observer
      */
-    public void addObserver(ConfigChangeListener observer) {
-        addObserver(observer, true);
+    public void addListener(ConfigChangeListener observer) {
+        addListener(true, observer);
     }
 
     //PENDING add value observers inheriting value class by wrapper
@@ -127,7 +127,7 @@ public class Configuration extends MutableMetaNode<Configuration> {
      *
      * @param observer
      */
-    public void removeObserver(ConfigChangeListener observer) {
+    public void removeListener(ConfigChangeListener observer) {
         this.observers.remove(observer);
     }
 
@@ -169,7 +169,7 @@ public class Configuration extends MutableMetaNode<Configuration> {
     }
 
     /**
-     * Return existing node if it exists, otherwise builder and attach empty child
+     * Return existing node if it exists, otherwise build and attach empty child
      * node
      *
      * @param name

@@ -17,6 +17,7 @@ package hep.dataforge.meta
 
 import hep.dataforge.names.Name
 import hep.dataforge.values.Value
+import org.jetbrains.annotations.NotNull
 import spock.lang.Specification
 
 /**
@@ -40,7 +41,7 @@ class MutableAnnotationSpec extends Specification {
 
     def "test MutableAnnotation Value observer"() {
         when:
-        testAnnotation.addObserver(new Observer());
+        testAnnotation.addListener(new Observer());
         testAnnotation.putValue("some_new_value", 13.3)
         then:
         testAnnotation.hasValue("some_new_value")
@@ -49,7 +50,7 @@ class MutableAnnotationSpec extends Specification {
 
     def "test child Value observer"() {
         when:
-        testAnnotation.addObserver(new Observer());
+        testAnnotation.addListener(new Observer());
         testAnnotation.getMeta("child").putValue("new_child_value", 89);
         then:
         testAnnotation.hasValue("child.new_child_value")
@@ -57,12 +58,12 @@ class MutableAnnotationSpec extends Specification {
 
 
     private class Observer implements ConfigChangeListener {
-        void notifyValueChanged(Name name, Value oldItem, Value newItem) {
+        void notifyValueChanged(@NotNull Name name, Value oldItem, Value newItem) {
             println "the value with name ${name} changed from ${oldItem} to ${newItem}"
         }
 
         @Override
-        void notifyNodeChanged(Name name, List<? extends Meta> oldItem, List<? extends Meta> newItem) {
+        void notifyNodeChanged(@NotNull Name name, @NotNull List<? extends Meta> oldItem, @NotNull List<? extends Meta> newItem) {
             println "the element with name ${name} changed from ${oldItem} to ${newItem}"
         }
 

@@ -8,19 +8,12 @@ package hep.dataforge.fx.values
 import hep.dataforge.values.Value
 
 
-class ValueCallbackResponse(
-        /**
-         * Set value success
-         */
-        internal var success: Boolean,
-        /**
-         * Value after change
-         */
-        internal var value: Value,
-        /**
-         * Message on unsuccessful change
-         */
-        internal var message: String)
+/**
+ * @param success
+ * @param value Value after change
+ * @param message Message on unsuccessful change
+ */
+class ValueCallbackResponse(val success: Boolean, val value: Value, val message: String)
 
 /**
  * A callback for some visual object trying to change some value

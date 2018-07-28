@@ -39,15 +39,15 @@ public class SimpleConfigurable implements Configurable {
      */
     public SimpleConfigurable(Configuration configuration) {
         this.configuration = configuration;
-        configuration.addObserver(new ConfigChangeListener() {
+        configuration.addListener(new ConfigChangeListener() {
 
             @Override
-            public void notifyValueChanged(Name name, Value oldItem, Value newItem) {
+            public void notifyValueChanged(@NotNull Name name, Value oldItem, Value newItem) {
                 applyValueChange(name.getUnescaped(), oldItem, newItem);
             }
 
             @Override
-            public void notifyNodeChanged(Name name, @NotNull List<? extends Meta> oldItem, @NotNull List<? extends Meta> newItem) {
+            public void notifyNodeChanged(@NotNull Name name, @NotNull List<? extends Meta> oldItem, @NotNull List<? extends Meta> newItem) {
                 applyNodeChange(name.getUnescaped(), oldItem, newItem);
             }
         });
@@ -112,7 +112,7 @@ public class SimpleConfigurable implements Configurable {
      * @param observer
      */
     public void addConfigObserver(ConfigChangeListener observer) {
-        this.getConfig().addObserver(observer);
+        this.getConfig().addListener(observer);
     }
 
     /**
@@ -121,7 +121,7 @@ public class SimpleConfigurable implements Configurable {
      * @param observer
      */
     public void removeConfigObserver(ConfigChangeListener observer) {
-        this.getConfig().addObserver(observer);
+        this.getConfig().addListener(observer);
     }
 
     /**

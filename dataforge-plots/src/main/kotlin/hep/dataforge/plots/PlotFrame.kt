@@ -233,8 +233,8 @@ class Axis(meta: Meta) : ConfigMorph(meta) {
     @Description("The definition of range for given axis")
     @NodeProperty
     @ValueDefs(
-            ValueDef(key = "from", info = "Upper border for range"),
-            ValueDef(key = "to", info = "Lower border for range")
+            ValueDef(key = "from", type = [ValueType.NUMBER], info = "Upper border for range"),
+            ValueDef(key = "to", type = [ValueType.NUMBER], info = "Lower border for range")
     )
     val range: Range by morphConfigNode()
 }

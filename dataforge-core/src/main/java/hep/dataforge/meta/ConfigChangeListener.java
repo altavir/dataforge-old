@@ -39,7 +39,7 @@ public interface ConfigChangeListener {
      * @param newItem the item of values after change. If null, then value has
      *                been removed
      */
-    void notifyValueChanged(Name name, @Nullable Value oldItem, @Nullable Value newItem);
+    void notifyValueChanged(@NotNull Name name, @Nullable Value oldItem, @Nullable Value newItem);
 
     /**
      * notify that element item is changed
@@ -50,7 +50,7 @@ public interface ConfigChangeListener {
      * @param newItem the item of elements after change. If null, then item has
      *                been removed
      */
-    default void notifyNodeChanged(Name name, @NotNull List<? extends Meta> oldItem, @NotNull List<? extends Meta> newItem) {
+    default void notifyNodeChanged(@NotNull Name name, @NotNull List<? extends Meta> oldItem, @NotNull List<? extends Meta> newItem) {
         //do nothing by default
     }
 

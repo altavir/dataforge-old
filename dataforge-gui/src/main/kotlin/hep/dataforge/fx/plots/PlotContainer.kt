@@ -132,7 +132,7 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
                                         textFill = Color.valueOf(item.config.getString("color"))
                                     }
 
-                                    item.config.addObserver { name, _, newItem ->
+                                    item.config.addListener { name, _, newItem ->
                                         when (name.unescaped) {
                                             "title" -> text = if (newItem == null) {
                                                 item.title

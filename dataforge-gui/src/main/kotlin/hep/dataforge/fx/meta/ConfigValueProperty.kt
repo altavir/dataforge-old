@@ -39,7 +39,7 @@ class ConfigValueProperty<T>(val config: Configuration, val valueName: String, v
 
     init {
         //adding a weak observer to configuration
-        config.addObserver(cfgListener, false)
+        config.addListener(false, cfgListener)
     }
 
     override fun getBean(): Configuration? {

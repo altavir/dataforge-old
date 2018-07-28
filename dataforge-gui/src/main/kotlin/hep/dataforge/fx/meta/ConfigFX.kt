@@ -4,46 +4,58 @@ import hep.dataforge.description.NodeDescriptor
 import hep.dataforge.description.ValueDescriptor
 import hep.dataforge.fx.values.ValueCallbackResponse
 import hep.dataforge.fx.values.ValueChooserFactory
-import hep.dataforge.isNull
 import hep.dataforge.meta.ConfigChangeListener
 import hep.dataforge.meta.Configuration
 import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name
+import hep.dataforge.nullable
+import hep.dataforge.orElse
 import hep.dataforge.values.Value
-import javafx.beans.binding.ObjectBinding
 import javafx.beans.binding.StringBinding
+import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
 import javafx.beans.value.ObservableBooleanValue
 import javafx.beans.value.ObservableStringValue
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
+import javafx.scene.control.TreeItem
 import tornadofx.*
-import java.util.HashSet
-import kotlin.collections.ArrayList
+import kotlin.streams.toList
+
+class ConfigTreeItem(configFX: ConfigFX) : TreeItem<ConfigFX>(configFX) {
+    init {
+        this.children.bind(value.children) { ConfigTreeItem(it) }
+    }
+
+    override fun isLeaf(): Boolean = value is ConfigFXValue
+}
+
 
 /**
  * A node, containing relative representation of configuration node and description
  * Created by darksnake on 01-May-17.
  */
-sealed class ConfigFX(val name: String, val parent: ConfigFXNode? = null) {
+sealed class ConfigFX(name: String) {
+
+    val nameProperty = SimpleStringProperty(name)
+    val name by nameProperty
+
+    val parentProperty = SimpleObjectProperty<ConfigFXNode>()
+    val parent by parentProperty
+
+    abstract val hasValueProperty: ObservableBooleanValue
+    //abstract val hasDefaultProperty: ObservableBooleanValue
+
+    abstract val descriptionProperty: ObservableStringValue
+
+    abstract val children: ObservableList<ConfigFX>
+
     /**
      * remove itself from parent
      */
     abstract fun remove()
 
-    abstract val isEmpty: ObservableBooleanValue
-    abstract val descriptionProperty: ObservableStringValue
-
-    val nameProperty = object : StringBinding() {
-        override fun computeValue(): String {
-            return name
-        }
-    }
-
     abstract fun invalidate()
-
-    abstract fun invalidateValue(path: Name)
-
-    abstract fun invalidateNode(path: Name)
 }
 
 
@@ -51,30 +63,47 @@ sealed class ConfigFX(val name: String, val parent: ConfigFXNode? = null) {
  * Tree item for node
  * Created by darksnake on 30-Apr-17.
  */
-open class ConfigFXNode(
-        name: String,
-        parent: ConfigFXNode? = null) : ConfigFX(name, parent) {
+open class ConfigFXNode(name: String, parent: ConfigFXNode? = null) : ConfigFX(name) {
 
-    open val descriptor: NodeDescriptor? = parent?.descriptor?.getNodeDescriptor(name);
-
-    open val configProperty: ObjectBinding<Configuration?> = object : ObjectBinding<Configuration?>() {
-        init {
-            parent?.let { bind(it.configProperty) }
-        }
-
-        override fun computeValue(): Configuration? {
-            return parent?.configuration?.optMeta(name)?.orElse(null) as Configuration?;
-        }
+    final override val hasValueProperty = parentProperty.booleanBinding(nameProperty) {
+        it?.configuration?.hasMeta(this.name) ?: false
     }
 
-    val configuration: Configuration?
-        get() = configProperty.get()
 
+    /**
+     * A descriptor that could be manually set to the node
+     */
+    val descriptorProperty = SimpleObjectProperty<NodeDescriptor?>()
 
-    override val descriptionProperty: ObservableStringValue = object : StringBinding() {
-        override fun computeValue(): String {
-            return descriptor?.info ?: ""
+    /**
+     * Actual descriptor which holds value inferred from parrent
+     */
+    private val actualDescriptor = objectBinding(descriptorProperty, parentProperty, nameProperty) {
+        value ?: parent?.descriptor?.getNodeDescriptor(name)
+    }
+
+    val descriptor: NodeDescriptor? by actualDescriptor
+
+    val configProperty = SimpleObjectProperty<Configuration?>()
+
+    private val actualConfig = objectBinding(configProperty, parentProperty, nameProperty) {
+        value ?: parent?.configuration?.getMetaList(name)?.firstOrNull()
+    }
+
+    val configuration: Configuration? by actualConfig
+
+    final override val descriptionProperty: ObservableStringValue = stringBinding(actualDescriptor) {
+        value?.info ?: ""
+    }
+
+    override val children: ObservableList<ConfigFX> = FXCollections.observableArrayList<ConfigFX>()
+
+    init {
+        parentProperty.set(parent)
+        hasValueProperty.onChange {
+            parent?.hasValueProperty?.invalidate()
         }
+        invalidate()
     }
 
     /**
@@ -86,61 +115,8 @@ open class ConfigFXNode(
         return configuration ?: if (parent == null) {
             throw RuntimeException("The configuration for root node is note defined")
         } else {
-            Configuration(name).also {
-                parent.getOrBuildNode().attachNode(it)
-            }
+            parent.getOrBuildNode().requestNode(name)
         }
-    }
-
-    override val isEmpty: ObservableBooleanValue
-        get() = configProperty.booleanBinding { it == null }
-
-    val children: ObservableList<ConfigFX> by lazy {
-        FXCollections.observableArrayList<ConfigFX>().apply {
-            setAll(buildChildren())
-        }
-    }
-
-    private fun updateChildren() {
-        children.setAll(buildChildren())
-    }
-
-    private fun buildChildren(): List<ConfigFX> {
-        val list: MutableList<ConfigFX> = ArrayList();
-        val nodeNames = HashSet<String>()
-        val valueNames = HashSet<String>()
-        configuration?.let { config ->
-            config.nodeNames.forEach { childNodeName ->
-                nodeNames.add(childNodeName)
-                val nodeSize = config.getMetaList(childNodeName).size
-                if (nodeSize == 1) {
-                    list.add(ConfigFXNode(childNodeName, this@ConfigFXNode))
-                } else {
-                    (0 until nodeSize).mapTo(list) { ConfigFXNode("$childNodeName[$it]", this@ConfigFXNode) }
-                }
-            }
-            //    Adding all existing values and nodes
-            config.valueNames.forEach { childValueName ->
-                valueNames.add(childValueName)
-                list.add(ConfigFXValue(childValueName, this@ConfigFXNode))
-            }
-        }
-        //    adding nodes and values from descriptor
-        descriptor?.let { desc ->
-            desc.childrenDescriptors().keys.forEach { nodeName ->
-                //Adding only those nodes, that have no configuration of themselves
-                if (!nodeNames.contains(nodeName)) {
-                    list.add(ConfigFXNode(nodeName, this@ConfigFXNode))
-                }
-            }
-            desc.valueDescriptors().keys.forEach { valueName ->
-                //    Adding only those values, that have no configuration of themselves
-                if (!valueNames.contains(valueName)) {
-                    list.add(ConfigFXValue(valueName, this@ConfigFXNode))
-                }
-            }
-        }
-        return list.sortedBy { it.name };
     }
 
     fun addValue(name: String) {
@@ -153,6 +129,7 @@ open class ConfigFXNode(
 
     fun removeValue(valueName: String) {
         configuration?.removeValue(valueName)
+        children.removeIf { it.name == name }
     }
 
     fun addNode(name: String) {
@@ -164,61 +141,99 @@ open class ConfigFXNode(
     }
 
     override fun remove() {
-        configuration?.let {
-            parent?.removeNode(name);
+        //FIXME does not work on multinodes
+        parent?.removeNode(name)
+        invalidate()
+    }
+
+    final override fun invalidate() {
+        actualDescriptor.invalidate()
+        actualConfig.invalidate()
+        hasValueProperty.invalidate()
+
+        val nodeNames = ArrayList<String>()
+        val valueNames = ArrayList<String>()
+
+        configuration?.apply {
+            nodeNames.addAll(this.nodeNames.toList())
+            valueNames.addAll(this.valueNames.toList())
+        }
+
+        descriptor?.apply {
+            nodeNames.addAll(childrenDescriptors().keys)
+            valueNames.addAll(valueDescriptors().keys)
+        }
+
+        //removing old values
+        children.removeIf { !(valueNames.contains(it.name) || nodeNames.contains(it.name)) }
+
+        valueNames.forEach { name ->
+            children.find { it.name == name }?.invalidate().orElse {
+                children.add(ConfigFXValue(name, this))
+            }
+        }
+
+        nodeNames.forEach { name ->
+            children.find { it.name == name }?.invalidate().orElse {
+                children.add(ConfigFXNode(name, this))
+            }
+        }
+        children.sortBy { it.name }
+    }
+
+    fun updateValue(path: Name, value: Value?) {
+        when {
+            path.length == 0 -> kotlin.error("Path never could be empty when updating value")
+            path.length == 1 -> {
+                val hasDescriptor = descriptor?.getValueDescriptor(path) != null
+                if (value == null && !hasDescriptor) {
+                    //removing the value if it is present
+                    children.removeIf { it.name == path.unescaped }
+                } else {
+                    //invalidating value if it is present
+                    children.find { it is ConfigFXValue && it.name == path.unescaped }?.invalidate().orElse {
+                        //adding new node otherwise
+                        children.add(ConfigFXValue(path.unescaped, this))
+                    }
+                }
+            }
+            path.length > 1 -> children.filterIsInstance<ConfigFXNode>().find { it.name == path.first.unescaped }?.updateValue(path.cutFirst(), value)
         }
     }
 
-    override fun invalidate() {
-        configProperty.invalidate()
-        updateChildren()
-    }
-
-    override fun invalidateValue(path: Name) {
-        if (path.length == 1) {
-            children.find { it is ConfigFXValue && it.name == path.first.toString() }?.invalidate()
-        } else if (path.length > 1) {
-            children.find { it is ConfigFXNode && it.name == path.first.toString() }?.invalidateValue(path.cutFirst())
-        }
-    }
-
-    override fun invalidateNode(path: Name) {
+    fun updateNode(path: Name, list: List<Meta>) {
         when {
             path.isEmpty() -> invalidate()
-            path.length == 1 -> children.find { it is ConfigFXNode && it.name == path.first.toString() }?.invalidate()
-            else -> children.find { it is ConfigFXNode && it.name == path.first.toString() }?.invalidateNode(path.cutFirst())
+            path.length == 1 -> {
+                val hasDescriptor = descriptor?.getNodeDescriptor(path.unescaped) != null
+                if (list.isEmpty() && !hasDescriptor) {
+                    children.removeIf { it.name == path.unescaped }
+                } else {
+                    children.find { it is ConfigFXNode && it.name == path.unescaped }?.invalidate().orElse {
+                        children.add(ConfigFXNode(path.unescaped, this))
+                    }
+                }
+            }
+            else -> children.filterIsInstance<ConfigFXNode>().find { it.name == path.first.toString() }?.updateNode(path.cutFirst(), list)
         }
     }
 }
 
 class ConfigFXRoot(rootConfig: Configuration, rootDescriptor: NodeDescriptor? = null) : ConfigFXNode(rootConfig.name), ConfigChangeListener {
 
-    override val descriptor: NodeDescriptor? = rootDescriptor;
-
-    override val configProperty: ObjectBinding<Configuration?> = object : ObjectBinding<Configuration?>() {
-        override fun computeValue(): Configuration? {
-            return rootConfig
-        }
-    }
-
     init {
-        rootConfig.addObserver(this)
+        configProperty.set(rootConfig)
+        descriptorProperty.set(rootDescriptor)
+        rootConfig.addListener(this)
+        invalidate()
     }
 
-    override fun notifyValueChanged(valueName: Name, oldItem: Value?, newItem: Value?) {
-        if (oldItem.isNull() || newItem.isNull()) {
-            invalidateNode(valueName.cutLast())
-        } else {
-            invalidateValue(valueName)
-        }
+    override fun notifyValueChanged(name: Name, oldItem: Value?, newItem: Value?) {
+        updateValue(name, newItem)
     }
 
-    override fun notifyNodeChanged(nodeName: Name, oldItem: MutableList<out Meta>, newItem: MutableList<out Meta>) {
-        if (oldItem.isEmpty() || newItem.isEmpty()) {
-            invalidateNode(nodeName.cutLast())
-        } else {
-            invalidateNode(nodeName)
-        }
+    override fun notifyNodeChanged(nodeName: Name, oldItem: List<Meta>, newItem: List<Meta>) {
+        updateNode(nodeName, newItem)
     }
 }
 
@@ -226,7 +241,18 @@ class ConfigFXRoot(rootConfig: Configuration, rootDescriptor: NodeDescriptor? = 
 /**
  * Created by darksnake on 01-May-17.
  */
-class ConfigFXValue(name: String, parent: ConfigFXNode) : ConfigFX(name, parent) {
+class ConfigFXValue(name: String, parent: ConfigFXNode) : ConfigFX(name) {
+
+    init {
+        parentProperty.set(parent)
+    }
+
+    override val hasValueProperty = parentProperty.booleanBinding(nameProperty) {
+        it?.configuration?.hasValue(this.name) ?: false
+    }
+
+
+    override val children: ObservableList<ConfigFX> = FXCollections.emptyObservableList()
 
     val descriptor: ValueDescriptor? = parent.descriptor?.getValueDescriptor(name);
 
@@ -236,18 +262,8 @@ class ConfigFXValue(name: String, parent: ConfigFXNode) : ConfigFX(name, parent)
         }
     }
 
-    private val valueProperty = object : ObjectBinding<Value?>() {
-        init {
-            bind(parent.configProperty)
-        }
-
-        override fun computeValue(): Value? {
-            return parent.configuration?.optValue(name)?.orElse(descriptor?.default)
-        }
-    }
-
-    override val isEmpty: ObservableBooleanValue = parent.configProperty.booleanBinding(valueProperty) {
-        !(it?.hasValue(name) ?: false)
+    val valueProperty = parentProperty.objectBinding(nameProperty) {
+        parent.configuration?.optValue(name).nullable ?: descriptor?.default
     }
 
 
@@ -255,32 +271,29 @@ class ConfigFXValue(name: String, parent: ConfigFXNode) : ConfigFX(name, parent)
         set(value) {
             parent?.setValue(name, value)
         }
-        get() = valueProperty.get() ?: Value.NULL
+        get() = valueProperty.value ?: Value.NULL
 
 
     override fun remove() {
         parent?.removeValue(name)
+        invalidate()
     }
 
     override fun invalidate() {
         valueProperty.invalidate()
-        valueChooser.setDisplayValue(value)
+        hasValueProperty.invalidate()
     }
 
-    override fun invalidateValue(path: Name) {
-        if (path.isEmpty()) {
-            invalidate()
+    //TODO move to editor
+    val valueChooser
+        get() = ValueChooserFactory.build(valueProperty, descriptor) { result ->
+            if (descriptor?.isValueAllowed(result) != false) {
+                this.value = result
+                ValueCallbackResponse(true, value, "")
+            } else {
+                ValueCallbackResponse(false, value, "Not allowed")
+            }
         }
-    }
-
-    override fun invalidateNode(path: Name) {
-        //do nothing
-    }
-
-    val valueChooser = ValueChooserFactory.build(value, descriptor) { value: Value ->
-        this.value = value
-        ValueCallbackResponse(true, value, "")
-    }
 
 
 }

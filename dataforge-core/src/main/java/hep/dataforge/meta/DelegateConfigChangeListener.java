@@ -39,12 +39,12 @@ public class DelegateConfigChangeListener implements ConfigChangeListener {
     }
 
     @Override
-    public void notifyValueChanged(Name name, Value oldValues, Value newItems) {
+    public void notifyValueChanged(@NotNull Name name, Value oldValues, Value newItems) {
         observer.notifyValueChanged(prefix.plus(name), oldValues, newItems);
     }
 
     @Override
-    public void notifyNodeChanged(Name name, @NotNull List<? extends Meta> oldValues, @NotNull List<? extends Meta> newItems) {
+    public void notifyNodeChanged(@NotNull Name name, @NotNull List<? extends Meta> oldValues, @NotNull List<? extends Meta> newItems) {
         observer.notifyNodeChanged(prefix.plus(name), oldValues, newItems);
     }
 

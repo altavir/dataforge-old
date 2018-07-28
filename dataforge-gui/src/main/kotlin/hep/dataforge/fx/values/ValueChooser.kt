@@ -8,7 +8,9 @@ package hep.dataforge.fx.values
 import hep.dataforge.description.ValueDescriptor
 import hep.dataforge.values.Value
 import javafx.beans.property.ObjectProperty
+import javafx.beans.value.ObservableValue
 import javafx.scene.Node
+import tornadofx.*
 
 /**
  * A value chooser object. Must have an empty constructor to be invoked by
@@ -38,7 +40,6 @@ interface ValueChooser {
     var value: Value?
 
 
-
     /**
      * Set display value but do not notify listeners
      *
@@ -51,12 +52,12 @@ interface ValueChooser {
         //TODO replace by property
     }
 
-    fun setCallback(callback:ValueCallback)
+    fun setCallback(callback: ValueCallback)
 }
 
-object ValueChooserFactory{
+object ValueChooserFactory {
     private fun build(descriptor: ValueDescriptor?): ValueChooser {
-        if(descriptor == null){
+        if (descriptor == null) {
             return TextValueChooser();
         }
         //val types = descriptor.type
@@ -69,10 +70,11 @@ object ValueChooserFactory{
         return chooser
     }
 
-    fun build(initialValue: Value, descriptor: ValueDescriptor? = null, callback: ValueCallback): ValueChooser {
+    fun build(value: ObservableValue<Value?>, descriptor: ValueDescriptor? = null, callback: ValueCallback): ValueChooser {
         val chooser = build(descriptor)
-        if (initialValue != Value.NULL) {
-            chooser.setDisplayValue(initialValue)
+        chooser.setDisplayValue(value.value ?: Value.NULL)
+        value.onChange {
+            chooser.setDisplayValue(it ?: Value.NULL)
         }
         chooser.setCallback(callback)
         return chooser
