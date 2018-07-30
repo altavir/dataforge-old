@@ -17,12 +17,13 @@
 package hep.dataforge.messages
 
 
+import hep.dataforge.context.Context
+import hep.dataforge.context.ContextAware
+import hep.dataforge.coroutineContext
 import hep.dataforge.io.envelopes.Envelope
 import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.channels.Channel
 import kotlinx.coroutines.experimental.launch
-import org.slf4j.LoggerFactory
 
 /**
  * An object that receives a message and redirects it according to its target
@@ -30,9 +31,17 @@ import org.slf4j.LoggerFactory
  *
  * @author Alexander Nozik
  */
-interface Dispatcher: Receiver {
-    fun dispatch(target: Target, message: Envelope)
+interface Dispatcher : Receiver {
 
+    /**
+     * Dispatch given message to given target. Evaluated asynchronously.
+     * Target overrides target in message if needed.
+     */
+    fun dispatch(target: Target, message: Message)
+
+    /**
+     * Infer the target from the message itself
+     */
     @JvmDefault
     override fun send(message: Message) {
         //TODO check for origin and target existence
@@ -44,36 +53,36 @@ interface Dispatcher: Receiver {
 /**
  * A coroutine based message server. It can dispatch incoming messages in a parallel way and organize single time pipelines for responders.
  * In theory, it could have any number of receivers.
+ * @param context a context to run dispatcher in
+ * @param fixed map of targets
+ * @param unclaimedAction action to be performed on unclaimed messages
  */
-class BasicDispatcher(val targets: Map<Target, Receiver>) : Dispatcher, AutoCloseable {
+class BasicDispatcher(
+        override val context: Context,
+        private val targets: Map<Target, Receiver>,
+        unclaimedAction: (suspend (Message) -> Unit)? = null
+) : Dispatcher, AutoCloseable, ContextAware {
 
     /**
      * Incoming message queue
      */
-    private val queue: Channel<Pair<Target,Message>> = Channel(Channel.UNLIMITED)
+    private val queue: Channel<Pair<Target, Message>> = Channel(Channel.UNLIMITED)
+    private val unclaimedAction: suspend (Message) -> Unit = unclaimedAction
+            ?: { logger.error("A message in dispatcher $this is unclaimed!") }
     private var job: Job? = null
-
-    /**
-     * A dump for unclaimed messages
-     */
-    private var unclaimed: Receiver = object : Receiver {
-        override fun send(message: Message) {
-            LoggerFactory.getLogger(javaClass).error("A message is unclaimed!")
-            //TODO add debug info here
-        }
-    }
 
     override fun close() {
         job?.cancel()
         job = null
     }
 
-    private fun startJob(){
-        if(job == null){
-            job = launch {
+    private fun startJob() {
+        if (job == null) {
+            job = launch(context.coroutineContext) {
                 while (true) {
                     val received = queue.receive()
-                    targets.getOrDefault(received.first, unclaimed).send(received.second)
+                    //Resend message or dump it if receiver not found
+                    targets[received.first]?.send(received.second) ?: launch { unclaimedAction(received.second) }
                 }
             }
         }
@@ -81,8 +90,8 @@ class BasicDispatcher(val targets: Map<Target, Receiver>) : Dispatcher, AutoClos
 
     override fun dispatch(target: Target, message: Envelope) {
         startJob()
-        async {
-            queue.send(Pair(target,message))
+        launch(context.coroutineContext) {
+            queue.send(Pair(target, message))
         }
     }
 }

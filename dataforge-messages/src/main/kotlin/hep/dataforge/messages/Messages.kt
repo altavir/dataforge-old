@@ -21,9 +21,8 @@ import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.names.Name
 import hep.dataforge.nullable
+import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.future.asCompletableFuture
-import java.util.concurrent.CompletableFuture
 
 //Message operations
 const val ACTION_KEY = "@message.action"
@@ -40,7 +39,9 @@ const val RESPONSE_SUCCESS_KEY = "success"
 const val RESPONSE_TYPE_SUFFIX = ".response"
 const val ERROR_RESPONSE_TYPE = "error"
 
+//TODO replace by inline classes?
 typealias Message = Envelope
+
 typealias MessageBuilder = EnvelopeBuilder
 typealias Target = Meta
 
@@ -77,6 +78,10 @@ val Target.id: Name
  * An object that can receive an envelope without a response
  */
 interface Receiver {
+
+    /**
+     * Evaluate message. The receiver is responsible to launch message evaluation of the calling thread.
+     */
     fun send(message: Message)
 }
 
@@ -90,11 +95,11 @@ interface Responder {
      * @param message
      * @return
      */
-    fun respond(message: Message): Message
+    suspend fun respond(message: Message): Message
 
     @JvmDefault
-    fun respondInFuture(message: Message): CompletableFuture<Message> {
-        return async { respond(message) }.asCompletableFuture()
+    fun respondInFuture(message: Message): Deferred<Message> {
+        return async { respond(message) }
     }
 }
 
@@ -105,8 +110,14 @@ interface Responder {
  */
 interface Validator {
 
+    /**
+     * Validate message and return result as meta
+     */
     fun validate(message: Message): Meta
 
+    /**
+     * Simplified validation result
+     */
     fun isValid(message: Message): Boolean {
         return validate(message).getBoolean(IS_VALID_KEY)
     }
@@ -115,10 +126,15 @@ interface Validator {
         const val IS_VALID_KEY = "isValid"
         const val MESSAGE_KEY = "message"
 
-        fun valid(): Meta {
-            return MetaBuilder("validationResult").putValue(IS_VALID_KEY, true).build()
-        }
+        /**
+         * Simple valid result
+         */
+        val valid: Meta = MetaBuilder("validationResult").putValue(IS_VALID_KEY, true).build()
 
+
+        /**
+         * Simple invalid result with list of messages
+         */
         fun invalid(vararg message: String): Meta {
             return MetaBuilder("validationResult")
                     .putValue(IS_VALID_KEY, false)

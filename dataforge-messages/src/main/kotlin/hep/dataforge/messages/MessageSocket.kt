@@ -16,9 +16,11 @@
 
 package hep.dataforge.messages
 
+import hep.dataforge.context.Context
+import hep.dataforge.context.ContextAware
+import hep.dataforge.coroutineContext
 import hep.dataforge.io.envelopes.*
 import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.channels.Channel
 import kotlinx.coroutines.experimental.launch
 import java.net.Socket
@@ -26,26 +28,30 @@ import java.net.Socket
 /**
  * A two directional client socket for messages
  */
-class MessageSocket(val receiver: Receiver, private val socketFactory: () -> Socket) : Receiver {
+class MessageSocket(override val context: Context, private val receiver: Receiver, private val socketFactory: () -> Socket) : Receiver, ContextAware, AutoCloseable {
     private var socket: Socket = socketFactory()
         get() {
-            if (field.isClosed) {
-                field = socketFactory()
+            synchronized(this) {
+                if (field.isClosed) {
+                    logger.info("Socket is closed, creating new socket.")
+                    field = socketFactory()
+                }
+                return field
             }
-            return field
         }
 
     // A buffer for incoming messages
     private val incoming: Channel<Envelope> = Channel(Channel.UNLIMITED)
     // A buffer for outgoing messages
     private val outgoing: Channel<Envelope> = Channel(Channel.UNLIMITED)
-    private var sendJob: Job? = null
-    private var receiveJob: Job? = null
-    private var relayJob: Job? = null
+
+    private var parentJob: Job? = null
 
 
-    fun start() {
-        sendJob = launch {
+    fun open() {
+        val job = Job()
+        parentJob = job
+        launch(context.coroutineContext, parent = job) {
             val stream = socket.getOutputStream()
             val writer = DefaultEnvelopeWriter(DefaultEnvelopeType.INSTANCE, binaryMetaType)
 
@@ -55,7 +61,7 @@ class MessageSocket(val receiver: Receiver, private val socketFactory: () -> Soc
             }
         }
 
-        receiveJob = launch {
+        launch(context.coroutineContext, parent = job) {
             val stream = socket.getInputStream()
             val reader = DefaultEnvelopeReader.INSTANCE
 
@@ -64,17 +70,15 @@ class MessageSocket(val receiver: Receiver, private val socketFactory: () -> Soc
             }
         }
 
-        relayJob = launch {
+        launch(context.coroutineContext, parent = job) {
             while (true) {
                 receiver.send(incoming.receive())
             }
         }
     }
 
-    fun stop() {
-        sendJob?.cancel()
-        receiveJob?.cancel()
-        relayJob?.cancel()
+    override fun close() {
+        parentJob?.cancel()
         socket.close()
     }
 
@@ -82,7 +86,7 @@ class MessageSocket(val receiver: Receiver, private val socketFactory: () -> Soc
      * send message via socket
      */
     override fun send(message: Envelope) {
-        async {
+        launch(context.coroutineContext) {
             incoming.send(message)
         }
     }

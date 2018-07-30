@@ -149,7 +149,7 @@ open class Context(
     }
 
     open val executors: ExecutorPlugin
-        get() = pluginManager.get(ExecutorPlugin::class) ?: parent?.executors ?: Global.executors
+        get() = pluginManager[ExecutorPlugin::class] ?: parent?.executors ?: Global.executors
 
     /**
      * Find out if context is locked
