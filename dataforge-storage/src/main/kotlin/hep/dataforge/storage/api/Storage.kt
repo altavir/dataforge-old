@@ -74,7 +74,7 @@ interface Storage : Metoid, Named, Provider, AutoCloseable, ContextAware, AutoCo
 
     @JvmDefault
     val fullName: Name
-        get() = getFullName(null)
+        get() = getFullName(this, parent, null)
 
     /**
      * Full
@@ -82,7 +82,7 @@ interface Storage : Metoid, Named, Provider, AutoCloseable, ContextAware, AutoCo
      */
     @JvmDefault
     val laminate: Laminate
-        get() = parent?.laminate?.withFirstLayer(meta) ?:Laminate(meta)
+        get() = parent?.laminate?.withFirstLayer(meta) ?: Laminate(meta)
 
     /**
      * Initialize this storage.
@@ -179,20 +179,6 @@ interface Storage : Metoid, Named, Provider, AutoCloseable, ContextAware, AutoCo
      */
     fun optShelf(name: String): Optional<Storage>
 
-    /**
-     * Get relative path of this storage to given root storage.
-     * If root is not ancestor of this storage or null, return full absolute path.
-     *
-     * @return
-     */
-    @JvmDefault
-    fun getFullName(root: Storage?): Name {
-        return if (parent == root || parent == null) {
-            Name.ofSingle(name)
-        } else {
-            parent!!.getFullName(root).plus(name)
-        }
-    }
 
     @JvmDefault
     override fun compareTo(other: Named): Int {
@@ -208,5 +194,19 @@ interface Storage : Metoid, Named, Provider, AutoCloseable, ContextAware, AutoCo
 
         const val LOADER_TARGET = "loader"
         const val STORAGE_TARGET = "storage"
+
+        /**
+         * Get relative path of this storage to given root storage.
+         * If root is not ancestor of this storage or null, return full absolute path.
+         *
+         * @return
+         */
+        fun getFullName(storage: Storage, parent: Storage?, root: Storage?): Name {
+            return if (parent == null || parent == root) {
+                Name.of(storage.name)
+            } else {
+                getFullName(parent, parent.parent, root) + Name.of(storage.name)
+            }
+        }
     }
 }

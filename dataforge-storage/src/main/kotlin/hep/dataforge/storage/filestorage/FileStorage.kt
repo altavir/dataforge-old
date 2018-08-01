@@ -59,12 +59,8 @@ open class FileStorage : AbstractStorage {
      * @param shelf
      * @throws StorageException
      */
-    @Throws(StorageException::class)
-    protected constructor(parent: FileStorage, config: Meta, shelf: String) : super(parent, shelf, config) {
-        //replacing points with path separators we builder directory structure
-
+    protected constructor(parent: FileStorage, config: Meta, shelf: String) : super(parent.context, parent, shelf, config) {
         dataDir = parent.dataDir.resolve(shelf.replace(".", File.separator))
-        startup()
     }
 
     /**
@@ -73,26 +69,11 @@ open class FileStorage : AbstractStorage {
      * @param meta
      * @throws StorageException
      */
-    @Throws(StorageException::class)
-    constructor(context: Context, meta: Meta, path: Path) : super(context, meta) {
+    constructor(context: Context, meta: Meta, path: Path) : super(context, null, path.fileName.toString(), meta) {
         this.dataDir = path
     }
 
-    private fun checkIfEnvelope(file: Path): Boolean {
-        try {
-            FileChannel.open(file, READ).use { channel ->
-                val buffer = ByteBuffer.allocate(30)
-                channel.read(buffer)
-                val bytes = String(buffer.array())
-                return bytes.startsWith("#~") || bytes.endsWith("!#\r\n")
-            }
-        } catch (e: IOException) {
-            return false
-        }
-
-    }
-
-    private fun startup() {
+    override fun open() {
         if (!Files.exists(dataDir)) {
             if (isReadOnly) {
                 throw StorageException("The directory for read only file storage does not exist")
@@ -114,6 +95,20 @@ open class FileStorage : AbstractStorage {
         if (meta.getBoolean("monitor", false)) {
             startMonitor()
         }
+    }
+
+    private fun checkIfEnvelope(file: Path): Boolean {
+        try {
+            FileChannel.open(file, READ).use { channel ->
+                val buffer = ByteBuffer.allocate(30)
+                channel.read(buffer)
+                val bytes = String(buffer.array())
+                return bytes.startsWith("#~") || bytes.endsWith("!#\r\n")
+            }
+        } catch (e: IOException) {
+            return false
+        }
+
     }
 
     //    private WatchService getWatchService() throws IOException {
@@ -297,7 +292,7 @@ open class FileStorage : AbstractStorage {
             this.shelves.clear()
             this.loaders.clear()
 
-            Files.list(dataDir).forEach{ this.updateFile(it) }
+            Files.list(dataDir).forEach { this.updateFile(it) }
         } catch (ex: IOException) {
             throw RuntimeException(ex)
         }

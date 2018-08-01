@@ -20,7 +20,6 @@ import hep.dataforge.context.Context
 import hep.dataforge.events.Event
 import hep.dataforge.events.EventHandler
 import hep.dataforge.exceptions.StorageException
-import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaHolder
 import hep.dataforge.names.Name
@@ -40,17 +39,17 @@ import java.util.*
  *
  * @author Darksnake
  */
-abstract class AbstractStorage : MetaHolder, Storage {
+abstract class AbstractStorage(
+        final override val context: Context,
+        final override val parent: Storage?,
+        final override val name: String,
+        meta: Meta
+) : MetaHolder(meta), Storage {
 
     protected val loaders: MutableMap<String, Loader> = HashMap()
     protected val shelves: MutableMap<String, Storage> = HashMap()
-    override val name: String
-    override val context: Context
-    /**
-     * @return the parent
-     */
-    override val parent: Storage?
-    private val connectionHelper: ConnectionHelper
+
+    private val _connectionHelper: ConnectionHelper by lazy { ConnectionHelper(this) }
 
     override val isOpen: Boolean
         get() = true
@@ -58,23 +57,8 @@ abstract class AbstractStorage : MetaHolder, Storage {
     val isRoot: Boolean
         get() = parent == null
 
-
-    protected constructor(parent: Storage, name: String, meta: Meta) : super(Laminate(meta, parent.meta)) {
-        this.name = name.replace(".", "_")
-        this.parent = parent
-        context = parent.context
-        connectionHelper = ConnectionHelper(this)
-    }
-
-    protected constructor(context: Context, meta: Meta) : super(meta) {
-        this.name = meta.getString("name", "").replace(".", "_")
-        this.context = context
-        this.parent = null
-        connectionHelper = ConnectionHelper(this)
-    }
-
     override fun getConnectionHelper(): ConnectionHelper {
-        return connectionHelper
+        return _connectionHelper
     }
 
     /**
@@ -202,12 +186,10 @@ abstract class AbstractStorage : MetaHolder, Storage {
     @Provides(STORAGE_TARGET)
     override fun optShelf(name: String): Optional<Storage> {
         val shelfName = Name.of(name)
-        return if (shelfName.length == 0) {
-            Optional.of(this)
-        } else if (shelfName.length == 1) {
-            Optional.ofNullable(shelves[name])
-        } else {
-            optShelf(shelfName.first.toString()).flatMap { child -> child.optShelf(shelfName.cutFirst().toString()) }
+        return when {
+            shelfName.length == 0 -> Optional.of(this)
+            shelfName.length == 1 -> Optional.ofNullable(shelves[name])
+            else -> optShelf(shelfName.first.toString()).flatMap { child -> child.optShelf(shelfName.cutFirst().toString()) }
         }
     }
 

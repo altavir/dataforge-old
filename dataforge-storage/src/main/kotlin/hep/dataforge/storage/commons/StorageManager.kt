@@ -82,7 +82,7 @@ class StorageManager : BasicPlugin {
             if (factory.isPresent) {
                 factory.get().build(context, config)
             } else {
-                throw RuntimeException("Can't find Storage factory for type " + type)
+                throw RuntimeException("Can't find Storage factory for type $type")
             }
         }
     }
