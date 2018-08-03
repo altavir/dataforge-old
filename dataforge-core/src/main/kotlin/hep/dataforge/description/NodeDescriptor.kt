@@ -188,7 +188,3 @@ open class NodeDescriptor(meta: Meta) : SimpleMetaMorph(meta.sealed), Named {
         }
     }
 }
-
-fun NodeDescriptor.updatedDefault(name: Name, default: Any) {
-
-}

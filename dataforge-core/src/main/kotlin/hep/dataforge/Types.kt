@@ -18,11 +18,11 @@ annotation class Type(val id: String)
  * Utils to get type of classes and objects
  */
 object Types {
-    fun get(cl: KClass<*>): String {
+    operator fun get(cl: KClass<*>): String {
         return cl.findAnnotation<Type>()?.id ?: cl.jvmName
     }
 
-    fun get(obj: Any): String{
+    operator fun get(obj: Any): String{
         return get(obj::class)
     }
 }

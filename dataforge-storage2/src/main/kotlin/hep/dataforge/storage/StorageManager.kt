@@ -32,11 +32,15 @@ class StorageManager() : BasicPlugin(), MutableStorage {
     private val _connectionHelper = ConnectionHelper(this)
     private val _children = HashMap<String, StorageElement>()
 
-    override val children: Map<String, StorageElement> = _children
+    override val children = _children.values
 
     override fun getConnectionHelper(): ConnectionHelper = _connectionHelper
 
-    override suspend fun createElement(meta: Meta): StorageElement {
+    override suspend fun open() {
+        //nothing
+    }
+
+    override suspend fun create(meta: Meta): StorageElement {
         val type = meta.getString("type", DEFAULT_STORAGE_TYPE)
         val element = context.findService(StorageFactory::class.java) { it.name == type }
                 ?.createElement(this, meta)
@@ -44,6 +48,7 @@ class StorageManager() : BasicPlugin(), MutableStorage {
         //TODO evaluate meta clash
         _children.putIfAbsent(element.name, element)
         return element
+
     }
 
     override fun detach() {

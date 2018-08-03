@@ -40,6 +40,7 @@ open class NamedData<T>(final override val name: String, type: Class<T>, goal: G
 
     override fun <R> cast(type: Class<R>): NamedData<R> {
         return if (type.isAssignableFrom(type)) {
+            @Suppress("UNCHECKED_CAST")
             NamedData(name, type, goal as Goal<R>, meta)
         } else {
             throw IllegalArgumentException("Invalid type to upcast data")
@@ -48,8 +49,8 @@ open class NamedData<T>(final override val name: String, type: Class<T>, goal: G
 
     companion object {
 
-        fun <T> buildStatic(name: String, content: T, meta: Meta): NamedData<T> {
-            return NamedData(name, (content as Any)::class.java as Class<T>, StaticGoal<T>(content), meta)
+        fun <T: Any> buildStatic(name: String, content: T, meta: Meta): NamedData<T> {
+            return NamedData(name, content.javaClass, StaticGoal<T>(content), meta)
         }
 
         /**

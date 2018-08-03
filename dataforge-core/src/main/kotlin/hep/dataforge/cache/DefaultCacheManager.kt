@@ -103,6 +103,7 @@ class DefaultCacheManager(override val context: Context, cfg: Meta) : MetaHolder
 
     override fun <T> unwrap(clazz: Class<T>): T {
         return if (clazz == DefaultCacheManager::class.java) {
+            @Suppress("UNCHECKED_CAST")
             DefaultCacheManager(Global, Meta.empty()) as T
         } else {
             throw IllegalArgumentException("Wrong wrapped class")

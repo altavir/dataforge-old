@@ -65,15 +65,12 @@ internal class TimeValue(override val time: Instant) : AbstractValue() {
     /**
      * {@inheritDoc}
      */
-    override fun equals(obj: Any?): Boolean {
-        if (obj == null) {
-            return false
+    override fun equals(other: Any?): Boolean {
+        return when (other) {
+            null -> false
+            is Value -> this.time == other.time
+            else -> false
         }
-        if (javaClass != obj.javaClass) {
-            return false
-        }
-        val other = obj as TimeValue?
-        return this.time == other!!.time
     }
 
     override val value: Any

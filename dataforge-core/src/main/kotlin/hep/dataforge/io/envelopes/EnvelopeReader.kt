@@ -76,7 +76,7 @@ interface EnvelopeReader {
          */
         @Throws(IOException::class)
         fun readFile(path: Path): Envelope {
-            val type = EnvelopeType.infer(path).orElse(TaglessEnvelopeType.INSTANCE)
+            val type = EnvelopeType.infer(path) ?: error("The file is not envelope")
             return type.reader.read(path)
         }
     }

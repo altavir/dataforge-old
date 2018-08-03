@@ -78,7 +78,7 @@ class StorageConnection(storageFactory: () -> Storage) : Connection, ContextAwar
             val storageManager = context.pluginManager.load(StorageManager::class.java)
             return StorageConnection {
                 runBlocking {
-                    storageManager.createElement(meta) as Storage
+                    storageManager.create(meta) as Storage
                 }
             }
         }

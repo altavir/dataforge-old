@@ -208,7 +208,7 @@ class StateHolder(val logger: Logger = LoggerFactory.getLogger(StateHolder::clas
                 }
             } catch (ex: CancellationException) {
                 subscriptions.values.forEach {
-                    it.close()
+                    it.cancel()
                 }
             }
         }

@@ -23,7 +23,7 @@ import hep.dataforge.values.Value
 import hep.dataforge.values.parseValue
 import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.channels.BroadcastChannel
-import kotlinx.coroutines.experimental.channels.SubscriptionReceiveChannel
+import kotlinx.coroutines.experimental.channels.ReceiveChannel
 import kotlinx.coroutines.experimental.time.withTimeout
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -59,7 +59,7 @@ sealed class State<T : Any>(
     /**
      * Open subscription for updates of this state
      */
-    fun subscribe(): SubscriptionReceiveChannel<T> {
+    fun subscribe(): ReceiveChannel<T> {
         return channel.openSubscription()
     }
 
@@ -71,7 +71,7 @@ sealed class State<T : Any>(
                     action(subscription.receive())
                 }
             } catch (ex: CancellationException) {
-                subscription.close()
+                subscription.cancel()
             }
         }
     }
@@ -137,7 +137,7 @@ sealed class State<T : Any>(
             val deferred = async<T> {
                 val subscription = subscribe()
                 setter.invoke(this@State, ref.get(), value)
-                return@async subscription.receive().also { subscription.close() }
+                return@async subscription.receive().also { subscription.cancel() }
             }
 
             return runBlocking {

@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package hep.dataforge.storage
+package hep.dataforge.storage.files
 
 import hep.dataforge.data.binary.Binary
 import hep.dataforge.data.binary.FileBinary
@@ -101,14 +101,14 @@ abstract class FileEnvelope(val path: Path) : Envelope, AutoCloseable {
          */
         fun readExisting(path: Path): FileEnvelope {
             if (Files.exists(path)) {
-                val type = EnvelopeType.infer(path).orElse(TaglessEnvelopeType.INSTANCE)
+                val type = EnvelopeType.infer(path)?: error("The file is not an envelope")
                 return when (type) {
                     is DefaultEnvelopeType -> TaggedFileEnvelope(path)
                     is TaglessEnvelopeType -> TODO("Implement for tagless envelope")
                     else -> throw RuntimeException("Envelope type ${type.name} could not be read")
                 }
             } else {
-                throw RuntimeException("File $path does not exist")
+                error("File $path does not exist")
             }
         }
 

@@ -81,9 +81,9 @@ open class Data<T>(val type: Class<T>,
     companion object {
 
         @JvmStatic
-        fun <T> buildStatic(content: T, meta: Meta = Meta.empty()): Data<T> {
+        fun <T:Any> buildStatic(content: T, meta: Meta = Meta.empty()): Data<T> {
             //val nonNull = content as? Any ?: throw RuntimeException("Can't create data from null object")
-            return Data((content as Any)::class.java as Class<T>, StaticGoal<T>(content), meta)
+            return Data(content.javaClass, StaticGoal<T>(content), meta)
         }
 
         @JvmStatic

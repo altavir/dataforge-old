@@ -18,11 +18,11 @@ package hep.dataforge.io.envelopes
 import hep.dataforge.context.Context
 import hep.dataforge.context.Global
 import hep.dataforge.io.IOUtils
+import hep.dataforge.nullable
 import org.slf4j.LoggerFactory
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption.READ
-import java.util.*
 
 /**
  * Envelope io format description
@@ -68,24 +68,25 @@ interface EnvelopeType {
          * @param path
          * @return
          */
-        fun infer(path: Path): Optional<EnvelopeType> {
+        fun infer(path: Path): EnvelopeType? {
             return try {
                 Files.newInputStream(path, READ).use { stream ->
                     IOUtils.nextLine(stream, "ASCII") { line ->
                         //skip shabang
                         line.isEmpty() || line.startsWith("#!") && !line.endsWith("#!")
-                    }.flatMap { header ->
+                    }.nullable?.let {  header ->
                         when {
                         //TODO use templates from appropriate types
-                            header.startsWith("#~DFTL") -> Optional.of<EnvelopeType>(TaglessEnvelopeType.INSTANCE)
-                            header.startsWith("#~") -> Optional.of<EnvelopeType>(DefaultEnvelopeType.INSTANCE)
-                            else -> Optional.empty()
+                            header.startsWith("#!") -> error("Legacy dataforge tags are not supported")
+                            header.startsWith("#~DFTL") -> TaglessEnvelopeType.INSTANCE
+                            header.startsWith("#~") -> DefaultEnvelopeType.INSTANCE
+                            else -> null
                         }
                     }
                 }
             } catch (ex: Exception) {
                 LoggerFactory.getLogger(EnvelopeType::class.java).warn("Could not infer envelope type of file {} due to exception: {}", path, ex)
-                Optional.empty()
+                null
             }
 
         }

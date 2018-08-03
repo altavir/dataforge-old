@@ -68,7 +68,7 @@ class Laminate(layers: List<Meta?>, descriptor: NodeDescriptor? = null) : Meta()
 
     @Contract(pure = true)
     fun hasDescriptor(): Boolean {
-        return this.descriptor != null
+        return !this.descriptor.meta.isEmpty
     }
 
     /**
@@ -126,7 +126,7 @@ class Laminate(layers: List<Meta?>, descriptor: NodeDescriptor? = null) : Meta()
             childLayers.add(m.getMeta(path))
         }
         return if (!childLayers.isEmpty()) {
-            Optional.of(Laminate(childLayers, descriptor?.childrenDescriptors()?.get(path)))
+            Optional.of(Laminate(childLayers, descriptor.childrenDescriptors()[path]))
         } else {
             //if node not found, using descriptor layer if it is defined
             descriptorLayer?.optMeta(path) ?: Optional.empty()

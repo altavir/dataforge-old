@@ -60,23 +60,23 @@ class TaskBuilder(var name: String) {
     }
 
     fun dependsOn(taskName: String, `as`: String): TaskBuilder {
-        return updateModel({ model, meta -> model.dependsOn(taskName, meta, `as`) })
+        return updateModel { model, meta -> model.dependsOn(taskName, meta, `as`) }
     }
 
     fun dependsOn(taskName: String, `as`: String, transformMeta: Function<MetaBuilder, Meta>): TaskBuilder {
-        return updateModel({ model, meta -> model.dependsOn(taskName, transformMeta.apply(meta.getBuilder()), `as`) })
+        return updateModel { model, meta -> model.dependsOn(taskName, transformMeta.apply(meta.getBuilder()), `as`) }
     }
 
     fun data(dataMask: String): TaskBuilder {
-        return updateModel({ model, meta -> model.data(dataMask) })
+        return updateModel { model, meta -> model.data(dataMask) }
     }
 
     fun data(dataMask: String, `as`: String): TaskBuilder {
-        return updateModel({ model, meta -> model.data(dataMask, `as`) })
+        return updateModel { model, meta -> model.data(dataMask, `as`) }
     }
 
     fun dataNode(type: Class<*>, nodeName: String): TaskBuilder {
-        return updateModel({ model, meta -> model.dataNode(type, nodeName) })
+        return updateModel { model, meta -> model.dataNode(type, nodeName) }
     }
 
     /**

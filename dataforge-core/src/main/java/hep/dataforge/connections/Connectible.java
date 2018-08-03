@@ -21,7 +21,7 @@
  */
 package hep.dataforge.connections;
 
-import hep.dataforge.CoreExtensionsKt;
+import hep.dataforge.UtilsKt;
 
 import java.util.List;
 import java.util.Optional;
@@ -85,7 +85,7 @@ public interface Connectible {
      * @return
      */
     default List<RoleDef> roleDefs() {
-        return CoreExtensionsKt.listAnnotations(this.getClass(), RoleDef.class, true);
+        return UtilsKt.listAnnotations(this.getClass(), RoleDef.class, true);
     }
 
     /**

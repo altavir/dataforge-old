@@ -64,14 +64,11 @@ internal class BooleanValue private constructor(override val boolean: Boolean) :
     /**
      * {@inheritDoc}
      */
-    override fun equals(obj: Any?): Boolean {
-        if (obj == null) {
-            return false
-        } else if (obj is Value) {
-            val other = obj as Value?
-            return this.boolean == other!!.boolean
-        } else {
-            return super.equals(obj)
+    override fun equals(other: Any?): Boolean {
+        return when (other) {
+            null -> false
+            is Value -> this.boolean == other.boolean
+            else -> false
         }
     }
 

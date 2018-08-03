@@ -15,7 +15,6 @@
  */
 package hep.dataforge.values
 
-import hep.dataforge.exceptions.ValueConversionException
 import java.math.BigDecimal
 import java.math.MathContext
 import java.time.Instant
@@ -66,19 +65,11 @@ internal class NumberValue(override val number: Number) : AbstractValue() {
     /**
      * {@inheritDoc}
      */
-    override fun equals(obj: Any?): Boolean {
-        if (obj == null) {
-            return false
-        } else if (obj is Value) {
-            val other = obj as Value?
-            try {
-                return ValueUtils.NUMBER_COMPARATOR.compare(this.number, other!!.number) == 0
-            } catch (ex: ValueConversionException) {
-                return false
-            }
-
-        } else {
-            return super.equals(obj)
+    override fun equals(other: Any?): Boolean {
+        return when (other) {
+            null -> false
+            is Value -> ValueUtils.NUMBER_COMPARATOR.compare(this.number, other.number) == 0
+            else -> false
         }
     }
 

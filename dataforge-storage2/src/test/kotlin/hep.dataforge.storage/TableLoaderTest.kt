@@ -17,8 +17,10 @@
 package hep.dataforge.storage
 
 import hep.dataforge.context.Global
+import hep.dataforge.storage.files.TableLoaderType
 import hep.dataforge.tables.MetaTableFormat
 import hep.dataforge.values.ValueMap
+import kotlinx.coroutines.experimental.runBlocking
 import org.junit.AfterClass
 import org.junit.Assert.assertEquals
 import org.junit.BeforeClass
@@ -60,11 +62,14 @@ class TableLoaderTest {
         val loader = TableLoaderType.create(Global, path, format)
         val writer = loader.mutable()
 
-        (1..10).forEach {
-            writer.append(it, it + 1, it * 2)
+        runBlocking {
+            writer.open()
+            (1..10).forEach {
+                writer.append(it, it + 1, it * 2)
+            }
         }
 
-        assertEquals(3, loader[1]?.getInt("b"))
+        assertEquals(3, runBlocking { loader.get(1)?.getInt("b")})
         writer.close()
         loader.close()
     }
@@ -77,6 +82,7 @@ class TableLoaderTest {
         val format = MetaTableFormat.forNames("a", "b", "c")
         val loader = TableLoaderType.create(Global, path, format)
         val writer = loader.mutable()
+        runBlocking { writer.open()}
         val data = (1..n).map { ValueMap.of(format.namesAsArray(), it, it + 1, it * 2) }
         val writeTime = benchmark {
             writer.appendAll(data)
@@ -86,6 +92,7 @@ class TableLoaderTest {
         loader.close()
 
         val reader = TableLoaderType.read(Global, path)
+        runBlocking { reader.open() }
 
         var lastValue: Int = 0
         val readTime = benchmark {
