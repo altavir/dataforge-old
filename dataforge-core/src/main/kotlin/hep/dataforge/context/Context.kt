@@ -211,11 +211,11 @@ open class Context(
      * @param <T>
      * @return
      */
-    operator fun <T> get(type: Class<T>): T {
-        return opt(type) ?: throw RuntimeException("Feature could not be loaded by type: " + type.name)
+    operator fun <T:Any> get(type: Class<T>): T {
+        return opt(type) ?: throw RuntimeException("Feature could not be loaded by type: " + type.simpleName)
     }
 
-    inline fun <reified T> get(): T {
+    inline fun <reified T: Any> get(): T {
         return get(T::class.java)
     }
 
@@ -236,7 +236,7 @@ open class Context(
      * @param <T>
      * @return
      */
-    fun <T> opt(type: Class<T>): T? {
+    fun <T: Any> opt(type: Class<T>): T? {
         return pluginManager
                 .stream(true)
                 .asSequence().filterIsInstance(type)

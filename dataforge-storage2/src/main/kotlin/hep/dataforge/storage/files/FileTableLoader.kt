@@ -16,6 +16,7 @@
 
 package hep.dataforge.storage.files
 
+import com.google.auto.service.AutoService
 import hep.dataforge.context.Context
 import hep.dataforge.io.envelopes.*
 import hep.dataforge.meta.Meta
@@ -24,8 +25,9 @@ import hep.dataforge.nullable
 import hep.dataforge.storage.IndexedTableLoader
 import hep.dataforge.storage.MutableTableLoader
 import hep.dataforge.storage.StorageElement
-import hep.dataforge.storage.files.TableLoaderType.TABLE_FORMAT_KEY
-import hep.dataforge.storage.files.TableLoaderType.binaryTableWriter
+import hep.dataforge.storage.StorageElementType
+import hep.dataforge.storage.files.TableLoaderType.Companion.TABLE_FORMAT_KEY
+import hep.dataforge.storage.files.TableLoaderType.Companion.binaryTableWriter
 import hep.dataforge.tables.MetaTableFormat
 import hep.dataforge.tables.TableFormat
 import hep.dataforge.values.*
@@ -214,43 +216,47 @@ private val binaryTableReader: (ByteBuffer, TableFormat) -> Values = { buffer, f
     }
 }
 
-object TableLoaderType : FileStorageElementType {
-    const val TABLE_ENVELOPE_TYPE = "hep.dataforge.storage.table"
-    const val BINARY_DATA_TYPE = "binary"
-    const val TEXT_DATA_TYPE = "text"
+@AutoService(StorageElementType::class)
+class TableLoaderType : FileStorageElementType {
+    companion object {
+        const val TABLE_ENVELOPE_TYPE = "hep.dataforge.storage.table"
+        const val BINARY_DATA_TYPE = "binary"
+        const val TEXT_DATA_TYPE = "text"
 
-    const val TABLE_FORMAT_KEY = "format"
+        const val TABLE_FORMAT_KEY = "format"
+
+
+        val textTableWriter: (Values, TableFormat) -> ByteBuffer = { values, format ->
+            val string = format.names.map { values[it] }.joinToString(separator = "\t", postfix = "\n")
+            ByteBuffer.wrap(string.toByteArray(Charsets.UTF_8))
+        }
+
+        val binaryTableWriter: (Values, TableFormat) -> ByteBuffer = { values, format ->
+            val baos = ByteArrayOutputStream(256)
+            val stream = DataOutputStream(baos)
+            format.names.map { values[it] }.forEach {
+                stream.writeValue(it)
+            }
+            stream.writeByte('\n'.toInt())
+            stream.flush()
+            ByteBuffer.wrap(baos.toByteArray())
+        }
+
+    }
 
     override val name: String = TABLE_ENVELOPE_TYPE
 
-
-
-    val textTableWriter: (Values, TableFormat) -> ByteBuffer = { values, format ->
-        val string = format.names.map { values[it] }.joinToString(separator = "\t", postfix = "\n")
-        ByteBuffer.wrap(string.toByteArray(Charsets.UTF_8))
-    }
-
-    val binaryTableWriter: (Values, TableFormat) -> ByteBuffer = { values, format ->
-        val baos = ByteArrayOutputStream(256)
-        val stream = DataOutputStream(baos)
-        format.names.map { values[it] }.forEach {
-            stream.writeValue(it)
-        }
-        stream.writeByte('\n'.toInt())
-        stream.flush()
-        ByteBuffer.wrap(baos.toByteArray())
-    }
-
-    override suspend fun create(parent: FileStorage, meta: Meta): FileTableLoader {
+    override suspend fun create(context: Context, meta: Meta, parent: StorageElement?): FileStorageElement {
         if (!meta.hasMeta(TABLE_FORMAT_KEY)) {
             throw IllegalArgumentException("Values format not found")
         }
         val fileName = meta.getString("name")
-        val path: Path = parent.path.resolve("$fileName.df")
-        return create(parent, parent.context, path, meta)
+        val path: Path = ((parent as? FileStorageElement)?.path ?: context.dataDir).resolve("$fileName.df")
+        return create(context, meta, path, parent)
+
     }
 
-    private fun create(parent: FileStorage?, context: Context, path: Path, meta: Meta): FileTableLoader {
+    private fun create(context: Context, meta: Meta, path: Path, parent: StorageElement?): FileTableLoader {
         val type = meta.getString(Envelope.ENVELOPE_DATA_TYPE_KEY, BINARY_DATA_TYPE)
 
         val envelope = EnvelopeBuilder()
@@ -279,7 +285,7 @@ object TableLoaderType : FileStorageElementType {
      * Create a standalone loader without a storage
      */
     fun create(context: Context, path: Path, meta: Meta): FileTableLoader {
-        return create(null, context, path, meta)
+        return create(context, meta, path, null)
     }
 
     /**
@@ -292,14 +298,14 @@ object TableLoaderType : FileStorageElementType {
         })
     }
 
-    override suspend fun read(parent: FileStorage, path: Path): FileTableLoader {
+    override suspend fun read(context: Context, path: Path, parent: StorageElement?): FileStorageElement? {
         val envelope = EnvelopeReader.readFile(path)
 
         val name = envelope.meta.optString("name").nullable ?: path.fileName.toString()
 
         return when (envelope.dataType) {
-            BINARY_DATA_TYPE -> FileTableLoader(parent.context, parent, name, path, binaryTableReader)
-            TEXT_DATA_TYPE -> FileTableLoader(parent.context, parent, name, path, textTableReader)
+            BINARY_DATA_TYPE -> FileTableLoader(context, parent, name, path, binaryTableReader)
+            TEXT_DATA_TYPE -> FileTableLoader(context, parent, name, path, textTableReader)
             else -> throw RuntimeException("Unknown data type for table loader")
         }
     }

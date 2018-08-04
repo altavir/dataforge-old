@@ -22,7 +22,12 @@ import hep.dataforge.context.Plugin
 import hep.dataforge.context.PluginDef
 import hep.dataforge.context.PluginFactory
 import hep.dataforge.exceptions.NameNotFoundException
+import hep.dataforge.meta.KMetaBuilder
 import hep.dataforge.meta.Meta
+import hep.dataforge.meta.buildMeta
+import hep.dataforge.providers.Provides
+import hep.dataforge.providers.ProvidesNames
+import kotlin.streams.toList
 
 
 @PluginDef(name = "storage", group = "hep.dataforge", info = "Dataforge root storage plugin")
@@ -40,16 +45,35 @@ class StorageManager() : BasicPlugin(), MutableStorage {
         //nothing
     }
 
+    val types by lazy { context.serviceStream(StorageElementType::class.java).toList() }
+
+    @Provides(STORAGE_TYPE_TARGET)
+    fun optType(name: String): StorageElementType? {
+        return types.find { it.name == name }
+    }
+
+    @ProvidesNames(STORAGE_TYPE_TARGET)
+    fun listTypes(): List<String> {
+        return types.map { it.name }
+    }
+
+    /**
+     * Create a root storage
+     */
     override suspend fun create(meta: Meta): StorageElement {
         val type = meta.getString("type", DEFAULT_STORAGE_TYPE)
-        val element = context.findService(StorageFactory::class.java) { it.name == type }
-                ?.createElement(this, meta)
+        val element = types.find { it.name == type }
+                ?.create(this, meta)
                 ?: throw NameNotFoundException("Storage factory with type $type not found in ${context.name}")
         //TODO evaluate meta clash
         _children.putIfAbsent(element.name, element)
         return element
-
     }
+
+    /**
+     * Utility function to create root storage
+     */
+    suspend fun create(builder: KMetaBuilder.() -> Unit): StorageElement = create(buildMeta("storage", builder))
 
     override fun detach() {
         super.detach()
@@ -68,5 +92,6 @@ class StorageManager() : BasicPlugin(), MutableStorage {
 
     companion object {
         const val DEFAULT_STORAGE_TYPE = ""
+        const val STORAGE_TYPE_TARGET = "storageType"
     }
 }

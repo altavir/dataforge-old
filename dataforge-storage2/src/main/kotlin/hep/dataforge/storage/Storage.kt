@@ -26,6 +26,7 @@ import hep.dataforge.connections.RoleDefs
 import hep.dataforge.context.Context
 import hep.dataforge.context.ContextAware
 import hep.dataforge.events.EventHandler
+import hep.dataforge.exceptions.NameNotFoundException
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.Metoid
 import hep.dataforge.names.Name
@@ -100,7 +101,7 @@ interface Storage : StorageElement {
     @JvmDefault
     operator fun get(name: Name): StorageElement? {
         return if (name.length == 1) {
-            children.find{it.name == name.unescaped}
+            children.find { it.name == name.unescaped }
         } else {
             (get(name.first) as Storage?)?.get(name.cutFirst())
         }
@@ -126,6 +127,19 @@ interface MutableStorage : Storage {
      * Create a new element of the storage. If element with this name already exists, checks meta and either does nothing or throws exception.
      */
     suspend fun create(meta: Meta): StorageElement
+
+    companion object {
+        /**
+         * Create new element but do not register it with parent
+         */
+        suspend fun createNewElement(parent: Storage, meta: Meta): StorageElement{
+            val type = meta.getString("type", StorageManager.DEFAULT_STORAGE_TYPE)
+            return parent.context.load<StorageManager>().optType(type)
+                    ?.create(parent.context, meta, parent)
+                    ?: throw NameNotFoundException(type, "Storage element factory.")
+
+        }
+    }
 }
 
 /**
@@ -133,7 +147,7 @@ interface MutableStorage : Storage {
  * @param T - the type of loader entry
  */
 @Type("hep.dataforge.storage.loader")
-interface Loader<T: Any> : StorageElement, Iterable<T>{
+interface Loader<T : Any> : StorageElement, Iterable<T> {
     /**
      * The explicit type of the element
      */
@@ -143,7 +157,7 @@ interface Loader<T: Any> : StorageElement, Iterable<T>{
 /**
  * Loader that could be appended after creation. Appending must be thread safe.
  */
-interface AppendableLoader<T: Any> : Loader<T> {
+interface AppendableLoader<T : Any> : Loader<T> {
 
     /**
      * Synchronously append loader and return when operation is complete
@@ -154,7 +168,7 @@ interface AppendableLoader<T: Any> : Loader<T> {
 /**
  * Loader which could be accessed by keys
  */
-interface IndexedLoader<K: Comparable<K>, T: Any> : Loader<T> {
+interface IndexedLoader<K : Comparable<K>, T : Any> : Loader<T> {
     /**
      * List of available loader keys. Duplicate keys are not allowed
      * TODO find "common" replacement or move functionality up
@@ -170,7 +184,7 @@ interface IndexedLoader<K: Comparable<K>, T: Any> : Loader<T> {
 /**
  * Mutable version of indexed loader. Set operation must be thread safe
  */
-interface MutableIndexedLoader<K: Comparable<K>, T: Any> : IndexedLoader<K, T> {
+interface MutableIndexedLoader<K : Comparable<K>, T : Any> : IndexedLoader<K, T> {
 
     suspend fun set(key: K, value: T)
 }
@@ -178,15 +192,15 @@ interface MutableIndexedLoader<K: Comparable<K>, T: Any> : IndexedLoader<K, T> {
 /**
  * A factory that produces storage elements
  */
-interface StorageFactory : Named {
+interface StorageElementType : Named {
 
     /**
      * Produce an element. The method uses optional parent, but element it produces could be different from the one, produced by parent.
      */
-    suspend fun createElement(context: Context, meta: Meta, parent: StorageElement? = null): StorageElement
+    suspend fun create(context: Context, meta: Meta, parent: StorageElement? = null): StorageElement
 
     @JvmDefault
-    suspend fun createElement(parent: StorageElement, meta: Meta): StorageElement {
-        return createElement(parent.context, meta, parent)
+    suspend fun create(parent: StorageElement, meta: Meta): StorageElement {
+        return create(parent.context, meta, parent)
     }
 }

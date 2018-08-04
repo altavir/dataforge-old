@@ -32,6 +32,7 @@ import java.time.Instant
 
 
 class TableLoaderTest {
+    val tableLoaderType = TableLoaderType()
 
     companion object {
         lateinit var dir: Path
@@ -59,7 +60,7 @@ class TableLoaderTest {
     fun testReadWrite() {
         val path = dir.resolve("read-write.df")
         val format = MetaTableFormat.forNames("a", "b", "c")
-        val loader = TableLoaderType.create(Global, path, format)
+        val loader = tableLoaderType.create(Global, path, format)
         val writer = loader.mutable()
 
         runBlocking {
@@ -80,7 +81,7 @@ class TableLoaderTest {
 
         val path = dir.resolve("performance.df")
         val format = MetaTableFormat.forNames("a", "b", "c")
-        val loader = TableLoaderType.create(Global, path, format)
+        val loader = tableLoaderType.create(Global, path, format)
         val writer = loader.mutable()
         runBlocking { writer.open()}
         val data = (1..n).map { ValueMap.of(format.namesAsArray(), it, it + 1, it * 2) }
@@ -91,7 +92,7 @@ class TableLoaderTest {
         writer.close()
         loader.close()
 
-        val reader = TableLoaderType.read(Global, path)
+        val reader = tableLoaderType.read(Global, path)
         runBlocking { reader.open() }
 
         var lastValue: Int = 0
