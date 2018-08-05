@@ -5,7 +5,6 @@ import hep.dataforge.description.NodeDescriptor
 import hep.dataforge.fx.dfIconView
 import hep.dataforge.fx.meta.ConfigEditor
 import hep.dataforge.fx.table.TableDisplay
-import hep.dataforge.io.envelopes.JavaObjectWrapper.name
 import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name
 import hep.dataforge.plots.*
@@ -38,7 +37,7 @@ internal val defaultDisplay: (PlotFrame) -> Node = {
     }
 }
 
-class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = defaultDisplay) : Fragment(icon = dfIconView) {
+class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = defaultDisplay) : Fragment(icon = dfIconView), PlotListener {
 
     private val configWindows = HashMap<hep.dataforge.meta.Configurable, Stage>()
     private val dataWindows = HashMap<Plot, Stage>()
@@ -53,7 +52,9 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
     val progressProperty = SimpleDoubleProperty(1.0)
     var progress by progressProperty
 
-    private lateinit var sidebar: VBox;
+    private lateinit var sidebar: VBox
+
+    private val treeRoot = fillTree(frame.plots)
 
     override val root = borderpane {
         center {
@@ -106,7 +107,7 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
                     }
                     treeview<Plottable> {
                         minWidth = 0.0
-                        root = fillTree(frame.plots);
+                        root = treeRoot
                         vgrow = Priority.ALWAYS
 
                         //cell format
@@ -214,6 +215,39 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
         }
     }
 
+    init {
+        frame.plots.addListener(this, false)
+    }
+
+    /**
+     * Data change listener. Attached always to root plot group
+     */
+    override fun dataChanged(caller: Plottable, path: Name) {
+        val plot = (caller as? PlotGroup)?.get(path)
+
+        fun TreeItem<Plottable>.findItem(relativePath: Name): TreeItem<Plottable>? {
+            return when {
+                relativePath.isEmpty() -> this
+                relativePath.length == 1 -> children.find { it.value.name == relativePath.unescaped }
+                else -> findItem(relativePath.first)?.findItem(relativePath.cutFirst())
+            }
+        }
+
+        val item = treeRoot.findItem(path)
+
+        if (plot == null && item != null) {
+            // remove item
+            item.parent.children.remove(item)
+        } else if (plot != null && item == null) {
+            treeRoot.findItem(path.cutLast())?.children?.add(fillTree(plot)) ?: kotlin.error("Parent tree item should exist at the moment")
+        }
+    }
+
+    override fun metaChanged(caller: Plottable, path: Name) {
+        //do nothing for now
+        //TODO update colors etc
+    }
+
     fun addToSideBar(index: Int, vararg nodes: Node) {
         sidebar.children.addAll(index, Arrays.asList(*nodes))
     }
@@ -261,32 +295,8 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
         }
     }
 
-    private inner class ContainerChangeListener(val item: TreeItem<Plottable>) : PlotListener {
-        private val referenceCache: MutableMap<Name, Plottable> = HashMap()
-
-        override fun metaChanged(caller: Plottable, path: Name) {
-            //do nothing
-        }
-
-        override fun dataChanged(caller: Plottable, path: Name) {
-            if (path.length == 1) {
-                val plot = (caller as? PlotGroup)?.get(path)
-                when {
-                    plot == null -> item.children.removeIf { it.value.name == name }
-                    referenceCache.containsKey(path) -> {
-                    }
-                    else -> {
-                            referenceCache[path] = plot
-                            item.children.add(fillTree(plot))
-                    }
-                }
-            }
-        }
-    }
-
     private fun fillTree(plot: Plottable): TreeItem<Plottable> {
         val item = TreeItem(plot)
-        plot.addListener(ContainerChangeListener(item))
         if (plot is PlotGroup) {
             item.children.setAll(plot.map { fillTree(it) })
         }
@@ -296,10 +306,9 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
 
     private fun getFullName(item: TreeItem<Plottable>): Name {
         return if (item.parent == null || item.parent.value.name.isEmpty()) {
-            Name.of(item.value.name);
+            Name.of(item.value.name)
         } else {
             getFullName(item.parent) + item.value.name
         }
     }
-
 }

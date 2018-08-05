@@ -35,7 +35,7 @@ abstract class FileEnvelope(val path: Path) : Envelope, AutoCloseable {
     protected abstract val dataOffset: Long
     protected abstract var dataLength: Int
 
-    protected val channel = FileChannel.open(path, StandardOpenOption.WRITE)
+    protected val channel by lazy { FileChannel.open(path, StandardOpenOption.WRITE)}
 
     /**
      * Read the whole data block
@@ -44,24 +44,21 @@ abstract class FileEnvelope(val path: Path) : Envelope, AutoCloseable {
         FileBinary(path, dataOffset)
     }
 
-    protected open fun updateDataLength(length: Int) {
-        dataLength = length
-    }
 
     /**
      * Append data to the end of envelope file and update tag
      */
     fun append(buffer: ByteBuffer) {
         synchronized(this) {
-            updateDataLength(dataLength + channel.write(buffer, dataOffset + dataLength))
+            dataLength += channel.write(buffer, dataOffset + dataLength)
         }
     }
 
-    fun appendAll(buffers: Iterable<ByteBuffer>){
+    fun appendAll(buffers: Iterable<ByteBuffer>) {
         synchronized(this) {
             channel.position(dataOffset + dataLength)
             val size = buffers.map { channel.write(it) }.sum()
-            updateDataLength(dataLength + size)
+            dataLength += size
         }
     }
 
@@ -71,7 +68,7 @@ abstract class FileEnvelope(val path: Path) : Envelope, AutoCloseable {
     fun clearData() {
         synchronized(this) {
             channel.truncate(dataOffset)
-            updateDataLength(0)
+            dataLength = 0
         }
     }
 
@@ -101,7 +98,7 @@ abstract class FileEnvelope(val path: Path) : Envelope, AutoCloseable {
          */
         fun readExisting(path: Path): FileEnvelope {
             if (Files.exists(path)) {
-                val type = EnvelopeType.infer(path)?: error("The file is not an envelope")
+                val type = EnvelopeType.infer(path) ?: error("The file is not an envelope")
                 return when (type) {
                     is DefaultEnvelopeType -> TaggedFileEnvelope(path)
                     is TaglessEnvelopeType -> TODO("Implement for tagless envelope")
@@ -132,11 +129,21 @@ abstract class FileEnvelope(val path: Path) : Envelope, AutoCloseable {
 
 class TaggedFileEnvelope(path: Path) : FileEnvelope(path) {
 
-    private val tag = Files.newByteChannel(path, StandardOpenOption.READ).use { EnvelopeTag().read(it) }
+    private val tag by lazy { Files.newByteChannel(path, StandardOpenOption.READ).use { EnvelopeTag().read(it) } }
 
-    override val dataOffset: Long = (tag.length + tag.metaSize).toLong()
+    override val dataOffset: Long by lazy { (tag.length + tag.metaSize).toLong() }
 
-    override var dataLength: Int = tag.dataSize
+    override var dataLength: Int
+        get() = tag.dataSize
+        set(value) {
+            if (value > Int.MAX_VALUE) {
+                throw RuntimeException("Too large data block")
+            }
+            tag.dataSize = value
+            if (channel.write(tag.toBytes(), 0L) < tag.length) {
+                throw error("Tag is not overwritten.")
+            }
+        }
 
 
     override val meta: Meta by lazy {
@@ -144,16 +151,5 @@ class TaggedFileEnvelope(path: Path) : FileEnvelope(path) {
             channel.read(it, tag.length.toLong())
         }
         tag.metaType.reader.readBuffer(buffer)
-    }
-
-    override fun updateDataLength(length: Int) {
-        if (dataLength > Int.MAX_VALUE) {
-            throw RuntimeException("Too large data block")
-        }
-        super.updateDataLength(length)
-        tag.dataSize = length
-        if (channel.write(tag.toBytes(), 0L) < tag.length) {
-            throw error("Tag is not overwritten.")
-        }
     }
 }

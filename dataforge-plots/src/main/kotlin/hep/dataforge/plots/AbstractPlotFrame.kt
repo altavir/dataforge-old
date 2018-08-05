@@ -50,12 +50,13 @@ abstract class AbstractPlotFrame : SimpleConfigurable(), PlotFrame, PlotListener
     /**
      * recursively apply some action to all plottables in hierarchy starting at root
      */
-    private fun recursiveApply(root: Name, action: (path: Name, plot: Plottable) -> Unit) {
+    private fun recursiveApply(root: Name, action: (path: Name, plot: Plottable?) -> Unit) {
+        val plot = plots[root]
+        action.invoke(root, plot)
         plots[root]?.let {
-            action.invoke(root, it)
             if (it is PlotGroup) {
-                it.forEach {
-                    recursiveApply(root + it.name, action)
+                it.forEach { child ->
+                    recursiveApply(root + child.name, action)
                 }
             }
         }

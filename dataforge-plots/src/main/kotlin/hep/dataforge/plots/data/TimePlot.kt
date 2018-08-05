@@ -47,7 +47,7 @@ import java.util.*
 class TimePlot(name: String, val yKey: String = Adapters.Y_AXIS, meta: Meta = Meta.empty(), private val timestampKey: String = TIMESTAMP_KEY) :
         XYPlot(name, meta, Adapters.buildXYAdapter(timestampKey, yKey)) {
 
-    private var map = TreeMap<Instant, Values>()
+    private val map = TreeMap<Instant, Values>()
 
     /**
      * Puts value with the same name as this y name from data point. If data
@@ -79,12 +79,31 @@ class TimePlot(name: String, val yKey: String = Adapters.Y_AXIS, meta: Meta = Me
      * @param time
      * @param value
      */
-    @Synchronized
     fun put(time: Instant, value: Value) {
         val point = HashMap<String, Value>(2)
         point[timestampKey] = Value.of(time)
         point[yKey] = value
-        this.map[time] = ValueMap(point)
+        synchronized(this) {
+            this.map[time] = ValueMap(point)
+        }
+
+        if (size() > 2) {
+            val maxItems = config.getInt(MAX_ITEMS_KEY, -1)
+            val prefItems = config.getInt(PREF_ITEMS_KEY, Math.min(400, maxItems))
+            val maxAge = config.getInt(MAX_AGE_KEY, -1)
+            cleanup(maxAge, maxItems, prefItems)
+        }
+
+        notifyDataChanged()
+    }
+
+    fun putAll(items: Iterable<Pair<Instant, Value>>) {
+        items.forEach{pair->
+            map[pair.first] = ValueMap.ofPairs(
+                    timestampKey to pair.first,
+                    yKey to pair.second
+            )
+        }
 
         if (size() > 2) {
             val maxItems = config.getInt(MAX_ITEMS_KEY, -1)
@@ -121,8 +140,6 @@ class TimePlot(name: String, val yKey: String = Adapters.Y_AXIS, meta: Meta = Me
         notifyDataChanged()
     }
 
-
-    @Synchronized
     private fun cleanup(maxAge: Int, maxItems: Int, prefItems: Int) {
         val first = map.firstKey()
         val last = map.lastKey()
@@ -141,12 +158,17 @@ class TimePlot(name: String, val yKey: String = Adapters.Y_AXIS, meta: Meta = Me
                 x = x.plusMillis(step.toLong())
             }
             //replacing map with new one
-            this.map = newMap
+            synchronized(this) {
+                this.map.clear()
+                this.map.putAll(newMap)
+            }
             LoggerFactory.getLogger(javaClass).debug("Reduced size from {} to {}", oldsize, size())
         }
 
-        while (maxAge > 0 && last != null && Duration.between(map.firstKey(), last).toMillis() > maxAge) {
-            map.remove(map.firstKey())
+        synchronized(this) {
+            while (maxAge > 0 && last != null && Duration.between(map.firstKey(), last).toMillis() > maxAge) {
+                map.remove(map.firstKey())
+            }
         }
     }
 

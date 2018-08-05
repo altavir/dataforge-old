@@ -56,14 +56,16 @@ class PlotGroup(name: String, descriptor: NodeDescriptor = NodeDescriptor.empty(
     private fun resolvePlotName(caller: Plottable): Name {
         return when {
             caller == this -> Name.empty()
-            plots.contains(caller) -> Name.of(caller.name)
+            plots.contains(caller) -> Name.ofSingle(caller.name)
             else -> error("Could not find $caller in $this")
         }
     }
 
 
     override fun dataChanged(caller: Plottable, path: Name) {
-        listeners.forEach { it.dataChanged(this, resolvePlotName(caller) + path) }
+        listeners.forEach {
+            it.dataChanged(this, resolvePlotName(caller) + path)
+        }
     }
 
     override fun metaChanged(caller: Plottable, path: Name) {
@@ -73,8 +75,8 @@ class PlotGroup(name: String, descriptor: NodeDescriptor = NodeDescriptor.empty(
 
     fun add(plot: Plottable) {
         this.plots.add(plot)
+        dataChanged(this, Name.ofSingle(plot.name))
         plot.addListener(this)
-        dataChanged(this, Name.of(plot.name))
     }
 
     operator fun Plottable.unaryPlus(){
@@ -93,10 +95,10 @@ class PlotGroup(name: String, descriptor: NodeDescriptor = NodeDescriptor.empty(
 
     fun remove(name: Name): PlotGroup {
         if (name.length == 1) {
-            plots.find { it.name == name.toString() }?.let {
-                it.removeListener(this)
-                plots.remove(it)
+            plots.find { it.name == name.unescaped }?.let {plot->
+                plots.remove(plot)
                 dataChanged(this, name)
+                plot.removeListener(this)
             }
         } else {
             (get(name.cutLast()) as? PlotGroup)?.remove(name.last)
@@ -138,7 +140,7 @@ class PlotGroup(name: String, descriptor: NodeDescriptor = NodeDescriptor.empty(
     operator fun get(name: Name): Plottable? {
         return when {
             name.length == 0 -> this
-            name.length == 1 -> plots.find { it.name == name.toString() }
+            name.length == 1 -> plots.find { it.name == name.unescaped }
             else -> (get(name.cutLast()) as? PlotGroup)?.get(name.last)
         }
     }

@@ -95,7 +95,7 @@ class TableLoaderTest {
         val reader = tableLoaderType.read(Global, path)
         runBlocking { reader.open() }
 
-        var lastValue: Int = 0
+        var lastValue: Int
         val readTime = benchmark {
             reader.forEachIndexed { index, it ->
                 lastValue = it["a"].int

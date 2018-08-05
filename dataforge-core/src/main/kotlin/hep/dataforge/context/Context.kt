@@ -330,7 +330,7 @@ open class Context(
      */
     val rootDir: Path by lazy {
         properties[ROOT_DIRECTORY_CONTEXT_KEY]
-                ?.let { Paths.get(it.string).also { Files.createDirectories(it) } }
+                ?.let {value -> Paths.get(value.string).also { Files.createDirectories(it) } }
                 ?: parent?.rootDir
                 ?: File(System.getProperty("user.home")).toPath()
     }
@@ -364,7 +364,7 @@ open class Context(
      */
     val tmpDir: Path by lazy {
         properties[TEMP_DIRECTORY_CONTEXT_KEY]
-                ?.let { rootDir.resolve(it.string).also { Files.createDirectories(it) } }
+                ?.let { value -> rootDir.resolve(value.string).also { Files.createDirectories(it) } }
                 ?: rootDir.resolve(".dataforge/.temp").also { Files.createDirectories(it) }
     }
 

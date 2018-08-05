@@ -16,7 +16,6 @@
 
 package hep.dataforge.names
 
-import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -25,7 +24,16 @@ class NameTest {
     fun testNameFromString() {
         val name = Name.of("first.second[28].third\\.andahalf")
         assertEquals(3, name.length.toLong())
-        Assert.assertEquals("third.andahalf", name.last.unescaped)
+        assertEquals("third.andahalf", name.last.unescaped)
+    }
+
+    @Test
+    fun testQuery(){
+        val name = Name.of("name[f = 4]")
+        assertEquals("name", name.ignoreQuery().toString())
+        assertEquals("f = 4", name.query)
+        assertEquals("name[f = 4]",name.toString())
+        assertEquals("name[f = 4]",name.unescaped)
     }
 
     @Test
@@ -34,7 +42,9 @@ class NameTest {
         val str = name.toString()
         val reconstructed = Name.of(str)
         assertEquals(name, reconstructed)
+        assertEquals("first", reconstructed.tokens[0].unescaped)
         assertEquals("name.with.dot", reconstructed.tokens[2].unescaped)
+        assertEquals("end[22]", reconstructed.tokens[3].unescaped)
     }
 
     @Test

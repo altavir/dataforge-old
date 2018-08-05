@@ -34,6 +34,8 @@ import hep.dataforge.providers.Provider
 import hep.dataforge.providers.Provides
 import hep.dataforge.providers.ProvidesNames
 import hep.dataforge.storage.StorageElement.Companion.STORAGE_TARGET
+import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.experimental.runBlocking
 import org.slf4j.Logger
 import java.util.*
 import kotlin.reflect.KClass
@@ -53,16 +55,15 @@ interface StorageElement : Named, Metoid, Provider, ContextAware, AutoConnectibl
     val parent: StorageElement?
 
     /**
-     * Prepare the storage to be used
-     */
-    suspend fun open()
-
-    /**
      * Full name relative to root storage
      */
     @JvmDefault
     val fullName: Name
-        get() = parent?.fullName?.plus(name) ?: Name.ofSingle(name)
+        get() = if(parent == null){
+            Name.empty()
+        } else{
+            parent?.fullName?.plus(name) ?: Name.ofSingle(name)
+        }
 
     companion object {
         const val STORAGE_TARGET = "storage"
@@ -77,14 +78,14 @@ interface Storage : StorageElement {
     /**
      * Top level children of this storage
      */
-    val children: Collection<StorageElement>
+    suspend fun getChildren(): Collection<StorageElement>
 
     /**
      * Names of direct children for provider
      */
     @get:ProvidesNames(STORAGE_TARGET)
     val childrenNames: Collection<String>
-        get() = children.map { it.name }
+        get() = runBlocking { getChildren().map { it.name }}
 
     /**
      * Get storage element (name notation for recursive calls). Null if not present
@@ -101,7 +102,9 @@ interface Storage : StorageElement {
     @JvmDefault
     operator fun get(name: Name): StorageElement? {
         return if (name.length == 1) {
-            children.find { it.name == name.unescaped }
+            runBlocking {
+                getChildren().find { it.name == name.unescaped }
+            }
         } else {
             (get(name.first) as Storage?)?.get(name.cutFirst())
         }
@@ -115,7 +118,9 @@ interface Storage : StorageElement {
      */
     @JvmDefault
     override fun close() {
-        children.forEach { it.close() }
+        launch {
+            getChildren().forEach { it.close() }
+        }
     }
 }
 

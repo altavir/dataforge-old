@@ -18,6 +18,8 @@ package hep.dataforge.storage
 
 import hep.dataforge.Type
 import hep.dataforge.meta.Meta
+import hep.dataforge.tables.ListTable
+import hep.dataforge.tables.Table
 import hep.dataforge.tables.TableFormat
 import hep.dataforge.tables.ValuesSource
 import hep.dataforge.values.Value
@@ -25,9 +27,26 @@ import hep.dataforge.values.Values
 
 @Type("hep.dataforge.storage.loader.table")
 interface TableLoader : Loader<Values>, ValuesSource {
+    /**
+     * Format of the table
+     */
     val format: TableFormat
+
+    /**
+     * Generate indexed loader based on this one. Type of the indesx is defined by meta
+     */
     fun indexed(meta: Meta = Meta.empty()): IndexedTableLoader
+
+    /**
+     * Generate a mutable loader based on this one. Throws an exception if it is not possible
+     */
     fun mutable(): MutableTableLoader
+
+    @JvmDefault
+    suspend fun asTable(): Table {
+        // Replace with custom table which will be updated with the loader
+        return ListTable(format, this.toList())
+    }
 }
 
 interface IndexedTableLoader : TableLoader, IndexedLoader<Value, Values> {
@@ -37,11 +56,19 @@ interface IndexedTableLoader : TableLoader, IndexedLoader<Value, Values> {
      * Notify loader that it should update index for this loader
      */
     fun updateIndex()
-
-    suspend fun select(from: Value, to: Value): List<Values> {
-        return keys.subSet(from, true, to, true).map { get(it)!! }
-    }
 }
+
+/**
+ * Select a range from this table loade
+ */
+suspend fun IndexedTableLoader.select(from: Value, to: Value): Table {
+    return ListTable(format, keys.subSet(from, true, to, true).map { get(it)!! })
+}
+
+suspend fun IndexedTableLoader.select(query: Meta): Table {
+    TODO("To be implemented")
+}
+
 
 interface MutableTableLoader : TableLoader, AppendableLoader<Values>
 

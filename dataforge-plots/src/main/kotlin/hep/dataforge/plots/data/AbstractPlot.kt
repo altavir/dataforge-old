@@ -28,13 +28,10 @@ import hep.dataforge.utils.ReferenceRegistry
  * @author darksnake
  */
 abstract class AbstractPlot(
-        name: String,
+        override val name: String,
         meta: Meta,
         adapter: ValuesAdapter?
 ) : SimpleConfigurable(meta), Plot {
-
-    //auto escape names
-    override val name: String = Name.ofSingle(name).toString()
 
     override val adapter: ValuesAdapter = adapter ?: Adapters.buildAdapter(meta.getMetaOrEmpty("adapter"))
 

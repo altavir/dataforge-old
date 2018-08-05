@@ -16,7 +16,6 @@
 
 package hep.dataforge.storage.files
 
-import com.google.auto.service.AutoService
 import hep.dataforge.context.Context
 import hep.dataforge.io.envelopes.*
 import hep.dataforge.meta.Meta
@@ -25,7 +24,6 @@ import hep.dataforge.nullable
 import hep.dataforge.storage.IndexedTableLoader
 import hep.dataforge.storage.MutableTableLoader
 import hep.dataforge.storage.StorageElement
-import hep.dataforge.storage.StorageElementType
 import hep.dataforge.storage.files.TableLoaderType.Companion.TABLE_FORMAT_KEY
 import hep.dataforge.storage.files.TableLoaderType.Companion.binaryTableWriter
 import hep.dataforge.tables.MetaTableFormat
@@ -216,7 +214,6 @@ private val binaryTableReader: (ByteBuffer, TableFormat) -> Values = { buffer, f
     }
 }
 
-@AutoService(StorageElementType::class)
 class TableLoaderType : FileStorageElementType {
     companion object {
         const val TABLE_ENVELOPE_TYPE = "hep.dataforge.storage.table"

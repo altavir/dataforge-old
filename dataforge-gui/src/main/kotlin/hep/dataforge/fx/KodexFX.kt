@@ -88,10 +88,12 @@ fun <R> UIComponent.runGoal(id: String, dispatcher: CoroutineContext = DefaultDi
 
 infix fun <R> Goal<R>.ui(action: (R) -> Unit): Goal<R> {
     return this.apply {
-        onComplete(uiExecutor, BiConsumer { res, _ ->
+        onComplete(uiExecutor, BiConsumer { res, ex ->
             if (res != null) {
                 action(res);
             }
+            //Always print stack trace if goal is evaluated on UI
+            ex?.printStackTrace()
         })
     }
 }

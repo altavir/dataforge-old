@@ -30,7 +30,7 @@ import kotlin.reflect.KClass
 /**
  * An abastract loader that reads the file an an envelope and then interprets the data as a sequence as binary objects with fixed offset
  */
-abstract class FileCollectionLoader<T : Any> (
+abstract class FileCollectionLoader<T : Any>(
         override val context: Context,
         override val parent: StorageElement? = null,
         final override val name: String,
@@ -40,10 +40,12 @@ abstract class FileCollectionLoader<T : Any> (
     private val _connectionHelper = ConnectionHelper(this)
 
     private var envelope: Envelope? = null
-
-    override suspend fun open() {
-        envelope = EnvelopeReader.readFile(path)
-    }
+        get() {
+            if (field == null) {
+                field = EnvelopeReader.readFile(path)
+            }
+            return field
+        }
 
     override val meta: Meta
         get() = envelope?.meta ?: error("Loader is closed")
@@ -69,5 +71,5 @@ abstract class FileCollectionLoader<T : Any> (
         envelope = null
     }
 
-    protected inner class Entry(val index: Int, val offset:Long, val value: T)
+    protected inner class Entry(val index: Int, val offset: Long, val value: T)
 }
