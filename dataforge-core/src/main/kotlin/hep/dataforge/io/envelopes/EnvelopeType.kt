@@ -17,12 +17,10 @@ package hep.dataforge.io.envelopes
 
 import hep.dataforge.context.Context
 import hep.dataforge.context.Global
-import hep.dataforge.io.IOUtils
-import hep.dataforge.nullable
 import org.slf4j.LoggerFactory
-import java.nio.file.Files
+import java.nio.channels.FileChannel
 import java.nio.file.Path
-import java.nio.file.StandardOpenOption.READ
+import java.nio.file.StandardOpenOption
 
 /**
  * Envelope io format description
@@ -70,18 +68,17 @@ interface EnvelopeType {
          */
         fun infer(path: Path): EnvelopeType? {
             return try {
-                Files.newInputStream(path, READ).use { stream ->
-                    IOUtils.nextLine(stream, "ASCII") { line ->
-                        //skip shabang
-                        line.isEmpty() || line.startsWith("#!") && !line.endsWith("#!")
-                    }.nullable?.let {  header ->
-                        when {
+                FileChannel.open(path, StandardOpenOption.READ).use {
+                    val buffer = it.map(FileChannel.MapMode.READ_ONLY, 0, 6)
+                    val array = ByteArray(6)
+                    buffer.get(array)
+                    val header = String(array)
+                    when {
                         //TODO use templates from appropriate types
-                            header.startsWith("#!") -> error("Legacy dataforge tags are not supported")
-                            header.startsWith("#~DFTL") -> TaglessEnvelopeType.INSTANCE
-                            header.startsWith("#~") -> DefaultEnvelopeType.INSTANCE
-                            else -> null
-                        }
+                        header.startsWith("#!") -> error("Legacy dataforge tags are not supported")
+                        header.startsWith("#~DFTL") -> TaglessEnvelopeType.INSTANCE
+                        header.startsWith("#~") -> DefaultEnvelopeType.INSTANCE
+                        else -> null
                     }
                 }
             } catch (ex: Exception) {
@@ -99,7 +96,7 @@ interface EnvelopeType {
 
         fun resolve(name: String, context: Context = Global): EnvelopeType? {
             synchronized(context) {
-                return context.findService(EnvelopeType::class.java){ it -> it.name == name }
+                return context.findService(EnvelopeType::class.java) { it -> it.name == name }
             }
         }
     }
