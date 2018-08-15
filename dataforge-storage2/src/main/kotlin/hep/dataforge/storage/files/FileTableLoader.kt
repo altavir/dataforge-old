@@ -168,7 +168,7 @@ class IndexedFileTableLoader(val loader: FileTableLoader, val indexField: String
  * Appendable version of FileTableLoader. Build
  */
 class AppendableFileTableLoader(val loader: FileTableLoader, val writer: (Values, TableFormat) -> ByteBuffer = binaryTableWriter) : IndexedTableLoader by loader, MutableTableLoader {
-    private val mutableEnvelope = FileEnvelope.readExisting(loader.path)
+    private val mutableEnvelope = MutableFileEnvelope.readExisting(loader.path)
 
     /**
      * Append single point

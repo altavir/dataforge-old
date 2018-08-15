@@ -27,15 +27,11 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 
-/**
- * A file i/o for envelope-based format
- */
-abstract class FileEnvelope(val path: Path) : Envelope, AutoCloseable {
-
+abstract class FileEnvelope(val path: Path): Envelope, AutoCloseable{
     protected abstract val dataOffset: Long
-    protected abstract var dataLength: Int
+    protected abstract val dataLength: Int
 
-    protected val channel by lazy { FileChannel.open(path, StandardOpenOption.WRITE)}
+    protected open val channel by lazy { FileChannel.open(path, StandardOpenOption.READ)}
 
     /**
      * Read the whole data block
@@ -44,6 +40,28 @@ abstract class FileEnvelope(val path: Path) : Envelope, AutoCloseable {
         FileBinary(path, dataOffset)
     }
 
+    /**
+     * Read data block in given position
+     */
+    fun read(pos: Long, length: Int): ByteBuffer {
+        return ByteBuffer.allocate(length).also { channel.read(it, pos) }
+    }
+
+    override fun close() {
+        channel.close()
+    }
+
+
+}
+
+/**
+ * A file i/o for envelope-based format
+ */
+abstract class MutableFileEnvelope(path: Path) : FileEnvelope(path), AutoCloseable {
+
+    abstract override var dataLength: Int
+
+    override val channel by lazy { FileChannel.open(path, StandardOpenOption.READ, StandardOpenOption.WRITE)}
 
     /**
      * Append data to the end of envelope file and update tag
@@ -80,23 +98,13 @@ abstract class FileEnvelope(val path: Path) : Envelope, AutoCloseable {
         append(buffer)
     }
 
-    /**
-     * Read data block in given position
-     */
-    fun read(pos: Long, length: Int): ByteBuffer {
-        return ByteBuffer.allocate(length).also { channel.read(it, pos) }
-    }
-
-    override fun close() {
-        channel.close()
-    }
 
     companion object {
 
         /**
-         * Read existing file as FileEnvelope
+         * Read existing file as MutableFileEnvelope
          */
-        fun readExisting(path: Path): FileEnvelope {
+        fun readExisting(path: Path): MutableFileEnvelope {
             if (Files.exists(path)) {
                 val type = EnvelopeType.infer(path) ?: error("The file is not an envelope")
                 return when (type) {
@@ -116,7 +124,7 @@ abstract class FileEnvelope(val path: Path) : Envelope, AutoCloseable {
          * @param properties additional properties for envelope
          */
         @Synchronized
-        fun createNew(path: Path, meta: Meta, properties: Map<String, String> = emptyMap()): FileEnvelope {
+        fun createNew(path: Path, meta: Meta, properties: Map<String, String> = emptyMap()): MutableFileEnvelope {
             val type = EnvelopeType.resolve(properties.getOrDefault(Envelope.ENVELOPE_TYPE_KEY, DefaultEnvelopeType.DEFAULT_ENVELOPE_NAME))
                     ?: throw NameNotFoundException("Can't resolve envelope type")
             Files.newOutputStream(path, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE).use {
@@ -127,7 +135,7 @@ abstract class FileEnvelope(val path: Path) : Envelope, AutoCloseable {
     }
 }
 
-class TaggedFileEnvelope(path: Path) : FileEnvelope(path) {
+class TaggedFileEnvelope(path: Path) : MutableFileEnvelope(path) {
 
     private val tag by lazy { Files.newByteChannel(path, StandardOpenOption.READ).use { EnvelopeTag().read(it) } }
 

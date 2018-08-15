@@ -37,11 +37,12 @@ import java.io.IOException
 object PlotUtils {
 
     fun getAWTColor(meta: Meta, def: Color?): Color? {
-        if (meta.hasValue("color")) {
-            val fxColor = javafx.scene.paint.Color.valueOf(meta.getString("color"))
-            return Color(fxColor.red.toFloat(), fxColor.green.toFloat(), fxColor.blue.toFloat())
-        } else {
-            return def
+        return when {
+            meta.hasValue("color") -> {
+                val fxColor = javafx.scene.paint.Color.valueOf(meta.getString("color"))
+                Color(fxColor.red.toFloat(), fxColor.green.toFloat(), fxColor.blue.toFloat())
+            }
+            else -> def
         }
     }
 
