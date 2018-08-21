@@ -222,9 +222,7 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
     /**
      * Data change listener. Attached always to root plot group
      */
-    override fun dataChanged(caller: Plottable, path: Name) {
-        val plot = (caller as? PlotGroup)?.get(path)
-
+    override fun dataChanged(caller: Plottable, path: Name, before: Plottable?, after: Plottable?) {
         fun TreeItem<Plottable>.findItem(relativePath: Name): TreeItem<Plottable>? {
             return when {
                 relativePath.isEmpty() -> this
@@ -235,15 +233,16 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
 
         val item = treeRoot.findItem(path)
 
-        if (plot == null && item != null) {
+        if (after == null && item != null) {
             // remove item
             item.parent.children.remove(item)
-        } else if (plot != null && item == null) {
-            treeRoot.findItem(path.cutLast())?.children?.add(fillTree(plot)) ?: kotlin.error("Parent tree item should exist at the moment")
+        } else if (after != null && item == null) {
+            treeRoot.findItem(path.cutLast())?.children?.add(fillTree(after))
+                    ?: kotlin.error("Parent tree item should exist at the moment")
         }
     }
 
-    override fun metaChanged(caller: Plottable, path: Name) {
+    override fun metaChanged(caller: Plottable, path: Name, plot: Plottable) {
         //do nothing for now
         //TODO update colors etc
     }

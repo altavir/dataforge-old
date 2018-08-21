@@ -102,11 +102,14 @@ class FXPlotOutput(context: Context, meta: Meta = Meta.empty()) : FXOutput(conte
                     frame.plots.configure(obj.plots.config)
 
                     obj.plots.addListener(object: PlotListener{
-                        override fun dataChanged(caller: Plottable, path: Name) {
-                            frame.plots[path] = obj.plots[path]
+
+                        override fun dataChanged(caller: Plottable, path: Name, before: Plottable?, after: Plottable?) {
+                            if(before!= after) {
+                                frame.plots[path] = after
+                            }
                         }
 
-                        override fun metaChanged(caller: Plottable, path: Name) {
+                        override fun metaChanged(caller: Plottable, path: Name, plot: Plottable) {
                             //frame.plots.metaChanged(caller,path)
                         }
                     })

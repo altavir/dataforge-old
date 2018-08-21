@@ -50,7 +50,7 @@ class PlotGroup(name: String, descriptor: NodeDescriptor = NodeDescriptor.empty(
     override var descriptor = descriptor
         set(value) {
             field = value
-            metaChanged(this, Name.empty())
+            metaChanged(this, Name.empty(), this)
         }
 
     private fun resolvePlotName(caller: Plottable): Name {
@@ -61,25 +61,25 @@ class PlotGroup(name: String, descriptor: NodeDescriptor = NodeDescriptor.empty(
         }
     }
 
-
-    override fun dataChanged(caller: Plottable, path: Name) {
+    override fun dataChanged(caller: Plottable, path: Name, before: Plottable?, after: Plottable?) {
         listeners.forEach {
-            it.dataChanged(this, resolvePlotName(caller) + path)
+            it.dataChanged(this, resolvePlotName(caller) + path, before, after)
         }
     }
 
-    override fun metaChanged(caller: Plottable, path: Name) {
-        listeners.forEach { it.metaChanged(this, resolvePlotName(caller) + path) }
+    override fun metaChanged(caller: Plottable, path: Name, plot: Plottable) {
+        listeners.forEach { it.metaChanged(this, resolvePlotName(caller) + path, plot) }
     }
 
 
     fun add(plot: Plottable) {
+        val before = plots.find { it.name == plot.name }
         this.plots.add(plot)
-        dataChanged(this, Name.ofSingle(plot.name))
+        dataChanged(this, Name.ofSingle(plot.name), before, plot)
         plot.addListener(this)
     }
 
-    operator fun Plottable.unaryPlus(){
+    operator fun Plottable.unaryPlus() {
         this@PlotGroup.add(this)
     }
 
@@ -95,9 +95,10 @@ class PlotGroup(name: String, descriptor: NodeDescriptor = NodeDescriptor.empty(
 
     fun remove(name: Name): PlotGroup {
         if (name.length == 1) {
-            plots.find { it.name == name.unescaped }?.let {plot->
+            val plot = plots.find { it.name == name.toString() }
+            if (plot != null) {
                 plots.remove(plot)
-                dataChanged(this, name)
+                dataChanged(this, name, plot, null)
                 plot.removeListener(this)
             }
         } else {
@@ -109,7 +110,7 @@ class PlotGroup(name: String, descriptor: NodeDescriptor = NodeDescriptor.empty(
     fun clear() {
         plots.forEach { it.removeListener(this) }
         plots.clear()
-        dataChanged(this, Name.empty())
+        dataChanged(this, Name.empty(), this, this)
     }
 
     @ProvidesNames(PLOT_TARGET)
@@ -140,7 +141,7 @@ class PlotGroup(name: String, descriptor: NodeDescriptor = NodeDescriptor.empty(
     operator fun get(name: Name): Plottable? {
         return when {
             name.length == 0 -> this
-            name.length == 1 -> plots.find { it.name == name.unescaped }
+            name.length == 1 -> plots.find { it.name == name.toString() }
             else -> (get(name.cutLast()) as? PlotGroup)?.get(name.last)
         }
     }
@@ -152,13 +153,13 @@ class PlotGroup(name: String, descriptor: NodeDescriptor = NodeDescriptor.empty(
      * * Do nothing if present and same
      */
     operator fun set(name: Name, plot: Plottable?) {
-        if(plot == null){
+        if (plot == null) {
             remove(name)
-        } else{
+        } else {
             val current = get(name)
-            if(current == null){
+            if (current == null) {
                 (get(name.cutLast()) as? PlotGroup)?.add(plot)
-            }  else if(current !== plot){
+            } else if (current !== plot) {
                 remove(name)
                 (get(name.cutLast()) as? PlotGroup)?.add(plot)
             }
@@ -186,7 +187,7 @@ class PlotGroup(name: String, descriptor: NodeDescriptor = NodeDescriptor.empty(
 
     override fun applyConfig(config: Meta) {
         super.applyConfig(config)
-        metaChanged(this, Name.empty())
+        metaChanged(this, Name.empty(), this)
     }
 
 

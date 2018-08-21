@@ -47,21 +47,19 @@ abstract class AbstractPlotFrame : SimpleConfigurable(), PlotFrame, PlotListener
     protected abstract fun updatePlotConfig(name: Name, config: Laminate)
 
 
-    /**
-     * recursively apply some action to all plottables in hierarchy starting at root
-     */
-    private fun recursiveApply(root: Name, action: (path: Name, plot: Plottable?) -> Unit) {
-        val plot = plots[root]
-        action.invoke(root, plot)
-        plots[root]?.let {
-            if (it is PlotGroup) {
-                it.forEach { child ->
-                    recursiveApply(root + child.name, action)
-                }
-            }
-        }
-    }
-
+//    /**
+//     * recursively apply some action to all plottables in hierarchy starting at root
+//     */
+//    private fun recursiveApply(root: Name, action: (path: Name, plot: Plottable?) -> Unit) {
+//        val plot = plots[root]
+//        action.invoke(root, plot)
+//        (plot as? PlotGroup)?.let {
+//            it.forEach { child ->
+//                recursiveApply(root + child.name, action)
+//            }
+//        }
+//    }
+//
     private fun resolveMeta(root: Plottable, path: Name): Laminate {
         return if (path.isEmpty()) {
             Laminate(listOf(root.config), root.descriptor)
@@ -75,16 +73,30 @@ abstract class AbstractPlotFrame : SimpleConfigurable(), PlotFrame, PlotListener
         }
     }
 
-    override fun dataChanged(caller: Plottable, path: Name) {
-        recursiveApply(path) { name, plot ->
-            updatePlotData(name, plot)
+
+    override fun dataChanged(caller: Plottable, path: Name, before: Plottable?, after: Plottable?) {
+        if (caller === this.plots) {
+            updatePlotData(path, after)
+            (before as? PlotGroup)?.stream(true)?.forEach {
+                dataChanged(caller, path + it.first, it.second , (after as? PlotGroup)?.get(it.first))
+            }
+            (after as? PlotGroup)?.stream(true)?.forEach {
+                dataChanged(caller, path + it.first, (before as? PlotGroup)?.get(it.first) , it.second)
+            }
+        } else {
+            error("The caller is expected to be this frame plots")
         }
     }
 
-    override fun metaChanged(caller: Plottable, path: Name) {
-        recursiveApply(path) { name, _ ->
-            updatePlotConfig(name, resolveMeta(caller, name))
+    override fun metaChanged(caller: Plottable, path: Name, plot: Plottable) {
+        updatePlotConfig(path, resolveMeta(caller, path))
+        if(plot is PlotGroup){
+            plot.stream(true).forEach{
+                val childPath = path + it.first
+                updatePlotConfig(childPath, resolveMeta(caller, childPath))
+            }
         }
+
     }
 
 }

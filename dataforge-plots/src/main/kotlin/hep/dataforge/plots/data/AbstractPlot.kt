@@ -52,7 +52,7 @@ abstract class AbstractPlot(
      */
     @Synchronized
     override fun applyConfig(config: Meta) {
-        listeners.forEach { l -> l.metaChanged(this, Name.empty()) }
+        listeners.forEach { l -> l.metaChanged(this, Name.empty(),this) }
     }
 
     /**
@@ -60,6 +60,6 @@ abstract class AbstractPlot(
      */
     @Synchronized
     fun notifyDataChanged() {
-        listeners.forEach { l -> l.dataChanged(this, Name.empty()) }
+        listeners.forEach { l -> l.dataChanged(this, Name.empty(), this, this) }
     }
 }

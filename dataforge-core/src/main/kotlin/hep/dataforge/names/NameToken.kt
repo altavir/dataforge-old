@@ -53,7 +53,7 @@ internal class NameToken(singlet: String) : Name {
         if (unescaped.matches(".*\\[.*]".toRegex())) {
             val bracketIndex = unescaped.indexOf("[")
             this.theName = unescaped.substring(0, bracketIndex)
-            this.theQuery = unescaped.substring(bracketIndex + 1, singlet.lastIndexOf("]"))
+            this.theQuery = unescaped.substring(bracketIndex + 1, unescaped.lastIndexOf("]"))
         } else {
             this.theName = unescaped
             this.theQuery = null

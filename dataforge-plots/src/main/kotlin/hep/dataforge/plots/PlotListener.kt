@@ -25,14 +25,16 @@ interface PlotListener {
     /**
      * Data changed for a specific plot. Data for group could not be changed
      * @param caller the plottable that sent the message
-     * @param path the path of added plot relative to callet
+     * @param path the path of added plot relative to caller. If empty, caller is the source of the event
+     * @param before the entry before change
+     * @param after the entry after change
      */
-    fun dataChanged(caller: Plottable, path: Name)
+    fun dataChanged(caller: Plottable, path: Name, before: Plottable?, after: Plottable?)
 
     /**
      * Configuration changed for node or plot
      * @param caller the plottable that sent the message
      * @param path full path of  plottable with changed meta relative to caller
      */
-    fun metaChanged(caller: Plottable, path: Name)
+    fun metaChanged(caller: Plottable, path: Name, plot: Plottable)
 }

@@ -265,7 +265,7 @@ class JFreeChartFrame : XYPlotFrame(), FXObject, Serializable {
                 runLater {
                     this.xyPlot.setDataset(wrapper.index, wrapper)
                 }
-                metaChanged(this.plots, name)
+                metaChanged(this.plots, name, plot)
             }
         }
     }
@@ -309,7 +309,7 @@ class JFreeChartFrame : XYPlotFrame(), FXObject, Serializable {
                 .boolean
 
         render.setSeriesVisible(0, visible)
-        render.setLegendItemLabelGenerator { dataset, series ->
+        render.setLegendItemLabelGenerator { _, _ ->
             config.optString("title").nullable ?: name.unescaped
 
         }
