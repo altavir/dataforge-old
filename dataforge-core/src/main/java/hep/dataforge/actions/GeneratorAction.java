@@ -11,6 +11,7 @@ import hep.dataforge.goals.GeneratorGoal;
 import hep.dataforge.goals.Goal;
 import hep.dataforge.io.history.Chronicle;
 import hep.dataforge.meta.Meta;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.stream.Stream;
 
@@ -21,6 +22,10 @@ import java.util.stream.Stream;
  * @author Alexander Nozik
  */
 public abstract class GeneratorAction<R> extends GenericAction<Void, R> {
+
+    public GeneratorAction(@NotNull String name,@NotNull Class<R> outputType) {
+        super(name, Void.class, outputType);
+    }
 
     @Override
     public DataNode<R> run(Context context, DataNode<? extends Void> data, Meta actionMeta) {
@@ -42,11 +47,6 @@ public abstract class GeneratorAction<R> extends GenericAction<Void, R> {
 
     protected String resultNodeName() {
         return "";
-    }
-
-    @Override
-    public Class<Void> getInputType() {
-        return Void.class;
     }
 
 }

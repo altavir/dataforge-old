@@ -41,12 +41,8 @@ import java.util.stream.Stream;
  */
 public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
 
-
-    public ManyToOneAction(String name) {
-        super(name);
-    }
-
-    public ManyToOneAction() {
+    public ManyToOneAction(@NotNull String name, @NotNull Class<T> inputType, @NotNull Class<R> outputType) {
+        super(name, inputType, outputType);
     }
 
     @Override

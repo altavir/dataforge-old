@@ -10,6 +10,7 @@ import hep.dataforge.goals.PipeGoal;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
@@ -18,6 +19,11 @@ import java.util.Map;
  * Created by darksnake on 28-Jan-17.
  */
 public abstract class OneToManyAction<T, R> extends GenericAction<T, R> {
+
+    public OneToManyAction(@NotNull String name, @NotNull Class<T> inputType, @NotNull Class<R> outputType) {
+        super(name, inputType, outputType);
+    }
+
     @Override
     public DataNode<R> run(Context context, DataNode<? extends T> data, Meta actionMeta) {
         checkInput(data);

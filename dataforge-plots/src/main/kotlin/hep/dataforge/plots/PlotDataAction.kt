@@ -50,7 +50,7 @@ import java.util.*
 //        info = "Save plot shapshots to file with default parameters")
 //@ValueDef(name = "serialize", type = "BOOLEAN", def = "false",
 //        info = "Serialize plot to file with default parameters")
-class PlotDataAction : OneToOneAction<Table, Table>() {
+class PlotDataAction : OneToOneAction<Table, Table>("plotData", Table::class.java, Table::class.java) {
 
     private val snapshotTasks = HashMap<String, Runnable>()
     private val serializeTasks = HashMap<String, Runnable>()

@@ -49,22 +49,23 @@ class PipeBuilder<T, R>(val context: Context, val actionName: String, var name: 
  */
 class KPipe<T : Any, R : Any>(
         actionName: String,
-        private val inType: Class<T>? = null,
-        private val outType: Class<R>? = null,
-        private val action: PipeBuilder<T, R>.() -> Unit) : GenericAction<T, R>(actionName) {
+        inputType: Class<T>,
+        outputType: Class<R>,
+        private val action: PipeBuilder<T, R>.() -> Unit) : GenericAction<T, R>(actionName, inputType, outputType) {
 
-    override fun run(context: Context, data: DataNode<out T>, meta: Meta): DataNode<R> {
+
+    override fun run(context: Context, data: DataNode<out T>, actionMeta: Meta): DataNode<R> {
         if (!this.inputType.isAssignableFrom(data.type)) {
             throw RuntimeException("Type mismatch in action $name. $inputType expected, but ${data.type} received")
         }
         val builder = DataSet.edit(outputType)
-        data.dataStream(true).forEach {
-            val laminate = Laminate(it.meta, meta)
+        data.dataStream(true).forEach { item ->
+            val laminate = Laminate(item.meta, actionMeta)
 
             val pipe = PipeBuilder<T, R>(
                     context,
                     name,
-                    it.name,
+                    item.name,
                     laminate.builder
             ).apply(action)
 
@@ -77,9 +78,9 @@ class KPipe<T : Any, R : Any>(
 
             val dispatcher = getExecutorService(context, laminate).asCoroutineDispatcher()
 
-            val goal = it.goal.pipe(dispatcher) {
+            val goal = item.goal.pipe(dispatcher) { goalData ->
                 pipe.logger.debug("Starting action ${this.name} on ${pipe.name}")
-                pipe.result.invoke(env, it).also {
+                pipe.result.invoke(env, goalData).also {
                     pipe.logger.debug("Finished action ${this.name} on ${pipe.name}")
                 }
             }
@@ -88,14 +89,6 @@ class KPipe<T : Any, R : Any>(
         }
 
         return builder.build();
-    }
-
-    override fun getInputType(): Class<T> {
-        return inType ?: super.getInputType()
-    }
-
-    override fun getOutputType(): Class<R> {
-        return outType ?: super.getOutputType()
     }
 }
 
@@ -161,20 +154,20 @@ class JoinGroupBuilder<T : Any, R : Any>(val context: Context, val meta: Meta) {
  */
 class KJoin<T : Any, R : Any>(
         actionName: String,
-        private val inType: Class<T>? = null,
-        private val outType: Class<R>? = null,
-        private val action: JoinGroupBuilder<T, R>.() -> Unit) : GenericAction<T, R>(actionName) {
+        inputType: Class<T>,
+        outputType: Class<R>,
+        private val action: JoinGroupBuilder<T, R>.() -> Unit) : GenericAction<T, R>(actionName, inputType, outputType) {
 
-    override fun run(context: Context, data: DataNode<out T>, meta: Meta): DataNode<R> {
+    override fun run(context: Context, data: DataNode<out T>, actionMeta: Meta): DataNode<R> {
         if (!this.inputType.isAssignableFrom(data.type)) {
             throw RuntimeException("Type mismatch in action $name. $inputType expected, but ${data.type} received")
         }
 
         val builder = DataSet.edit(outputType)
 
-        JoinGroupBuilder<T, R>(context, meta).apply(action).buildGroups(context, data).forEach { group ->
+        JoinGroupBuilder<T, R>(context, actionMeta).apply(action).buildGroups(context, data).forEach { group ->
 
-            val laminate = Laminate(group.meta, meta)
+            val laminate = Laminate(group.meta, actionMeta)
 
             val goalMap: Map<String, Goal<out T>> = group.node
                     .dataStream()
@@ -204,13 +197,6 @@ class KJoin<T : Any, R : Any>(
         return builder.build();
     }
 
-    override fun getInputType(): Class<T> {
-        return inType ?: super.getInputType()
-    }
-
-    override fun getOutputType(): Class<R> {
-        return outType ?: super.getOutputType()
-    }
 }
 
 
@@ -237,12 +223,12 @@ class SplitBuilder<T : Any, R : Any>(val context: Context, val name: String, val
 }
 
 class KSplit<T : Any, R : Any>(
-        name: String? = null,
-        private val inType: Class<T>? = null,
-        private val outType: Class<R>? = null,
-        private val action: SplitBuilder<T, R>.() -> Unit) : GenericAction<T, R>(name) {
+        actionName: String,
+        inputType: Class<T>,
+        outputType: Class<R>,
+        private val action: SplitBuilder<T, R>.() -> Unit) : GenericAction<T, R>(actionName,inputType,outputType) {
 
-    override fun run(context: Context, data: DataNode<out T>, meta: Meta): DataNode<R> {
+    override fun run(context: Context, data: DataNode<out T>, actionMeta: Meta): DataNode<R> {
         if (!this.inputType.isAssignableFrom(data.type)) {
             throw RuntimeException("Type mismatch in action $name. $inputType expected, but ${data.type} received")
         }
@@ -253,7 +239,7 @@ class KSplit<T : Any, R : Any>(
         runBlocking {
             data.dataStream(true).forEach {
 
-                val laminate = Laminate(it.meta, meta)
+                val laminate = Laminate(it.meta, actionMeta)
 
                 val split = SplitBuilder<T, R>(context, it.name, it.meta).apply(action)
 
@@ -283,14 +269,6 @@ class KSplit<T : Any, R : Any>(
         }
 
         return builder.build();
-    }
-
-    override fun getInputType(): Class<T> {
-        return inType ?: super.getInputType()
-    }
-
-    override fun getOutputType(): Class<R> {
-        return outType ?: super.getOutputType()
     }
 }
 

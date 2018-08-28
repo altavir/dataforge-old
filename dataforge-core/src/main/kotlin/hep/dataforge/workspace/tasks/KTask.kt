@@ -98,8 +98,8 @@ class KTaskBuilder(val name: String) {
             noinline action: PipeBuilder<T, R>.() -> Unit) {
         val pipe: Action<T, R> = KPipe(
                 actionName = Name.joinString(name, actionName),
-                inType = T::class.java,
-                outType = R::class.java,
+                inputType = T::class.java,
+                outputType = R::class.java,
                 action = action
         )
         action(pipe, from, to);
@@ -112,8 +112,8 @@ class KTaskBuilder(val name: String) {
             noinline action: suspend ActionEnv.(T) -> R) {
         val pipe: Action<T, R> = KPipe(
                 actionName = Name.joinString(name, actionName),
-                inType = T::class.java,
-                outType = R::class.java,
+                inputType = T::class.java,
+                outputType = R::class.java,
                 action = {
                     result(action)
                 }
@@ -129,8 +129,8 @@ class KTaskBuilder(val name: String) {
             noinline action: JoinGroupBuilder<T, R>.() -> Unit) {
         val join: Action<T, R> = KJoin(
                 actionName = Name.joinString(name, actionName),
-                inType = T::class.java,
-                outType = R::class.java,
+                inputType = T::class.java,
+                outputType = R::class.java,
                 action = action
         )
         action(join, from, to);
@@ -143,8 +143,8 @@ class KTaskBuilder(val name: String) {
             noinline action: suspend ActionEnv.(Map<String, T>) -> R) {
         val join: Action<T, R> = KJoin(
                 actionName = Name.joinString(name, actionName),
-                inType = T::class.java,
-                outType = R::class.java,
+                inputType = T::class.java,
+                outputType = R::class.java,
                 action = {
                     result(meta.getString("@target", actionName), action)
                 }
@@ -158,9 +158,9 @@ class KTaskBuilder(val name: String) {
             to: String = "",
             noinline action: SplitBuilder<T, R>.() -> Unit) {
         val split: Action<T, R> = KSplit(
-                name = Name.joinString(name, actionName),
-                inType = T::class.java,
-                outType = R::class.java,
+                actionName = Name.joinString(name, actionName),
+                inputType = T::class.java,
+                outputType = R::class.java,
                 action = action
         )
         action(split, from, to);

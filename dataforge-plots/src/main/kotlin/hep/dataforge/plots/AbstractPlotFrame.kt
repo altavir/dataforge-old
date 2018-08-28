@@ -46,20 +46,6 @@ abstract class AbstractPlotFrame : SimpleConfigurable(), PlotFrame, PlotListener
      */
     protected abstract fun updatePlotConfig(name: Name, config: Laminate)
 
-
-//    /**
-//     * recursively apply some action to all plottables in hierarchy starting at root
-//     */
-//    private fun recursiveApply(root: Name, action: (path: Name, plot: Plottable?) -> Unit) {
-//        val plot = plots[root]
-//        action.invoke(root, plot)
-//        (plot as? PlotGroup)?.let {
-//            it.forEach { child ->
-//                recursiveApply(root + child.name, action)
-//            }
-//        }
-//    }
-//
     private fun resolveMeta(root: Plottable, path: Name): Laminate {
         return if (path.isEmpty()) {
             Laminate(listOf(root.config), root.descriptor)

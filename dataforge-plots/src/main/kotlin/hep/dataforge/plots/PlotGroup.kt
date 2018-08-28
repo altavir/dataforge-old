@@ -39,11 +39,9 @@ import java.util.stream.Stream
 /**
  * A group of plottables. It could store Plots as well as other plot groups.
  */
-class PlotGroup(name: String, descriptor: NodeDescriptor = NodeDescriptor.empty("group"))
+class PlotGroup(override  val name: String, descriptor: NodeDescriptor = NodeDescriptor.empty("group"))
     : SimpleConfigurable(), Plottable, Provider, PlotListener, Iterable<Plottable> {
 
-    //auto escape names
-    override val name: String = Name.ofSingle(name).toString()
     private val plots = LinkedHashSet<Plottable>()
     private val listeners = ReferenceRegistry<PlotListener>()
 
@@ -95,7 +93,7 @@ class PlotGroup(name: String, descriptor: NodeDescriptor = NodeDescriptor.empty(
 
     fun remove(name: Name): PlotGroup {
         if (name.length == 1) {
-            val plot = plots.find { it.name == name.toString() }
+            val plot = plots.find { it.name == name.unescaped }
             if (plot != null) {
                 plots.remove(plot)
                 dataChanged(this, name, plot, null)
@@ -141,7 +139,7 @@ class PlotGroup(name: String, descriptor: NodeDescriptor = NodeDescriptor.empty(
     operator fun get(name: Name): Plottable? {
         return when {
             name.length == 0 -> this
-            name.length == 1 -> plots.find { it.name == name.toString() }
+            name.length == 1 -> plots.find { it.name == name.unescaped }
             else -> (get(name.cutLast()) as? PlotGroup)?.get(name.last)
         }
     }

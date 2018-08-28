@@ -19,7 +19,6 @@ package hep.dataforge.workspace
 import hep.dataforge.cache.CachePlugin
 import hep.dataforge.context.Context
 import hep.dataforge.context.Global
-import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.workspace.tasks.PipeTask
@@ -72,7 +71,7 @@ class WorkspaceTest {
                     model.data("*")
                 }
 
-                override fun result(context: Context, name: String, input: Number, meta: Laminate): Number {
+                override fun result(context: Context, name: String, input: Number, meta: Meta): Number {
                     try {
                         Thread.sleep(200)
                     } catch (e: InterruptedException) {
@@ -89,7 +88,7 @@ class WorkspaceTest {
                     model.dependsOn("test1", meta)
                 }
 
-                override fun result(context: Context, name: String, input: Number, meta: Laminate): Number {
+                override fun result(context: Context, name: String, input: Number, meta: Meta): Number {
                     try {
                         Thread.sleep(200)
                     } catch (e: InterruptedException) {

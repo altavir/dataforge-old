@@ -38,12 +38,10 @@ import org.slf4j.Logger;
  */
 public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
 
-    public OneToOneAction(String name) {
-        super(name);
+    public OneToOneAction(String name, Class<T> inputType, Class<R> outputType) {
+        super(name,inputType,outputType);
     }
 
-    public OneToOneAction() {
-    }
 
 
     @Override

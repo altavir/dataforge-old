@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hep.dataforge.actions;
+package hep.dataforge.actions
 
-import hep.dataforge.Named;
-import hep.dataforge.context.Context;
-import hep.dataforge.data.DataNode;
-import hep.dataforge.description.Described;
-import hep.dataforge.meta.Meta;
+import hep.dataforge.Named
+import hep.dataforge.context.Context
+import hep.dataforge.data.DataNode
+import hep.dataforge.description.Described
+import hep.dataforge.meta.Meta
 
 /**
  * The action is an independent process that could be performed on one
@@ -30,11 +30,12 @@ import hep.dataforge.meta.Meta;
  * @author Alexander Nozik
  * @param <T> - the main type of input data
  * @param <R> - the main type of resulting object
- */
-public interface Action<T, R> extends Named, Described {
+*/
+interface Action<in T: Any, R: Any> : Named, Described {
 
-    String ACTION_TARGET = "action";
+    fun run(context: Context, data: DataNode<out T>, actionMeta: Meta): DataNode<R>
 
-    DataNode<R> run(Context context, DataNode<? extends T> data, Meta actionMeta);
-
+    companion object {
+        const val ACTION_TARGET = "action"
+    }
 }

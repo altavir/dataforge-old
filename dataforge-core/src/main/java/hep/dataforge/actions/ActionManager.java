@@ -38,7 +38,6 @@ public class ActionManager extends BasicPlugin {
         //TODO move somewhere else
         putAction(TransformTableAction.class);
         putAction(ReadPointSetAction.class);
-        putAction(RunConfigAction.class);
     }
 
     protected Optional<ActionManager> getParent() {

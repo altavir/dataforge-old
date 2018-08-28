@@ -37,6 +37,10 @@ import static hep.dataforge.tables.Filtering.buildConditionSet;
 @NodeDef(key = "filters", required = true, info = "The filtering condition.", descriptor = "method::hep.dataforge.tables.Filtering.buildConditionSet")
 public class TransformTableAction extends OneToOneAction<Table, Table> {
 
+    public TransformTableAction() {
+        super("transformTable", Table.class, Table.class);
+    }
+
     /**
      * {@inheritDoc}
      *

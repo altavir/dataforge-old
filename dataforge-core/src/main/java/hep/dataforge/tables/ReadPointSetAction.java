@@ -27,6 +27,10 @@ import java.io.InputStream;
 @TypedActionDef(name = "readdataset", inputType = InputStream.class, outputType = Table.class, info = "Read DataSet from text file")
 public class ReadPointSetAction extends OneToOneAction<InputStream, Table> {
 
+    public ReadPointSetAction() {
+        super("readdataset", InputStream.class, Table.class);
+    }
+
     public static final String READ_DATA_SET_ACTION_NAME = "readdataset";
 
     /**
