@@ -64,7 +64,6 @@ class TableLoaderTest {
         val writer = loader.mutable()
 
         runBlocking {
-            writer.open()
             (1..10).forEach {
                 writer.append(it, it + 1, it * 2)
             }
@@ -83,7 +82,6 @@ class TableLoaderTest {
         val format = MetaTableFormat.forNames("a", "b", "c")
         val loader = tableLoaderType.create(Global, path, format)
         val writer = loader.mutable()
-        runBlocking { writer.open()}
         val data = (1..n).map { ValueMap.of(format.namesAsArray(), it, it + 1, it * 2) }
         val writeTime = benchmark {
             writer.appendAll(data)
@@ -93,7 +91,6 @@ class TableLoaderTest {
         loader.close()
 
         val reader = tableLoaderType.read(Global, path)
-        runBlocking { reader.open() }
 
         var lastValue: Int
         val readTime = benchmark {

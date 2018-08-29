@@ -5,7 +5,7 @@ import hep.dataforge.meta.Meta
 import hep.dataforge.storage.api.Loader
 import hep.dataforge.storage.api.Storage
 
-class DummyStorage(context: Context) : AbstractStorage(context, Meta.empty()) {
+class DummyStorage(context: Context) : AbstractStorage(context,null,"dummy", Meta.empty()) {
     override fun createLoader(loaderName: String, loaderConfiguration: Meta): Loader {
         error("Not available for dummy")
     }

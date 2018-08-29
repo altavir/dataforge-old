@@ -32,7 +32,7 @@ abstract class BinaryServer(override val context: Context) : Responder, ContextA
 
     abstract fun evaluate(chunk: ByteBuffer, meta: Meta): ByteBuffer
 
-    override fun respond(message: Message): Message {
+    override suspend fun respond(message: Message): Message {
         val buffer = ByteBuffer.allocate(chunkSize)
         val out = ByteArrayOutputStream()
         val response = message.data.channel.use {

@@ -12,6 +12,8 @@ import hep.dataforge.tables.ListTable;
 import hep.dataforge.tables.Table;
 import hep.dataforge.values.Values;
 
+import java.util.stream.Collectors;
+
 /**
  * A handler to evaluate Google visualization library requests to point loaders
  * <p> https://developers.google.com/chart/interactive/docs/dev/implementing_data_source </p>
@@ -41,7 +43,7 @@ public class PointLoaderDataHandler extends GoogleDataHandler {
             index = loader.getIndex();
         }
         try {
-            return new ListTable(loader.getFormat(), index.query(query));
+            return new ListTable(loader.getFormat(), index.query(query).collect(Collectors.toList()));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

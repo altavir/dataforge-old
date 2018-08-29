@@ -27,7 +27,7 @@ class HTMLOutputTest{
     fun renderTest(){
         val output = HTMLOutput(Global, System.out.appendHTML(prettyPrint = true)).apply {
             render(
-                DescriptorBuilder()
+                DescriptorBuilder("test")
                         .value("a", info = "a value")
                         .build()
             )

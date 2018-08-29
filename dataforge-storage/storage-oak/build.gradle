@@ -1,6 +1,0 @@
-description = 'dataforge-storage-oak'
-
-dependencies{
-    compile project(':dataforge-storage')
-    compile 'org.apache.jackrabbit:oak-jcr:1.3.12'
-}
