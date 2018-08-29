@@ -31,7 +31,7 @@ class SmartDataLoader : DataLoader<Any> {
                 meta.optString(FACTORY_TYPE_KEY).flatMap { loader ->
                     context.serviceStream(DataLoader::class.java)
                             .filter { it -> it.name == loader }
-                            .findFirst()
+                            .findFirst() ?: error("DataLoader with type $loader not found")
                 }.orElse(DummyDataFactory(Any::class.java)) as DataLoader<Any>
             }
         }

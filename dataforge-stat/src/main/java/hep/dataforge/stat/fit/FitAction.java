@@ -45,6 +45,10 @@ import java.io.PrintWriter;
 @NodeDef(key = "stage", multiple = true, info = "Fit stages")
 public class FitAction extends OneToOneAction<Table, FitResult> {
 
+    public FitAction() {
+        super("fit", Table.class, FitResult.class);
+    }
+
     public static final String FIT_ACTION_NAME = "fit";
 
     /**
