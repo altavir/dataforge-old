@@ -43,7 +43,7 @@ abstract class GenericAction<T : Any, R : Any>(
         override val name: String,
         val inputType: Class<T>,
         val outputType: Class<R>
-) : Action<T, R>, Cloneable, SelfRendered {
+) : Action<T, R>, SelfRendered {
 
     private val definition: TypedActionDef?
         get() = if (javaClass.isAnnotationPresent(TypedActionDef::class.java)) {

@@ -83,9 +83,11 @@ class OutputContainer(val context: Context, val meta: Meta) : Fragment(title = "
     }
 
     fun get(meta: Meta): Output {
-        val stage = meta.getString(OUTPUT_STAGE_KEY, "@default")
-        val container = stages.getOrPut(stage) { buildStageContainer() }
-        return container.get(meta)
+        synchronized(this) {
+            val stage = meta.getString(OUTPUT_STAGE_KEY, "@default")
+            val container = stages.getOrPut(stage) { buildStageContainer() }
+            return container.get(meta)
+        }
     }
 
     /**

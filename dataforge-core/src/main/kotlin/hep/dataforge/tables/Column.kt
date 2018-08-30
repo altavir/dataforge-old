@@ -13,16 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hep.dataforge.tables;
+package hep.dataforge.tables
 
-import hep.dataforge.Named;
-import hep.dataforge.values.Value;
-import org.jetbrains.annotations.NotNull;
+import hep.dataforge.Named
+import hep.dataforge.values.Value
 
-import java.io.Serializable;
-import java.util.List;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
+import java.io.Serializable
+import java.util.stream.Stream
+import java.util.stream.StreamSupport
 
 /**
  * Column of values with format meta
@@ -31,22 +29,20 @@ import java.util.stream.StreamSupport;
  * @version $Id: $Id
  */
 
-public interface Column extends Named, Iterable<Value>, Serializable {
+interface Column : Named, Iterable<Value>, Serializable {
 
-    ColumnFormat getFormat();
+    val format: ColumnFormat
 
-    @NotNull
-    @Override
-    default String getName() {
-        return getFormat().getName();
-    }
+    @JvmDefault
+    override val name: String
+        get() = format.name
 
     /**
      * Get the value with the given index
      * @param n
      * @return
      */
-    Value get(int n);
+    operator fun get(n: Int): Value
 
     //TODO add custom value type accessors
 
@@ -54,19 +50,20 @@ public interface Column extends Named, Iterable<Value>, Serializable {
      * Get values as list
      * @return
      */
-    List<Value> asList();
+    fun asList(): List<Value>
 
     /**
      * The length of the column
      * @return
      */
-    int size();
+    fun size(): Int
 
     /**
      * Get the values as a stream
      * @return
      */
-    default Stream<Value> stream() {
-        return StreamSupport.stream(spliterator(), false);
+    @JvmDefault
+    fun stream(): Stream<Value> {
+        return StreamSupport.stream(spliterator(), false)
     }
 }

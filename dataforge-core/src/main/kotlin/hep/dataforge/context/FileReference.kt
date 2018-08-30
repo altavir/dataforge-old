@@ -22,6 +22,7 @@ import hep.dataforge.data.binary.FileBinary
 import hep.dataforge.names.Name
 import java.io.File
 import java.io.OutputStream
+import java.net.URI
 import java.nio.channels.SeekableByteChannel
 import java.nio.file.Files
 import java.nio.file.Path
@@ -133,6 +134,14 @@ class FileReference private constructor(override val context: Context, val path:
 
     companion object {
 
+        private fun resolvePath(parent: Path, name: String): Path {
+            return if (name.contains("://")) {
+                Paths.get(URI(name))
+            } else {
+                parent.resolve(name)
+            }
+        }
+
         /**
          * Provide a reference to a new file in tmp directory with unique ID.
          */
@@ -149,7 +158,7 @@ class FileReference private constructor(override val context: Context, val path:
                 context.workDir
             } else {
                 val relativeDir = path.tokens.joinToString(File.separator) { it.toString() }
-                context.workDir.resolve(relativeDir)
+                resolvePath(context.workDir,relativeDir)
             }
 
             val file = dir.resolve("$prefix.$suffix")
@@ -164,7 +173,7 @@ class FileReference private constructor(override val context: Context, val path:
         }
 
         fun openDataFile(context: Context, name: String): FileReference {
-            val path = context.dataDir.resolve(name)
+            val path = resolvePath(context.dataDir,name)
             return FileReference(context, path, DATA)
         }
 
@@ -179,7 +188,7 @@ class FileReference private constructor(override val context: Context, val path:
          * Create a reference to the system scope file using string
          */
         fun openFile(context: Context, path: String): FileReference {
-            return FileReference(context, Paths.get(path), SYS)
+            return FileReference(context, resolvePath(context.rootDir, path), SYS)
         }
 
     }

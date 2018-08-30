@@ -64,9 +64,7 @@ class ListTable @JvmOverloads constructor(override val format: TableFormat, poin
             throw NameNotFoundException(name)
         }
         return object : Column {
-            override fun getFormat(): ColumnFormat {
-                return this@ListTable.format.getColumn(name)
-            }
+            override val format: ColumnFormat = this@ListTable.format.getColumn(name)
 
             override fun get(n: Int): Value {
                 return asList()[n]
