@@ -49,6 +49,7 @@ class FXTableOutput(context: Context) : FXOutput(context) {
 
     override val view: Fragment = object : Fragment() {
         override val root = borderpane {
+            //TODO add meta display
             center = tableDisplay.root
         }
     }

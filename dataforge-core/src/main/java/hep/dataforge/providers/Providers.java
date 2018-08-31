@@ -30,7 +30,7 @@ public class Providers {
         if (tailOpt.isPresent()) {
             return opt.flatMap(res -> {
                 if (res instanceof Provider) {
-                    Provider p = Provider.class.cast(res);
+                    Provider p = (Provider) res;
                     //using default chain target if needed
                     Path tail = tailOpt.get();
                     if (tail.getTarget().isEmpty()) {

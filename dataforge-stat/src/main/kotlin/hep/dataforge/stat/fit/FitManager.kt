@@ -75,7 +75,7 @@ class FitManager : BasicPlugin() {
 
     fun buildModel(meta: Meta): Model {
         return context.provideAll(ModelFactory.MODEL_TARGET, ModelFactory::class.java)
-                .filter { it.name == meta.getString("name") }.findFirst()
+                .filter { it.name == meta.getString("modelName") }.findFirst()
                 .orElseThrow { RuntimeException("Model not defined") }
                 .build(context, meta)
     }

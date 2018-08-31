@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,7 +26,6 @@ import hep.dataforge.providers.ProvidesNames;
 import hep.dataforge.utils.ContextMetaFactory;
 
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -54,8 +53,8 @@ public class ModelLibrary extends BasicPlugin {
     }
 
     @Provides(MODEL_TARGET)
-    private Optional<ModelFactory> findFactory(String name) {
-        return factories.stream().filter(it -> Objects.equals(it.getName(), name)).findFirst();
+    public Optional<ModelFactory> findFactory(String name) {
+        return factories.stream().filter(it -> it.getName().equals(name)).findFirst();
     }
 
     @ProvidesNames(MODEL_TARGET)

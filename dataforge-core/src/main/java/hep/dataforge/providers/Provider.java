@@ -87,12 +87,13 @@ public interface Provider {
 
     /**
      * Stream of all elements with given target
+     *
      * @param target
      * @param type
      * @param <T>
      * @return
      */
     default <T> Stream<T> provideAll(String target, Class<T> type) {
-        return listContent(target).map(it -> provide(target, it, type).get());
+        return listContent(target).map(it -> provide(target, it, type).orElseThrow(() -> new IllegalStateException("The element " + it + " is declared but not provided")));
     }
 }
