@@ -5,7 +5,6 @@ import hep.dataforge.meta.MetaMorph
 import hep.dataforge.meta.MorphTarget
 import hep.dataforge.values.*
 import java.util.*
-import java.util.function.Function
 import java.util.stream.IntStream
 import java.util.stream.Stream
 import kotlin.streams.toList
@@ -129,7 +128,7 @@ class ColumnTable : Table {
      * @param transform
      * @return
      */
-    fun replaceColumn(columnName: String, transform: Function<Values, Any>): ColumnTable {
+    fun replaceColumn(columnName: String, transform: (Values)->Any): ColumnTable {
         if (!map.containsKey(columnName)) {
             throw NameNotFoundException(columnName)
         }
