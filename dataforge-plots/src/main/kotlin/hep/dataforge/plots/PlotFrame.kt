@@ -24,8 +24,11 @@ import hep.dataforge.io.envelopes.JavaObjectWrapper.JAVA_SERIAL_DATA
 import hep.dataforge.io.envelopes.SimpleEnvelope
 import hep.dataforge.meta.*
 import hep.dataforge.plots.PlotFrame.Companion.PLOT_FRAME_TYPE
+import hep.dataforge.plots.data.DataPlot
+import hep.dataforge.tables.ValuesAdapter
 import hep.dataforge.utils.MetaFactory
 import hep.dataforge.values.ValueType
+import hep.dataforge.values.Values
 import java.io.ObjectStreamException
 import java.io.OutputStream
 import java.io.Serializable
@@ -237,4 +240,8 @@ class Axis(meta: Meta) : ConfigMorph(meta) {
             ValueDef(key = "to", type = [ValueType.NUMBER], info = "Lower border for range")
     )
     val range: Range by morphConfigNode()
+}
+
+fun PlotFrame.plotData(name: String, data: Iterable<Values> = emptyList(), adapter: ValuesAdapter? = null, metaBuilder: KMetaBuilder.() -> Unit = {}){
+    add(DataPlot.plot(name, data, adapter, metaBuilder))
 }

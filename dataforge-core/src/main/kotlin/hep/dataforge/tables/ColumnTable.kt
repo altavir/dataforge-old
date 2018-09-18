@@ -178,3 +178,6 @@ class ColumnTable : Table {
         }
     }
 }
+
+
+fun Table.asColumnTable(): ColumnTable = ColumnTable.copy(this)
