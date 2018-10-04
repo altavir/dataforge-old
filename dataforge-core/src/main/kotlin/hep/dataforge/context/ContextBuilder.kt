@@ -19,9 +19,7 @@ package hep.dataforge.context
 import hep.dataforge.context.Context.Companion.DATA_DIRECTORY_CONTEXT_KEY
 import hep.dataforge.context.Context.Companion.ROOT_DIRECTORY_CONTEXT_KEY
 import hep.dataforge.io.OutputManager
-import hep.dataforge.meta.Meta
-import hep.dataforge.meta.MetaBuilder
-import hep.dataforge.meta.MetaUtils
+import hep.dataforge.meta.*
 import hep.dataforge.values.Value
 import hep.dataforge.values.asValue
 import java.io.IOException
@@ -95,6 +93,10 @@ class ContextBuilder(val name: String, val parent: Context = Global) {
     fun plugin(type: Class<out Plugin>, meta: Meta = Meta.empty()): ContextBuilder {
         val tag = PluginTag.resolve(type)
         return plugin(parent.pluginManager.pluginLoader.get(tag, meta))
+    }
+
+    inline fun <reified T : Plugin> plugin(noinline metaBuilder: KMetaBuilder.() -> Unit = {}): ContextBuilder {
+        return plugin(T::class.java, buildMeta("plugin", metaBuilder))
     }
 
     fun plugin(tag: String, meta: Meta): ContextBuilder {

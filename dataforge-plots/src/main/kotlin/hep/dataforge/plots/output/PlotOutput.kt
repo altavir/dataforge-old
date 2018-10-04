@@ -39,7 +39,7 @@ fun Context.plot(plottables: Iterable<Plottable>, name: String? = null, stage: S
     output.render(plottables, stage, name, Plot.PLOT_TYPE, transform)
 }
 
-fun Context.plot(name: String, stage: String = "", action: PlotFrame.() -> Unit) {
+fun Context.plotFrame(name: String, stage: String = "", action: PlotFrame.() -> Unit) {
     val frame = VirtualPlotFrame().apply(action)
     output[stage, name, PLOT_TYPE].render(frame)
 }

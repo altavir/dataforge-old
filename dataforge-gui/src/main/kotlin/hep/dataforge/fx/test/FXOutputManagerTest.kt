@@ -21,7 +21,7 @@ import hep.dataforge.fx.output.FXOutputManager
 import hep.dataforge.io.render
 import hep.dataforge.meta.Meta
 import hep.dataforge.plots.data.DataPlot
-import hep.dataforge.plots.output.plot
+import hep.dataforge.plots.output.plotFrame
 import hep.dataforge.tables.buildTable
 
 fun main(args: Array<String>) {
@@ -33,7 +33,7 @@ fun main(args: Array<String>) {
     Global.output["text2", "n"].render("affff")
 
 
-    Global.plot(stage = "plots", name = "frame") {
+    Global.plotFrame(stage = "plots", name = "frame") {
         DataPlot.plot("data", x = doubleArrayOf(1.0, 2.0, 3.0), y = doubleArrayOf(2.0, 3.0, 4.0))
     }
 

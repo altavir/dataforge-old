@@ -160,7 +160,7 @@ open class Context(
         get() = lock.isLocked
 
     open val history: Chronicler
-        get() = pluginManager.get(Chronicler::class) ?: parent?.history ?: Global.history
+        get() = pluginManager[Chronicler::class] ?: parent?.history ?: Global.history
 
     /**
      * {@inheritDoc} namespace does not work

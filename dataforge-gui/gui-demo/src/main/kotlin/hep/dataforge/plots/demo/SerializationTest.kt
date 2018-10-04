@@ -5,7 +5,6 @@ import hep.dataforge.fx.output.FXOutputManager
 import hep.dataforge.plots.data.DataPlot
 import hep.dataforge.plots.data.XYFunctionPlot
 import hep.dataforge.plots.jfreechart.JFreeChartPlugin
-import hep.dataforge.plots.output.plot
 import hep.dataforge.tables.Adapters
 import hep.dataforge.tables.Tables
 import hep.dataforge.values.ValueMap
@@ -42,7 +41,7 @@ fun main(args: Array<String>) {
     val dataPlot = DataPlot.plot("dataPlot", ds, Adapters.buildXYAdapter("myX", "myXErr", "myY", "myYErr"))
 
 
-    context.plot("before"){
+    context.plotFrame("before"){
         +dataPlot
     }
 
@@ -55,7 +54,7 @@ fun main(args: Array<String>) {
     val bais = ByteArrayInputStream(baos.toByteArray());
     val restored: DataPlot = ObjectInputStream(bais).readObject() as DataPlot
 
-    context.plot("after"){
+    context.plotFrame("after"){
         +restored
     }
 

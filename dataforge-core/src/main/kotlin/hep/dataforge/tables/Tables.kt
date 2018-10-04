@@ -132,6 +132,8 @@ fun Table.addColumn(format: ColumnFormat, transform: Values.() -> Any): Table {
     return ColumnTable.copy(this).buildColumn(format, transform)
 }
 
+fun Table.addColumn(name: String, type: ValueType, transform: Values.() -> Any): Table = addColumn(ColumnFormat.build(name, type), transform)
+
 fun Table.replaceColumn(name: String, transform: Values.() -> Any): Table {
     return ColumnTable.copy(this).replaceColumn(name, transform)
 }

@@ -29,6 +29,9 @@ open class NamedData<T>(final override val name: String, type: Class<T>, goal: G
     }
 
 
+    operator fun component1() = name
+    operator fun component2(): T = goal.get()
+
     /**
      * Return unnamed data corresponding to this named one
      *

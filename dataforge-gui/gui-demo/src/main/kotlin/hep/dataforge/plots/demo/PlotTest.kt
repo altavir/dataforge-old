@@ -16,13 +16,10 @@
 package hep.dataforge.plots.demo
 
 import hep.dataforge.buildContext
-import hep.dataforge.configure
 import hep.dataforge.fx.output.FXOutputManager
-import hep.dataforge.fx.plots.group
 import hep.dataforge.plots.data.DataPlot
 import hep.dataforge.plots.data.XYFunctionPlot
 import hep.dataforge.plots.jfreechart.JFreeChartPlugin
-import hep.dataforge.plots.output.plot
 import hep.dataforge.tables.Adapters
 import hep.dataforge.tables.Tables
 import hep.dataforge.values.ValueMap
@@ -56,7 +53,7 @@ fun main(args: Array<String>) {
 
     val dataPlot = DataPlot.plot("data.Plot", ds, Adapters.buildXYAdapter("myX", "myXErr", "myY", "myYErr"))
 
-    context.plot("test", stage = "test") {
+    context.plotFrame("test", stage = "test") {
         configure {
             "yAxis" to {
                 "type" to "log"
@@ -73,7 +70,7 @@ fun main(args: Array<String>) {
         }
     }
 
-    context.plot("test1") {
+    context.plotFrame("test1") {
         +funcPlot
     }
 

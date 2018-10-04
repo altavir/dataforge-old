@@ -159,7 +159,7 @@ class ColumnTable : Table {
 
 
         fun copy(table: Table): ColumnTable {
-            return table as? ColumnTable ?: ColumnTable(table.columns)
+            return ColumnTable(table.columns)
         }
 
         /**
