@@ -12,16 +12,17 @@ class StreamConsumer(val output: Output, val meta: Meta = Meta.empty()) : Output
 
     override fun write(b: Int) {
         synchronized(buffer) {
-            buffer.write(b)
-            if (b.toChar() == '\n') {
-                flush()
+            when(b.toChar()){
+                '\r' -> {}
+                '\n' -> flush()
+                else -> buffer.write(b)
             }
         }
     }
 
     override fun flush() {
         synchronized(buffer) {
-            output.render(String(buffer.toByteArray(), Charsets.UTF_8).replace("\r", ""), meta)
+            output.render(String(buffer.toByteArray(), Charsets.UTF_8), meta)
             buffer.reset()
         }
     }
