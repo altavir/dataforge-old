@@ -219,7 +219,7 @@ open class HTMLOutput(override val context: Context, private val consumer: TagCo
             }
             is CharSequence, is Record -> {
                 appendHTML(meta) {
-                    p {
+                    pre {
                         +obj.toString()
                     }
                 }

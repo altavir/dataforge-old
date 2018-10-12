@@ -22,8 +22,10 @@ class StreamConsumer(val output: Output, val meta: Meta = Meta.empty()) : Output
 
     override fun flush() {
         synchronized(buffer) {
-            output.render(String(buffer.toByteArray(), Charsets.UTF_8), meta)
-            buffer.reset()
+            if(buffer.size()>0) {
+                output.render(String(buffer.toByteArray(), Charsets.UTF_8), meta)
+                buffer.reset()
+            }
         }
     }
 

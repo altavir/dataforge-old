@@ -8,7 +8,7 @@ import java.util.stream.Stream
  * A wrapper for DataNode that allowes to access speciffically typed content.
  * Created by darksnake on 07-Sep-16.
  */
-class CheckedDataNode<T: Any>(private val node: DataNode<*>, override val type: Class<T>) : DataNode<T> {
+class CheckedDataNode<T : Any>(private val node: DataNode<*>, override val type: Class<T>) : DataNode<T> {
 
     override val meta: Meta
         get() = node.meta
@@ -36,13 +36,7 @@ class CheckedDataNode<T: Any>(private val node: DataNode<*>, override val type: 
     }
 
     override fun optNode(nodeName: String): DataNode<T>? {
-        return node.optNode(nodeName)?.let { n ->
-            if (type.isAssignableFrom(n.type)) {
-                n.checked(type)
-            } else {
-                null
-            }
-        }
+        return node.optNode(nodeName)?.checked(type)
     }
 
     override fun dataStream(recursive: Boolean): Stream<NamedData<out T>> {
