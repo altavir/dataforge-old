@@ -54,6 +54,7 @@ open class HTMLOutput(override val context: Context, private val consumer: TagCo
                         is TextEmphasis -> "font-style: italic"
                     }
                 }
+                +text
             }
         }
     }

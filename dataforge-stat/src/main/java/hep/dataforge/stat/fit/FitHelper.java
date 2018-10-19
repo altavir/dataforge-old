@@ -262,11 +262,7 @@ public class FitHelper {
             } else {
                 for (FitStage stage : stages) {
                     Misc.checkThread();
-//                    try {
-                    result = manager.runStage(state, stage, log);
-//                    } catch (Exception ex) {
-//                        result = FitResult.builder(state, false, stage.getFreePars());
-//                    }
+                    result = manager.runStage(result.optState().get(), stage, log);
                     listener.accept(stage, result);
                 }
             }

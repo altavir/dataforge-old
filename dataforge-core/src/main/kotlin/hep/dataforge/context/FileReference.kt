@@ -98,18 +98,18 @@ class FileReference private constructor(override val context: Context, val path:
     /**
      * Output stream for this file reference
      *
-     * TODO cahce stream?
+     * TODO cache stream?
      */
     val outputStream: OutputStream
         get() {
             prepareWrite()
-            return Files.newOutputStream(absolutePath, StandardOpenOption.WRITE, StandardOpenOption.CREATE)
+            return Files.newOutputStream(absolutePath, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
         }
 
     val channel: SeekableByteChannel
         get() {
             prepareWrite()
-            return Files.newByteChannel(absolutePath, StandardOpenOption.WRITE, StandardOpenOption.CREATE)
+            return Files.newByteChannel(absolutePath, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
         }
 
     /**
