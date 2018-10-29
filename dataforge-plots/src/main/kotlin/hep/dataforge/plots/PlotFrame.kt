@@ -25,6 +25,7 @@ import hep.dataforge.io.envelopes.SimpleEnvelope
 import hep.dataforge.meta.*
 import hep.dataforge.plots.PlotFrame.Companion.PLOT_FRAME_TYPE
 import hep.dataforge.plots.data.DataPlot
+import hep.dataforge.plots.data.XYFunctionPlot
 import hep.dataforge.tables.ValuesAdapter
 import hep.dataforge.utils.MetaFactory
 import hep.dataforge.values.ValueType
@@ -242,6 +243,10 @@ class Axis(meta: Meta) : ConfigMorph(meta) {
     val range: Range by morphConfigNode()
 }
 
-fun PlotFrame.plotData(name: String, data: Iterable<Values> = emptyList(), adapter: ValuesAdapter? = null, metaBuilder: KMetaBuilder.() -> Unit = {}){
+fun PlotFrame.plotData(name: String, data: Iterable<Values> = emptyList(), adapter: ValuesAdapter? = null, metaBuilder: KMetaBuilder.() -> Unit = {}) {
     add(DataPlot.plot(name, data, adapter, metaBuilder))
+}
+
+fun PlotFrame.plotFunction(name: String, from: Double, to: Double, numPoints: Int = XYFunctionPlot.DEFAULT_DENSITY, meta: Meta = Meta.empty(), function: (Double) -> Double) {
+    add(XYFunctionPlot.plot(name, from, to, numPoints, meta, function))
 }

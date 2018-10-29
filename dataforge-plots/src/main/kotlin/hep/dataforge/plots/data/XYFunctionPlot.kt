@@ -166,11 +166,11 @@ class XYFunctionPlot(name: String, meta: Meta = Meta.empty(), val function: (Dou
 
     companion object {
 
-        private const val DEFAULT_DENSITY = 200
+        const val DEFAULT_DENSITY = 200
 
         @JvmOverloads
-        fun plot(name: String, from: Double, to: Double, numPoints: Int = DEFAULT_DENSITY, function: (Double) -> Double): XYFunctionPlot {
-            val p = XYFunctionPlot(name, Meta.empty(), function)
+        fun plot(name: String, from: Double, to: Double, numPoints: Int = DEFAULT_DENSITY, meta: Meta = Meta.empty(), function: (Double) -> Double): XYFunctionPlot {
+            val p = XYFunctionPlot(name, meta, function)
             p.range = Pair(from, to)
             p.density = numPoints
             return p

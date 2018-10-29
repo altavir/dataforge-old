@@ -77,6 +77,8 @@ class ContextBuilder(val name: String, val parent: Context = Global) {
         return this
     }
 
+    fun properties(action: KMetaBuilder.() -> Unit): ContextBuilder = properties(buildMeta("properties", action))
+
     fun plugin(plugin: Plugin): ContextBuilder {
         this.plugins.add(plugin)
         return this

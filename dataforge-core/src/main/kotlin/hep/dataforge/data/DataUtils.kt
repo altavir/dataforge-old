@@ -16,9 +16,13 @@
 
 package hep.dataforge.data
 
+import hep.dataforge.await
+import hep.dataforge.context.Context
 import hep.dataforge.context.FileReference
+import hep.dataforge.coroutineContext
 import hep.dataforge.data.binary.Binary
 import hep.dataforge.goals.AbstractGoal
+import hep.dataforge.goals.Coal
 import hep.dataforge.goals.Goal
 import hep.dataforge.goals.PipeGoal
 import hep.dataforge.io.MetaFileReader
@@ -44,21 +48,27 @@ object DataUtils {
     /**
      * Combine two data elements of different type into single data
      */
-    fun <S1, S2, R> combine(data1: Data<out S1>, data2: Data<out S2>,
+    fun <S1, S2, R> combine(context: Context,
+                            data1: Data<out S1>, data2: Data<out S2>,
                             type: Class<R>,
                             meta: Meta,
                             transform: (S1, S2) -> R): Data<R> {
-        val combineGoal = object : AbstractGoal<R>() {
-            @Throws(Exception::class)
-            override fun compute(): R {
-                return transform(data1.get(), data2.get())
-            }
-
-            override fun dependencies(): Stream<Goal<*>> {
-                return Stream.of(data1.goal, data2.goal)
-            }
+//        val combineGoal = object : AbstractGoal<R>() {
+//            @Throws(Exception::class)
+//            override fun compute(): R {
+//                return transform(data1.get(), data2.get())
+//            }
+//
+//            override fun dependencies(): Stream<Goal<*>> {
+//                return Stream.of(data1.goal, data2.goal)
+//            }
+//        }
+        val goal = Coal<R>(context.coroutineContext, listOf(data1.goal, data2.goal)) {
+            val res1 = data1.goal.await()
+            val res2 = data2.goal.await()
+            transform(res1,res2)
         }
-        return Data(type, combineGoal, meta)
+        return Data(type, goal, meta)
     }
 
 
@@ -130,7 +140,7 @@ object DataUtils {
      * @param data
      * @param <T>
      * @return
-    */
+     */
     fun <T : Any> singletonNode(nodeName: String, data: Data<T>): DataNode<T> {
         return DataSet.edit(data.type)
                 .apply { putData(DataNode.DEFAULT_DATA_FRAGMENT_NAME, data) }
@@ -144,7 +154,7 @@ object DataUtils {
     /**
      * Reslove external meta for file if it is present
      */
-    fun readExternalMeta(file: FileReference): Meta?{
+    fun readExternalMeta(file: FileReference): Meta? {
         val metaFileDirectory = file.absolutePath.resolveSibling(META_DIRECTORY)
         return MetaFileReader.resolve(metaFileDirectory, file.absolutePath.fileName.toString()).orElse(null)
     }
@@ -158,7 +168,7 @@ object DataUtils {
      * @param reader
      * @param <T>
      * @return
-    */
+     */
     fun <T> readFile(file: FileReference, override: Meta, type: Class<T>, reader: (Binary) -> T): Data<T> {
         val filePath = file.absolutePath
         if (!Files.isRegularFile(filePath)) {
@@ -196,7 +206,7 @@ object DataUtils {
      * @param reader   a bifunction taking the binary itself and combined meta as arguments and returning
      * @param <T>
      * @return
-    */
+     */
     fun <T> readEnvelope(filePath: Path, override: Meta, type: Class<T>, reader: BiFunction<Binary, Meta, T>): Data<T> {
         try {
             val envelope = EnvelopeReader.readFile(filePath)

@@ -21,18 +21,18 @@ import kotlin.coroutines.experimental.CoroutineContext
  * @param block execution block. Could be suspending
  */
 class Coal<R>(
-        private val deps: Collection<Goal<*>> = Collections.emptyList(),
         val dispatcher: CoroutineContext,
+        private val deps: Collection<Goal<*>> = Collections.emptyList(),
         val id: String = "",
         block: suspend () -> R) : Goal<R> {
 
-    /**
-     * Construct using context
-     */
-    constructor(deps: Collection<Goal<*>> = Collections.emptyList(),
-                context: Context,
-                id: String = "",
-                block: suspend () -> R) : this(deps, context.coroutineContext, id, block)
+//    /**
+//     * Construct using context
+//     */
+//    constructor(deps: Collection<Goal<*>> = Collections.emptyList(),
+//                context: Context,
+//                id: String = "",
+//                block: suspend () -> R) : this(context.coroutineContext, deps, id, block)
 
     private val listeners = ReferenceRegistry<GoalListener<R>>();
 
@@ -116,21 +116,21 @@ class Coal<R>(
 
 
 fun <R> Context.goal(deps: Collection<Goal<*>> = Collections.emptyList(), id: String = "", block: suspend () -> R): Coal<R> {
-    return Coal(deps, coroutineContext, id, block);
+    return Coal(coroutineContext, deps, id, block);
 }
 
 /**
  * Create a simple generator Coal (no dependencies)
  */
 fun <R> Context.generate(id: String = "", block: suspend () -> R): Coal<R> {
-    return Coal(Collections.emptyList(), coroutineContext, id, block);
+    return Coal(coroutineContext, Collections.emptyList(), id, block);
 }
 
 /**
  * Join a uniform list of goals
  */
 fun <T, R> List<Goal<out T>>.join(dispatcher: CoroutineContext, block: suspend (List<T>) -> R): Coal<R> {
-    return Coal(this, dispatcher) {
+    return Coal(dispatcher, this) {
         block.invoke(this.map {
             it.await()
         })
@@ -141,7 +141,7 @@ fun <T, R> List<Goal<out T>>.join(dispatcher: CoroutineContext, block: suspend (
  * Transform using map of goals as a dependency
  */
 fun <T, R> Map<String, Goal<out T>>.join(dispatcher: CoroutineContext, block: suspend (Map<String, T>) -> R): Coal<R> {
-    return Coal(this.values, dispatcher) {
+    return Coal(dispatcher, this.values) {
         block.invoke(this.mapValues { it.value.await() })
     }
 }
@@ -151,7 +151,7 @@ fun <T, R> Map<String, Goal<out T>>.join(dispatcher: CoroutineContext, block: su
  * Pipe goal
  */
 fun <T, R> Goal<T>.pipe(dispatcher: CoroutineContext, block: suspend (T) -> R): Coal<R> {
-    return Coal(listOf(this), dispatcher) {
+    return Coal(dispatcher, listOf(this)) {
         block.invoke(this.await())
     }
 }

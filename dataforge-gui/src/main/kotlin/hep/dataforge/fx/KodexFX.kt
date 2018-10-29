@@ -75,7 +75,7 @@ private fun removeMonitor(component: UIComponent, id: String) {
 
 fun <R> UIComponent.runGoal(id: String, dispatcher: CoroutineContext = DefaultDispatcher, block: suspend GoalMonitor.() -> R): Coal<R> {
     val monitor = getMonitor(id);
-    return Coal(Collections.emptyList(), dispatcher, id) {
+    return Coal(dispatcher, Collections.emptyList(), id) {
         monitor.progress = -1.0
         block(monitor).also {
             monitor.progress = 1.0
