@@ -32,4 +32,30 @@ class LaminateTest {
         assertEquals(3, laminate.toString().split("\n".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray().size.toLong())
     }
 
+    @Test
+    fun testMerge() {
+        val meta1 = buildMeta {
+            "a" to 11
+            "aNode" to {
+                "a1" to 11
+            }
+        }
+
+        val meta2 = buildMeta {
+            "b" to 22
+            "bNode" to {
+                "b1" to 22
+            }
+        }
+
+        val laminate = Laminate.join(meta1, meta2)
+
+        val sealed = laminate.sealed
+
+        assertEquals(11, sealed["a"]!!)
+        assertEquals(11, sealed["aNode.a1"]!!)
+        assertEquals(22, sealed["b"]!!)
+        assertEquals(22, sealed["bNode.b1"]!!)
+    }
+
 }

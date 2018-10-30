@@ -19,9 +19,11 @@ import hep.dataforge.description.Described
 import hep.dataforge.description.Descriptors
 import hep.dataforge.description.NodeDescriptor
 import hep.dataforge.io.XMLMetaWriter
+import hep.dataforge.nullable
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueFactory
 import org.jetbrains.annotations.Contract
+import java.time.Instant
 import java.util.*
 import java.util.stream.Collector
 import java.util.stream.Collectors
@@ -33,13 +35,13 @@ import java.util.stream.Stream
  *
  * @author darksnake
  */
-class Laminate(layers: List<Meta?>, descriptor: NodeDescriptor? = null) : Meta(), Described {
+class Laminate(layers: Iterable<Meta?>, descriptor: NodeDescriptor? = null) : Meta(), Described {
 
     //TODO consider descriptor merging
-    override val descriptor: NodeDescriptor = descriptor ?: layers.stream()
+    override val descriptor: NodeDescriptor = descriptor ?: layers.asSequence()
             .filter { it -> it is Laminate }.map { Laminate::class.java.cast(it) }
             .map { it.descriptor }
-            .findFirst().orElse(NodeDescriptor(Meta.empty()))
+            .firstOrNull() ?: NodeDescriptor(Meta.empty())
 
 
     /**
@@ -303,4 +305,27 @@ class Laminate(layers: List<Meta?>, descriptor: NodeDescriptor? = null) : Meta()
     override fun toString(): String {
         return XMLMetaWriter().writeString(this.merge())
     }
+
+    companion object {
+        fun join(meta: Iterable<Meta?>, descriptor: NodeDescriptor? = null): Laminate {
+            return Laminate(meta.toList(), descriptor)
+        }
+
+        fun join(vararg meta: Meta): Laminate = join(meta.asIterable())
+    }
+}
+
+fun Iterable<Meta?>.toLaminate(descriptor: NodeDescriptor? = null) = Laminate.join(this, descriptor)
+
+inline operator fun <reified T: Any> Meta.get(name: String) : T? = when(T::class){
+    String::class -> optString(name).nullable as T?
+    Double::class -> optNumber(name).map { it.toDouble() }.nullable as T?
+    Int::class -> optNumber(name).map { it.toInt() }.nullable as T?
+    Short::class -> optNumber(name).map { it.toShort() }.nullable as T?
+    Long::class -> optNumber(name).map { it.toLong() }.nullable as T?
+    Float::class -> optNumber(name).map { it.toFloat() }.nullable as T?
+    Boolean::class -> optBoolean(name).nullable as T?
+    Instant::class -> optTime(name).nullable as T?
+    Meta::class -> optMeta(name).nullable as T?
+    else -> error("Type ${T::class} is not recognized as a meta member")
 }
