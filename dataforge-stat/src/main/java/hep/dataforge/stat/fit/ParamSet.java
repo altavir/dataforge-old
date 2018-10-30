@@ -102,6 +102,7 @@ public class ParamSet implements Values, MetaMorph {
         });
     }
 
+    @NotNull
     @Override
     public Meta toMeta() {
         MetaBuilder builder = new MetaBuilder("params");
@@ -125,6 +126,7 @@ public class ParamSet implements Values, MetaMorph {
         return set;
     }
 
+    @NotNull
     @Override
     public Optional<Value> optValue(@NotNull String path) {
         return optByName(path).map(par -> ValueFactory.of(par.getValue()));
@@ -160,7 +162,6 @@ public class ParamSet implements Values, MetaMorph {
      * {@inheritDoc}
      */
     public int size() {
-        assert params != null;
         return params.size();
     }
 

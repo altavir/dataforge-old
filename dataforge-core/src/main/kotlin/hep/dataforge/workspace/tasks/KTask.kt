@@ -85,10 +85,9 @@ class KTaskBuilder(val name: String) {
      * Perform given action on data elements in `from` node in input and put the result to `to` node
      */
     inline fun <reified T : Any, reified R : Any> action(action: Action<T, R>, from: String = "", to: String = "") {
-        val transform: TaskModel.(DataNode<out T>) -> DataNode<out R> = { data ->
+        transform(from, to){ data: DataNode<out T> ->
             action.run(context, data, meta)
         }
-        transform(from, to, transform)
     }
 
     inline fun <reified T : Any, reified R : Any> pipeAction(
@@ -114,9 +113,7 @@ class KTaskBuilder(val name: String) {
                 actionName = Name.joinString(name, actionName),
                 inputType = T::class.java,
                 outputType = R::class.java,
-                action = {
-                    result(action)
-                }
+                action = { result(action) }
         )
         action(pipe, from, to);
     }

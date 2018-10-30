@@ -38,10 +38,10 @@ import java.io.PrintWriter;
 @NodeDef(key = "model",
         required = true, info = "The model against which fit should be made",
         descriptor = "method::hep.dataforge.stat.models.ModelManager.getModel")
-@NodeDef(key = "params", required = true,
-        info = "Initial fit parameter set. Both parameters from action annotation and parameters from data annotation are used. "
-                + "The merging of parameters is made supposing the annotation of data is main and annotation of action is secondary.",
-        descriptor = "method::hep.dataforge.stat.fit.ParamSet.fromMeta")
+//@NodeDef(key = "params", required = true,
+//        info = "Initial fit parameter set. Both parameters from action annotation and parameters from data annotation are used. "
+//                + "The merging of parameters is made supposing the annotation of data is main and annotation of action is secondary.",
+//        descriptor = "method::hep.dataforge.stat.fit.ParamSet.fromMeta")
 @NodeDef(key = "stage", multiple = true, info = "Fit stages")
 public class FitAction extends OneToOneAction<Table, FitResult> {
 

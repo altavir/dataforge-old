@@ -138,6 +138,26 @@ fun Table.replaceColumn(name: String, transform: Values.() -> Any): Table {
     return ColumnTable.copy(this).replaceColumn(name, transform)
 }
 
+/* Row filtering and sorting */
+
+fun Table.filter(condition: (Values) -> Boolean): Table {
+    return ListTable(format, rows.filter(condition).toList())
+}
+
+fun Table.sort(comparator: Comparator<Values>): Table {
+    return ListTable(format, rows.sorted(comparator).toList())
+}
+
+fun Table.sort(name: String = format.first().name, ascending: Boolean = true): Table {
+    return sort(
+            Comparator { o1: Values, o2: Values ->
+                val signum = if (ascending) +1 else -1
+                o1.getValue(name).compareTo(o2.getValue(name)) * signum
+            }
+    )
+}
+
+
 /* Row reduction */
 
 fun <K> Table.reduceRows(format: TableFormat? = null, keySelector: (Values) -> K, mapper: (K, List<Values>) -> Values) =

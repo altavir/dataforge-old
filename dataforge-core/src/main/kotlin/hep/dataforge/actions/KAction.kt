@@ -62,10 +62,13 @@ class KPipe<T : Any, R : Any>(
         data.dataStream(true).forEach { item ->
             val laminate = Laminate(item.meta, actionMeta)
 
+            val prefix = actionMeta.getString("@namePrefix", "")
+            val suffix = actionMeta.getString("@nameSuffix", "")
+
             val pipe = PipeBuilder<T, R>(
                     context,
                     name,
-                    item.name,
+                    prefix + item.name + suffix,
                     laminate.builder
             ).apply(action)
 
@@ -226,7 +229,7 @@ class KSplit<T : Any, R : Any>(
         actionName: String,
         inputType: Class<T>,
         outputType: Class<R>,
-        private val action: SplitBuilder<T, R>.() -> Unit) : GenericAction<T, R>(actionName,inputType,outputType) {
+        private val action: SplitBuilder<T, R>.() -> Unit) : GenericAction<T, R>(actionName, inputType, outputType) {
 
     override fun run(context: Context, data: DataNode<out T>, actionMeta: Meta): DataNode<R> {
         if (!this.inputType.isAssignableFrom(data.type)) {
