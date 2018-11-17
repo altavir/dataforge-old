@@ -1,5 +1,5 @@
 description = 'New API and implementation of dataforge-storage'
 
 dependencies {
-    implementation project(':dataforge-core')
+    compile project(':dataforge-core')
 }

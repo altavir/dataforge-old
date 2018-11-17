@@ -22,7 +22,6 @@
 package hep.dataforge.meta
 
 import hep.dataforge.io.XMLMetaReader
-import hep.dataforge.meta.Template
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.io.IOException

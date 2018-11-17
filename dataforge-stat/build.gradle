@@ -1,5 +1,5 @@
 description = 'dataforge-fitting'
 
 dependencies {
-    implementation project(':dataforge-maths')
+    compile project(':dataforge-maths')
 }

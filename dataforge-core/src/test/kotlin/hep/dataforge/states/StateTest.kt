@@ -16,7 +16,9 @@
 
 package hep.dataforge.states
 
+import hep.dataforge.context.Global
 import hep.dataforge.values.Value
+import kotlinx.coroutines.launch
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.util.concurrent.atomic.AtomicReference
@@ -28,7 +30,7 @@ class StateTest {
         val ref = AtomicReference<Value>(Value.NULL)
 
         val receiver = state.channel.openSubscription()
-        launch {
+        Global.launch {
             while (true) {
                 val res = receiver.receive()
                 println(res)

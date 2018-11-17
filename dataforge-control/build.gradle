@@ -3,8 +3,8 @@ description = 'dataforge-control'
 
 dependencies {
     // Adding dependencies here will add the dependencies to each subproject.
-    implementation project(':dataforge-core')
+    compile project(':dataforge-core')
     //TODO consider removing storage dependency
-    implementation project(':dataforge-storage')
-    implementation 'org.scream3r:jssc:2.8.0'
+    compile project(':dataforge-storage')
+    compile 'org.scream3r:jssc:2.8.0'
 }

@@ -6,7 +6,7 @@ and open the template in the editor.
 -->
 
 <root>
-    <someNode myValue="${hep.dataforge.values.pet}">
+    <someNode myValue="${values.pet}">
         <subNode ggg="81.5"/>
         <subNode _at_include="nodes.myNode"/>
     </someNode>

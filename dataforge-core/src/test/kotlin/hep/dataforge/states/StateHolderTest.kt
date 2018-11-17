@@ -16,7 +16,9 @@
 
 package hep.dataforge.states
 
+import hep.dataforge.context.Global
 import hep.dataforge.values.Value
+import kotlinx.coroutines.launch
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.util.concurrent.ConcurrentHashMap
@@ -33,7 +35,7 @@ class StateHolderTest {
         states.init(ValueState("state2"))
 
         val subscription = states.subscribe()
-        launch {
+        Global.launch {
 
             while (true) {
                 subscription.receive().also {

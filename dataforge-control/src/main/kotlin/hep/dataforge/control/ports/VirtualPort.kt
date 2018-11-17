@@ -19,6 +19,7 @@ import hep.dataforge.exceptions.PortException
 import hep.dataforge.meta.Configurable
 import hep.dataforge.meta.Configuration
 import hep.dataforge.meta.Meta
+import kotlinx.coroutines.*
 import java.time.Duration
 import java.util.concurrent.CopyOnWriteArraySet
 import java.util.function.Supplier

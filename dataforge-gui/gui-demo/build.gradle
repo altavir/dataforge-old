@@ -13,8 +13,8 @@ mainClassName = mainClass
 description = "A demonstration for plots capabilities"
 
 dependencies {
-    implementation project(':dataforge-plots:plots-jfc')
-    implementation project(':dataforge-gui')
+    compile project(':dataforge-plots:plots-jfc')
+    compile project(':dataforge-gui')
 }
 
 

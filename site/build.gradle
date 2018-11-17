@@ -21,7 +21,7 @@ repositories {
 }
 
 dependencies {
-    implementation "com.sysgears.grain:grain:0.7.1-SNAPSHOT"
+    compile "com.sysgears.grain:grain:0.7.1-SNAPSHOT"
 }
 
 /**

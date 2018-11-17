@@ -17,6 +17,7 @@ import static hep.dataforge.meta.MetaUtils.transformValue;
 /**
  * @author Alexander Nozik
  */
+@Deprecated
 public class Template implements Metoid, UnaryOperator<Meta> {
 
     /**

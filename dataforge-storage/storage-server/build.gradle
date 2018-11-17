@@ -13,8 +13,8 @@ description = 'A servlet for remote view of repository'
 mainClassName = 'hep.dataforge.server.TestServer'
 
 dependencies {
-    implementation project(':dataforge-storage')
-    implementation 'org.freemarker:freemarker:2.3.26-incubating'
+    compile project(':dataforge-storage')
+    compile 'org.freemarker:freemarker:2.3.26-incubating'
 }
 
 //ratpack.baseDir = file('src/ratpack')

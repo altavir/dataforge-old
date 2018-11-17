@@ -60,7 +60,7 @@ class CachePlugin(meta: Meta) : BasicPlugin(meta) {
                 context.logger.info("Loaded cache manager $it")
             }
         } catch (ex: CacheException) {
-            context.logger.warn("Cache provider not found. Will use default immutable implementation.")
+            context.logger.warn("Cache provider not found. Will use default cache implementation.")
             DefaultCacheManager(context, meta)
         }
     }
