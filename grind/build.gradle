@@ -6,8 +6,8 @@ compileGroovy.dependsOn(compileKotlin)
 compileGroovy.classpath += files(compileKotlin.destinationDir)
 
 dependencies {
-    compile project(":dataforge-core")
-    compile 'org.codehaus.groovy:groovy-all:2.4+'
+    implementation project(":dataforge-core")
+    implementation 'org.codehaus.groovy:groovy-all:2.4+'
 
-    testCompile project(":dataforge-gui")
+    testImplementation project(":dataforge-gui")
 }

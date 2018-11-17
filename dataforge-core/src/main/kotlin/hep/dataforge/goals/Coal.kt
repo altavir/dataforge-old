@@ -2,26 +2,26 @@ package hep.dataforge.goals
 
 import hep.dataforge.await
 import hep.dataforge.context.Context
-import hep.dataforge.coroutineContext
 import hep.dataforge.utils.ReferenceRegistry
-import kotlinx.coroutines.experimental.*
-import kotlinx.coroutines.experimental.future.asCompletableFuture
+import kotlinx.coroutines.*
+import kotlinx.coroutines.future.asCompletableFuture
+import kotlinx.coroutines.time.withTimeout
 import org.slf4j.LoggerFactory
+import java.time.Duration
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 import java.util.stream.Stream
-import kotlin.coroutines.experimental.CoroutineContext
 
 /**
  * Coroutine implementation of Goal
  * @param id - string id of the Coal
  * @param deps - dependency goals
- * @param dispatcher custom coroutine dispatcher. By default common pool
+ * @param scope custom coroutine dispatcher. By default common pool
  * @param block execution block. Could be suspending
  */
 class Coal<R>(
-        val dispatcher: CoroutineContext,
+        val scope: CoroutineScope,
         private val deps: Collection<Goal<*>> = Collections.emptyList(),
         val id: String = "",
         block: suspend () -> R) : Goal<R> {
@@ -36,7 +36,7 @@ class Coal<R>(
 
     private val listeners = ReferenceRegistry<GoalListener<R>>();
 
-    private var deferred: Deferred<R> = async(dispatcher, CoroutineStart.LAZY) {
+    private var deferred: Deferred<R> = scope.async(start = CoroutineStart.LAZY) {
         try {
             notifyListeners { onGoalStart() }
             if (!id.isEmpty()) {
@@ -52,9 +52,9 @@ class Coal<R>(
         }
     }
 
-    private fun notifyListeners(action: suspend GoalListener<R>.() -> Unit) {
+    private fun CoroutineScope.notifyListeners(action: suspend GoalListener<R>.() -> Unit) {
         listeners.forEach {
-            launch(context = dispatcher) {
+            scope.launch {
                 try {
                     action.invoke(it)
                 } catch (ex: Exception) {
@@ -81,12 +81,13 @@ class Coal<R>(
 
     override fun get(timeout: Long, unit: TimeUnit): R {
         return runBlocking {
-            withTimeout(timeout, unit) { await() }
+            withTimeout(Duration.ofMillis(timeout)) { await() }
         }
     }
 
     override fun cancel(mayInterruptIfRunning: Boolean): Boolean {
-        return deferred.cancel();
+        deferred.cancel()
+        return true
     }
 
     override fun isCancelled(): Boolean {
@@ -116,21 +117,21 @@ class Coal<R>(
 
 
 fun <R> Context.goal(deps: Collection<Goal<*>> = Collections.emptyList(), id: String = "", block: suspend () -> R): Coal<R> {
-    return Coal(coroutineContext, deps, id, block);
+    return Coal(this, deps, id, block);
 }
 
 /**
  * Create a simple generator Coal (no dependencies)
  */
 fun <R> Context.generate(id: String = "", block: suspend () -> R): Coal<R> {
-    return Coal(coroutineContext, Collections.emptyList(), id, block);
+    return Coal(this, Collections.emptyList(), id, block);
 }
 
 /**
  * Join a uniform list of goals
  */
-fun <T, R> List<Goal<out T>>.join(dispatcher: CoroutineContext, block: suspend (List<T>) -> R): Coal<R> {
-    return Coal(dispatcher, this) {
+fun <T, R> List<Goal<out T>>.join(scope: CoroutineScope, block: suspend (List<T>) -> R): Coal<R> {
+    return Coal(scope, this) {
         block.invoke(this.map {
             it.await()
         })
@@ -140,8 +141,8 @@ fun <T, R> List<Goal<out T>>.join(dispatcher: CoroutineContext, block: suspend (
 /**
  * Transform using map of goals as a dependency
  */
-fun <T, R> Map<String, Goal<out T>>.join(dispatcher: CoroutineContext, block: suspend (Map<String, T>) -> R): Coal<R> {
-    return Coal(dispatcher, this.values) {
+fun <T, R> Map<String, Goal<out T>>.join(scope: CoroutineScope, block: suspend (Map<String, T>) -> R): Coal<R> {
+    return Coal(scope, this.values) {
         block.invoke(this.mapValues { it.value.await() })
     }
 }
@@ -150,8 +151,8 @@ fun <T, R> Map<String, Goal<out T>>.join(dispatcher: CoroutineContext, block: su
 /**
  * Pipe goal
  */
-fun <T, R> Goal<T>.pipe(dispatcher: CoroutineContext, block: suspend (T) -> R): Coal<R> {
-    return Coal(dispatcher, listOf(this)) {
+fun <T, R> Goal<T>.pipe(scope: CoroutineScope, block: suspend (T) -> R): Coal<R> {
+    return Coal(scope, listOf(this)) {
         block.invoke(this.await())
     }
 }

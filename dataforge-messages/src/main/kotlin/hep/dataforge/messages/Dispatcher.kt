@@ -19,11 +19,7 @@ package hep.dataforge.messages
 
 import hep.dataforge.context.Context
 import hep.dataforge.context.ContextAware
-import hep.dataforge.coroutineContext
 import hep.dataforge.io.envelopes.Envelope
-import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.channels.Channel
-import kotlinx.coroutines.experimental.launch
 
 /**
  * An object that receives a message and redirects it according to its target
@@ -78,7 +74,7 @@ class BasicDispatcher(
 
     private fun startJob() {
         if (job == null) {
-            job = launch(context.coroutineContext) {
+            job = launch(context.scope) {
                 while (true) {
                     val received = queue.receive()
                     //Resend message or dump it if receiver not found
@@ -90,7 +86,7 @@ class BasicDispatcher(
 
     override fun dispatch(target: Target, message: Envelope) {
         startJob()
-        launch(context.coroutineContext) {
+        launch(context.scope) {
             queue.send(Pair(target, message))
         }
     }

@@ -14,8 +14,9 @@ import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.names.Name
-import kotlinx.coroutines.experimental.asCoroutineDispatcher
-import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.plus
+import kotlinx.coroutines.runBlocking
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.stream.Collectors
@@ -79,7 +80,7 @@ class KPipe<T : Any, R : Any>(
                     context.history.getChronicle(Name.joinString(pipe.name, name))
             )
 
-            val dispatcher = getExecutorService(context, laminate).asCoroutineDispatcher()
+            val dispatcher = context + getExecutorService(context, laminate).asCoroutineDispatcher()
 
             val goal = item.goal.pipe(dispatcher) { goalData ->
                 pipe.logger.debug("Starting action ${this.name} on ${pipe.name}")
@@ -190,7 +191,7 @@ class KJoin<T : Any, R : Any>(
                     context.history.getChronicle(Name.joinString(groupName, name))
             )
 
-            val dispatcher = getExecutorService(context, group.meta).asCoroutineDispatcher()
+            val dispatcher = context + getExecutorService(context, group.meta).asCoroutineDispatcher()
 
             val goal = goalMap.join(dispatcher) { group.result.invoke(env, it) }
             val res = NamedData(env.name, outputType, goal, env.meta)
@@ -247,7 +248,7 @@ class KSplit<T : Any, R : Any>(
                 val split = SplitBuilder<T, R>(context, it.name, it.meta).apply(action)
 
 
-                val dispatcher = getExecutorService(context, laminate).asCoroutineDispatcher()
+                val dispatcher = context + getExecutorService(context, laminate).asCoroutineDispatcher()
 
                 // Create a map of results in a single goal
                 //val commonGoal = it.goal.pipe(dispatcher) { split.result.invoke(env, it) }

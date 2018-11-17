@@ -15,10 +15,10 @@ import hep.dataforge.values.NamedValue
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueProvider
 import hep.dataforge.values.ValueType
-import kotlinx.coroutines.experimental.future.await
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.future.await
 import java.time.Instant
 import java.util.stream.Collectors
-import kotlin.coroutines.experimental.CoroutineContext
 import kotlin.streams.asSequence
 
 /**
@@ -161,9 +161,6 @@ fun <T : Configurable> T.configure(transform: KMetaBuilder.() -> Unit): T {
 
 //suspending functions
 
-val Context.coroutineContext: CoroutineContext
-    get() = this.executors.kDispatcher
-
 /**
  * Use goal as a suspending function
  */
@@ -175,8 +172,8 @@ suspend fun <R> Goal<R>.await(): R {
     }
 }
 
-inline fun <T, reified R> Data<T>.pipe(dispatcher: CoroutineContext, noinline transform: suspend (T) -> R): Data<R> =
-        Data(R::class.java, this.goal.pipe(dispatcher, transform), this.meta)
+inline fun <T, reified R> Data<T>.pipe(scope: CoroutineScope, noinline transform: suspend (T) -> R): Data<R> =
+        Data(R::class.java, this.goal.pipe(scope, transform), this.meta)
 
-inline fun <T, reified R> NamedData<T>.pipe(dispatcher: CoroutineContext, noinline transform: suspend (T) -> R): NamedData<R> =
-        NamedData(this.name, R::class.java, this.goal.pipe(dispatcher, transform), this.meta)
+inline fun <T, reified R> NamedData<T>.pipe(scope: CoroutineScope, noinline transform: suspend (T) -> R): NamedData<R> =
+        NamedData(this.name, R::class.java, this.goal.pipe(scope, transform), this.meta)

@@ -35,10 +35,6 @@ import hep.dataforge.meta.MetaMorph
 import hep.dataforge.meta.buildMeta
 import hep.dataforge.states.*
 import hep.dataforge.values.ValueType
-import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.asCoroutineDispatcher
-import kotlinx.coroutines.experimental.launch
-import kotlinx.coroutines.experimental.time.delay
 import java.time.Duration
 import java.time.Instant
 
@@ -151,7 +147,7 @@ abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, me
     }
 
     protected fun measurement(action: suspend () -> Unit) {
-        job = launch {
+        job = context.launch {
             notifyMeasurementState(MeasurementState.IN_PROGRESS)
             action.invoke()
             notifyMeasurementState(MeasurementState.STOPPED)
@@ -159,7 +155,7 @@ abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, me
     }
 
     protected fun scheduleMeasurement(interval: Duration, action: suspend () -> Unit) {
-        job = launch {
+        job = context.launch {
             delay(interval)
             notifyMeasurementState(MeasurementState.IN_PROGRESS)
             action.invoke()
@@ -167,8 +163,9 @@ abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, me
         }
     }
 
+    @InternalCoroutinesApi
     protected fun regularMeasurement(interval: Duration, action: suspend () -> Unit) {
-        job = launch {
+        job = context.launch {
             while (true) {
                 notifyMeasurementState(MeasurementState.IN_PROGRESS)
                 action.invoke()

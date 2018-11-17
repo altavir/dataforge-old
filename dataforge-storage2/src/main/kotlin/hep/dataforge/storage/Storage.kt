@@ -25,6 +25,7 @@ import hep.dataforge.connections.RoleDef
 import hep.dataforge.connections.RoleDefs
 import hep.dataforge.context.Context
 import hep.dataforge.context.ContextAware
+import hep.dataforge.context.launch
 import hep.dataforge.events.EventHandler
 import hep.dataforge.exceptions.NameNotFoundException
 import hep.dataforge.meta.Meta
@@ -34,9 +35,6 @@ import hep.dataforge.providers.Provider
 import hep.dataforge.providers.Provides
 import hep.dataforge.providers.ProvidesNames
 import hep.dataforge.storage.StorageElement.Companion.STORAGE_TARGET
-import kotlinx.coroutines.experimental.launch
-import kotlinx.coroutines.experimental.runBlocking
-import org.slf4j.Logger
 import java.util.*
 import kotlin.reflect.KClass
 

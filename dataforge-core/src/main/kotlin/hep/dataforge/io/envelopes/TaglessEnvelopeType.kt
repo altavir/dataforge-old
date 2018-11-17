@@ -26,7 +26,6 @@ import java.nio.channels.ReadableByteChannel
 import java.text.ParseException
 import java.util.*
 import java.util.regex.Pattern
-import kotlin.coroutines.experimental.buildSequence
 
 /**
  * A tagless envelope. No tag. Data infinite by default
@@ -108,12 +107,12 @@ class TaglessEnvelopeType : EnvelopeType {
          * Read lines using provided channel and buffer. Buffer state is changed by this operation
          */
         private fun readLines(channel: ReadableByteChannel, buffer: ByteBuffer): Sequence<String> {
-            return buildSequence {
+            return sequence {
                 val builder = ByteArrayOutputStream()
                 while (true) {
                     if (!buffer.hasRemaining()) {
                         if (!channel.isOpen) {
-                            return@buildSequence
+                            break
                         }
                         buffer.flip()
                         val count = channel.read(buffer)

@@ -1,5 +1,5 @@
 description = 'dataforge-plots'
 
 dependencies {
-    compile project(':dataforge-core')
+    implementation project(':dataforge-core')
 }

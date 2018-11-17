@@ -21,10 +21,10 @@ import hep.dataforge.description.*
 import hep.dataforge.meta.*
 import hep.dataforge.values.Value
 import hep.dataforge.values.parseValue
-import kotlinx.coroutines.experimental.*
-import kotlinx.coroutines.experimental.channels.BroadcastChannel
-import kotlinx.coroutines.experimental.channels.ReceiveChannel
-import kotlinx.coroutines.experimental.time.withTimeout
+import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.BroadcastChannel
+import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.time.withTimeout
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -37,17 +37,18 @@ import kotlin.reflect.KProperty
 /**
  * A logical state possibly backed by physical state
  */
+@Suppress("EXPERIMENTAL_API_USAGE")
 sealed class State<T : Any>(
         final override val name: String,
         def: T? = null,
         owner: Stateful? = null,
+        private val scope: CoroutineScope = GlobalScope,
         private val getter: (suspend () -> T)? = null,
         private val setter: (suspend State<T>.(T?, T) -> Unit)? = null) : Named, MetaID {
     private var valid: Boolean = false
 
     val logger: Logger = owner?.logger ?: LoggerFactory.getLogger("state::$name")
 
-    private val parentJob = Job()
     private val ref = AtomicReference<T>()
     val channel = BroadcastChannel<T>(BUFFER_SIZE)
 
@@ -63,9 +64,9 @@ sealed class State<T : Any>(
         return channel.openSubscription()
     }
 
-    fun onChange(action: suspend (T) -> Unit) {
+    fun onChange(scope: CoroutineScope = GlobalScope, action: suspend (T) -> Unit) {
         val subscription = subscribe()
-        launch(parent = parentJob) {
+        scope.launch {
             try {
                 while (true) {
                     action(subscription.receive())
@@ -119,7 +120,7 @@ sealed class State<T : Any>(
         } else {
             val transformed = transform(value)
             setter?.let {
-                launch {
+                scope.launch {
                     it.invoke(this@State, ref.get(), transformed)
                 }
             } ?: update(value)
@@ -134,7 +135,7 @@ sealed class State<T : Any>(
             update(value)
             return value
         } else {
-            val deferred = async<T> {
+            val deferred = scope.async<T> {
                 val subscription = subscribe()
                 setter.invoke(this@State, ref.get(), value)
                 return@async subscription.receive().also { subscription.cancel() }
@@ -234,7 +235,6 @@ private fun (suspend () -> Any).toValue(): (suspend () -> Value) {
     return { Value.of(this.invoke()) }
 }
 
-
 class ValueState(
         name: String,
         val descriptor: ValueDescriptor = ValueDescriptor.empty(name),
@@ -242,7 +242,7 @@ class ValueState(
         owner: Stateful? = null,
         getter: (suspend () -> Any)? = null,
         setter: (suspend State<Value>.(Value?, Value) -> Unit)? = null
-) : State<Value>(name, def, owner, getter?.toValue(), setter) {
+) : State<Value>(name, def, owner, getter = getter?.toValue(), setter = setter) {
 
     constructor(
             def: ValueDef,
@@ -344,7 +344,6 @@ fun ValueState(def: StateDef): ValueState {
     return ValueState(def.value)
 }
 
-
 class MetaState(
         name: String,
         val descriptor: NodeDescriptor = NodeDescriptor.empty(name),
@@ -352,7 +351,7 @@ class MetaState(
         owner: Stateful? = null,
         getter: (suspend () -> Meta)? = null,
         setter: (suspend State<Meta>.(Meta?, Meta) -> Unit)? = null
-) : State<Meta>(name, def, owner, getter, setter) {
+) : State<Meta>(name, def, owner, getter = getter,  setter = setter) {
 
     constructor(
             def: NodeDef,
@@ -384,7 +383,7 @@ class MorphState<T : MetaMorph>(
         owner: Stateful? = null,
         getter: (suspend () -> T)? = null,
         setter: (suspend State<T>.(T?, T) -> Unit)? = null
-) : State<T>(name, def, owner, getter, setter) {
+) : State<T>(name, def, owner, getter = getter, setter = setter) {
     override fun transform(value: Any): T {
         return (value as? MetaMorph)?.morph(type)
                 ?: throw RuntimeException("The state $name requires metamorph value, but found ${value::class}")

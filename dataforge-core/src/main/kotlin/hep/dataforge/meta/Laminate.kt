@@ -143,11 +143,10 @@ class Laminate(layers: Iterable<Meta?>, descriptor: NodeDescriptor? = null) : Me
      * @return
      */
     override fun getMetaList(path: String): List<Meta> {
-        val stream: Stream<Meta>
-        if (descriptorLayer == null) {
-            stream = layers.stream()
+        val stream: Stream<Meta> = if (descriptorLayer == null) {
+            layers.stream()
         } else {
-            stream = Stream.concat(layers.stream(), Stream.of<Meta>(descriptorLayer))
+            Stream.concat(layers.stream(), Stream.of<Meta>(descriptorLayer))
         }
 
         return stream

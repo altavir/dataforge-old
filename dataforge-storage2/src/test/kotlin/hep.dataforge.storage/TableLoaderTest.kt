@@ -20,7 +20,7 @@ import hep.dataforge.context.Global
 import hep.dataforge.storage.files.TableLoaderType
 import hep.dataforge.tables.MetaTableFormat
 import hep.dataforge.values.ValueMap
-import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.runBlocking
 import org.junit.AfterClass
 import org.junit.Assert.assertEquals
 import org.junit.BeforeClass

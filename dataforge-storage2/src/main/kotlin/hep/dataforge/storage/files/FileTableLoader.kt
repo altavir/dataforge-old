@@ -29,7 +29,6 @@ import hep.dataforge.storage.files.TableLoaderType.Companion.binaryTableWriter
 import hep.dataforge.tables.MetaTableFormat
 import hep.dataforge.tables.TableFormat
 import hep.dataforge.values.*
-import kotlinx.coroutines.experimental.runBlocking
 import java.io.ByteArrayOutputStream
 import java.io.DataOutputStream
 import java.nio.ByteBuffer
@@ -37,7 +36,6 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 import java.util.*
-import kotlin.coroutines.experimental.buildSequence
 
 
 /**
@@ -129,7 +127,7 @@ open class FileTableLoader internal constructor(
             var counter = startIndex
             val buffer = data.buffer
             buffer.position(offset.toInt())
-            return buildSequence {
+            return sequence {
                 while (buffer.remaining() > 0) {
                     yield(Entry(counter, buffer.position().toLong(), reader(buffer, format)))
                     counter++

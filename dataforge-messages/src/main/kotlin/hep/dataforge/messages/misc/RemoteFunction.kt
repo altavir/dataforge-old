@@ -19,7 +19,6 @@ package hep.dataforge.messages.misc
 import hep.dataforge.messages.MessageBuilder
 import hep.dataforge.messages.Responder
 import hep.dataforge.meta.Meta
-import kotlinx.coroutines.experimental.async
 
 interface RemoteFunction {
     suspend operator fun invoke(key: String, meta: Meta, arguments: List<Double>): Double

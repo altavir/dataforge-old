@@ -1,6 +1,6 @@
 apply plugin: 'groovy'
 
 dependencies {
-    compile project(':grind')
-    compile project(':dataforge-maths')
+    implementation project(':grind')
+    implementation project(':dataforge-maths')
 }

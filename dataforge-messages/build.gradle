@@ -1,5 +1,5 @@
 description = "Remote execution and distributed systems"
 
 dependencies {
-    compile project(':dataforge-core')
+    implementation project(':dataforge-core')
 }

@@ -19,7 +19,6 @@ package hep.dataforge.data
 import hep.dataforge.await
 import hep.dataforge.context.Context
 import hep.dataforge.context.FileReference
-import hep.dataforge.coroutineContext
 import hep.dataforge.data.binary.Binary
 import hep.dataforge.goals.AbstractGoal
 import hep.dataforge.goals.Coal
@@ -63,7 +62,7 @@ object DataUtils {
 //                return Stream.of(data1.goal, data2.goal)
 //            }
 //        }
-        val goal = Coal<R>(context.coroutineContext, listOf(data1.goal, data2.goal)) {
+        val goal = Coal<R>(context, listOf(data1.goal, data2.goal)) {
             val res1 = data1.goal.await()
             val res2 = data2.goal.await()
             transform(res1,res2)

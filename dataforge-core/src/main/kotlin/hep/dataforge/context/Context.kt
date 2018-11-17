@@ -35,6 +35,7 @@ import hep.dataforge.values.BooleanValue
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueProvider
 import hep.dataforge.values.ValueProvider.Companion.VALUE_TARGET
+import kotlinx.coroutines.CoroutineScope
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -48,6 +49,7 @@ import java.util.concurrent.Executors
 import java.util.stream.Stream
 import kotlin.collections.HashMap
 import kotlin.collections.set
+import kotlin.coroutines.CoroutineContext
 import kotlin.streams.asSequence
 import kotlin.streams.asStream
 
@@ -66,7 +68,7 @@ open class Context(
         val parent: Context? = Global,
         classLoader: ClassLoader? = null,
         private val properties: MutableMap<String, Value> = ConcurrentHashMap()
-) : Provider, ValueProvider, Named, AutoCloseable, MetaID {
+) : Provider, ValueProvider, Named, AutoCloseable, MetaID, CoroutineScope {
 
     /**
      * A class loader for this context. Parent class loader is used by default
@@ -147,9 +149,6 @@ open class Context(
             }.also { started = true }
         }
     }
-
-    open val executors: ExecutorPlugin
-        get() = pluginManager[ExecutorPlugin::class] ?: parent?.executors ?: Global.executors
 
     /**
      * Find out if context is locked
@@ -400,6 +399,13 @@ open class Context(
             pluginManager.stream(true).flatMap { it.provideAll(target, type) }
         }
     }
+
+
+    open val executors: ExecutorPlugin
+        get() = pluginManager[ExecutorPlugin::class] ?: parent?.executors ?: Global.executors
+
+    override val coroutineContext: CoroutineContext
+        get() =  this.executors.coroutineContext
 
     companion object {
 

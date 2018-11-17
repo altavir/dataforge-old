@@ -19,9 +19,6 @@ import hep.dataforge.exceptions.PortException
 import hep.dataforge.meta.Configurable
 import hep.dataforge.meta.Configuration
 import hep.dataforge.meta.Meta
-import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.asCoroutineDispatcher
-import kotlinx.coroutines.experimental.launch
 import java.time.Duration
 import java.util.concurrent.CopyOnWriteArraySet
 import java.util.function.Supplier
@@ -36,7 +33,7 @@ abstract class VirtualPort protected constructor(meta: Meta) : Port(meta), Confi
     override var meta = Configuration(meta)
     protected open val delimeter = meta.getString("delimenter", "\n")
 
-    protected val coroutineContext = executor.asCoroutineDispatcher()
+    private val scope = GlobalScope + executor.asCoroutineDispatcher()
 
     @Throws(PortException::class)
     override fun open() {
@@ -89,8 +86,8 @@ abstract class VirtualPort protected constructor(meta: Meta) : Port(meta), Confi
     @Synchronized
     protected fun planResponse(response: String, delay: Duration, vararg tags: String) {
         clearCompleted()
-        val future = launch(coroutineContext) {
-            kotlinx.coroutines.experimental.time.delay(delay)
+        val future = scope.launch {
+            kotlinx.coroutines.time.delay(delay)
             receive((response + delimeter).toByteArray())
         }
         this.futures.add(TaggedFuture(future, *tags))
@@ -99,11 +96,11 @@ abstract class VirtualPort protected constructor(meta: Meta) : Port(meta), Confi
     @Synchronized
     protected fun planRegularResponse(responseBuilder: Supplier<String>, delay: Duration, period: Duration, vararg tags: String) {
         clearCompleted()
-        val future = launch(coroutineContext) {
-            kotlinx.coroutines.experimental.time.delay(delay)
+        val future = scope.launch {
+            kotlinx.coroutines.time.delay(delay)
             while (true) {
                 receive((responseBuilder.get() + delimeter).toByteArray())
-                kotlinx.coroutines.experimental.time.delay(period)
+                kotlinx.coroutines.time.delay(period)
             }
         }
         this.futures.add(TaggedFuture(future, *tags))
@@ -123,7 +120,7 @@ abstract class VirtualPort protected constructor(meta: Meta) : Port(meta), Confi
             return tags.contains(tag)
         }
 
-        fun cancel(): Boolean {
+        fun cancel() {
             return future.cancel()
         }
     }

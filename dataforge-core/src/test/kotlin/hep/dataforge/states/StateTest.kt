@@ -17,7 +17,6 @@
 package hep.dataforge.states
 
 import hep.dataforge.values.Value
-import kotlinx.coroutines.experimental.launch
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.util.concurrent.atomic.AtomicReference

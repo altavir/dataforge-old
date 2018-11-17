@@ -17,12 +17,12 @@ mainClassName = mainClass
 description = 'The grind plugin for dataforge framework'
 
 dependencies {
-    compile project(':grind')
-    compile project(':dataforge-plots:plots-jfc')
-    compile project(':dataforge-gui')
-    compile group: 'org.jline', name: 'jline', version: '3.5.1'
+    implementation project(':grind')
+    implementation project(':dataforge-plots:plots-jfc')
+    implementation project(':dataforge-gui')
+    implementation group: 'org.jline', name: 'jline', version: '3.5.1'
 //    compile group: 'net.java.dev.jna', name: 'jna', version: '4.4.0'
-    compile group: 'org.fusesource.jansi', name: 'jansi', version: '1.16'
+    implementation group: 'org.fusesource.jansi', name: 'jansi', version: '1.16'
 }
 
 task shell(dependsOn: classes, type: JavaExec) {

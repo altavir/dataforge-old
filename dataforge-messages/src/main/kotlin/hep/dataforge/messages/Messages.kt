@@ -21,8 +21,6 @@ import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.names.Name
 import hep.dataforge.nullable
-import kotlinx.coroutines.experimental.Deferred
-import kotlinx.coroutines.experimental.async
 
 //Message operations
 const val ACTION_KEY = "@message.action"

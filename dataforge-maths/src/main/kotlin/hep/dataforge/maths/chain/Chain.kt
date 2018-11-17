@@ -16,11 +16,6 @@
 
 package hep.dataforge.maths.chain
 
-import kotlinx.coroutines.experimental.channels.ReceiveChannel
-import kotlinx.coroutines.experimental.channels.asReceiveChannel
-import kotlinx.coroutines.experimental.channels.map
-import kotlinx.coroutines.experimental.runBlocking
-
 /**
  * A not-necessary-Markov chain of some type
  * @param S - the state of the chain
@@ -46,7 +41,7 @@ interface Chain<out R> : Sequence<R> {
      * Chain as a coroutine receive channel
      */
     val channel: ReceiveChannel<R>
-        get() = asReceiveChannel()
+        get() = GlobalScope.produce { while (true) send(next()) }
 
     override fun iterator(): Iterator<R> {
         return object : Iterator<R> {
@@ -82,6 +77,16 @@ interface Chain<out R> : Sequence<R> {
     }
 }
 
+private class TransientValue<R : Any> {
+    val mutex = Mutex()
+
+    var value: R? = null
+        private set
+
+    suspend fun update(value: R) {
+        mutex.withLock { this.value = value }
+    }
+}
 
 //TODO force forks on mapping operations?
 
@@ -89,40 +94,32 @@ interface Chain<out R> : Sequence<R> {
  * A simple chain of independent tokens
  */
 class SimpleChain<out R : Any>(private val gen: suspend () -> R) : Chain<R> {
-
-    private var _value: R? = null
-
+    private val _value = TransientValue<R>()
     override val value: R
-        get() = _value ?: runBlocking { next() }
+        get() = _value.value ?: runBlocking { next() }
 
     override suspend fun next(): R {
-        _value = gen();
-        return value;
+        _value.update(gen())
+        return value
     }
 
-    override fun fork(): Chain<R> {
-        return this
-    }
-
+    override fun fork(): Chain<R> = this
 }
 
 /**
  * A stateless Markov chain
  */
-class MarkovChain<R : Any>(private val seed: () -> R, private val gen: suspend (R) -> R) : Chain<R> {
+class MarkovChain<out R : Any>(private val seed: () -> R, private val gen: suspend (R) -> R) : Chain<R> {
 
     constructor(seed: R, gen: suspend (R) -> R) : this({ seed }, gen)
 
-    private var _value: R? = null
-
+    private val _value = TransientValue<R>()
     override val value: R
-        get() = _value ?: seed()
+        get() = _value.value ?: runBlocking { next() }
 
     override suspend fun next(): R {
-        synchronized(this) {
-            _value = gen(value)
-            return value
-        }
+        _value.update(gen(_value.value ?: seed()))
+        return value
     }
 
     override fun fork(): Chain<R> {
@@ -133,19 +130,16 @@ class MarkovChain<R : Any>(private val seed: () -> R, private val gen: suspend (
 /**
  * A chain with possibly mutable state. The state must not be changed outside the chain. Two chins should never share the state
  */
-class StatefulChain<S, R : Any>(val state: S, private val seed: S.() -> R, private val gen: suspend S.(R) -> R) : Chain<R> {
+class StatefulChain<S, out R : Any>(val state: S, private val seed: S.() -> R, private val gen: suspend S.(R) -> R) : Chain<R> {
     constructor(state: S, seed: R, gen: suspend S.(R) -> R) : this(state, { seed }, gen)
 
-    private var _value: R? = null
-
+    private val _value = TransientValue<R>()
     override val value: R
-        get() = _value ?: state.seed()
+        get() = _value.value ?: runBlocking { next() }
 
     override suspend fun next(): R {
-        synchronized(this) {
-            _value = gen(state, value)
-            return value
-        }
+        _value.update(gen(state,_value.value ?: seed(state)))
+        return value
     }
 
     override fun fork(): Chain<R> {

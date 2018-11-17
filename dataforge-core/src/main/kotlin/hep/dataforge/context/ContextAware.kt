@@ -16,6 +16,7 @@
 package hep.dataforge.context
 
 import hep.dataforge.Named
+import kotlinx.coroutines.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -41,3 +42,8 @@ interface ContextAware {
             context.logger
         }
 }
+
+fun ContextAware.launch(block: suspend CoroutineScope.() -> Unit): Job = context.launch(block = block)
+
+fun <R> ContextAware.async(block: suspend CoroutineScope.() -> R): Deferred<R> = context.async(block = block)
+

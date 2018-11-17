@@ -31,7 +31,6 @@ import hep.dataforge.meta.Meta
 import hep.dataforge.meta.Metoid
 import hep.dataforge.names.AnonymousNotAlowed
 import hep.dataforge.utils.ContextMetaFactory
-import kotlinx.coroutines.experimental.runBlocking
 
 /**
  * @author Alexander Nozik

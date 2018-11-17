@@ -26,10 +26,12 @@ import hep.dataforge.providers.Provides
 import hep.dataforge.providers.ProvidesNames
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueProvider
-import kotlinx.coroutines.experimental.CancellationException
-import kotlinx.coroutines.experimental.channels.ReceiveChannel
-import kotlinx.coroutines.experimental.channels.produce
-import kotlinx.coroutines.experimental.selects.select
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.channels.produce
+import kotlinx.coroutines.selects.select
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.*
@@ -94,7 +96,7 @@ fun Stateful.valueState(
     return if (def == null) {
         ValueState(name = name, owner = this, getter = getter, setter = setter)
     } else {
-        ValueState(def.value,this, getter, setter)
+        ValueState(def.value, this, getter, setter)
     }
 }
 
@@ -193,9 +195,9 @@ class StateHolder(val logger: Logger = LoggerFactory.getLogger(StateHolder::clas
      * Subscribe on updates of specific states. By default subscribes on all updates.
      * Subscription is formed when the method is called, so states initialized after that are ignored.
      */
-    fun subscribe(pattern: Regex = ".*".toRegex()): ReceiveChannel<Pair<String, Any>> {
+    fun subscribe(pattern: Regex = ".*".toRegex(), scope: CoroutineScope = GlobalScope): ReceiveChannel<Pair<String, Any>> {
         val subscriptions = stateMap.filter { it.key.matches(pattern) }.mapValues { it.value.subscribe() }
-        return produce {
+        return scope.produce {
             try {
                 while (true) {
                     select<Unit> {

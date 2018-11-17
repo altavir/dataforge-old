@@ -2,8 +2,9 @@ package hep.dataforge.workspace
 
 import hep.dataforge.context.Context
 import hep.dataforge.context.Global
-import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardWatchEventKinds
@@ -24,7 +25,7 @@ class FileBasedWorkspace(private val path: Path, private val parser: (Path) -> W
 
     override fun buildWorkspace(): Workspace {
         if (watchJob == null) {
-            watchJob = launch {
+            watchJob = GlobalScope.launch {
                 while (true) {
                     fileMonitor.pollEvents().forEach {
                         if(it.context() == path) {

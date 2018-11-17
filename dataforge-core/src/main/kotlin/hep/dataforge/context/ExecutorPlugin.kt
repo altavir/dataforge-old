@@ -17,17 +17,17 @@
 package hep.dataforge.context
 
 import hep.dataforge.meta.Meta
-import kotlinx.coroutines.experimental.CancellationException
-import kotlinx.coroutines.experimental.asCoroutineDispatcher
-import kotlinx.coroutines.experimental.cancel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.cancel
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.ForkJoinPool
-import kotlin.coroutines.experimental.CoroutineContext
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Plugin managing execution
  */
-interface ExecutorPlugin : Plugin {
+interface ExecutorPlugin : Plugin, CoroutineScope {
     /**
      * Default executor for this plugin
      */
@@ -37,11 +37,6 @@ interface ExecutorPlugin : Plugin {
      * Create or load custom executor
      */
     fun getExecutor(meta: Meta): ExecutorService
-
-    /**
-     * A dispatcher for default coroutine thread pool
-     */
-    val kDispatcher: CoroutineContext
 }
 
 @PluginDef(group = "hep.dataforge", name = "executor", support = true, info = "Executor plugin")
@@ -73,12 +68,12 @@ class DefaultExecutorPlugin(meta: Meta = Meta.empty()) : BasicPlugin(meta), Exec
         }
     }
 
-    override val kDispatcher by lazy { defaultExecutor.asCoroutineDispatcher() }
+    override val coroutineContext: CoroutineContext by lazy { defaultExecutor.asCoroutineDispatcher() }
 
 
     override fun detach() {
         executors.values.forEach { it.shutdown() }
-        kDispatcher.cancel(CancellationException("Executor detached"))
+        coroutineContext.cancel()
         super.detach()
     }
 }

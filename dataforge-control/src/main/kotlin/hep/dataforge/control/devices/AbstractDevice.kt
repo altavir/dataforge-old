@@ -31,8 +31,6 @@ import hep.dataforge.meta.MetaHolder
 import hep.dataforge.names.AnonymousNotAlowed
 import hep.dataforge.states.*
 import hep.dataforge.values.ValueType
-import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.launch
 import java.time.Duration
 import java.util.concurrent.*
 
@@ -68,7 +66,7 @@ abstract class AbstractDevice(override val context: Context = Global, meta: Meta
      */
     val initialized by initializedState.booleanDelegate
 
-    private val stateListenerJob: Job = launch {
+    private val stateListenerJob: Job = GlobalScope.launch {
         val subscription = states.subscribe()
         while (true) {
             subscription.receive().also { onStateChange(it.first, it.second) }
@@ -121,7 +119,7 @@ abstract class AbstractDevice(override val context: Context = Global, meta: Meta
             }
         }
         states.update(INITIALIZED_STATE, false)
-        stateListenerJob.cancel(CancellationException("Device is shut down"))
+        stateListenerJob.cancel()
         executor.shutdown()
     }
 

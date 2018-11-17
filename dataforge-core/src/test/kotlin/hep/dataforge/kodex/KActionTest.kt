@@ -25,7 +25,7 @@ import hep.dataforge.workspace.BasicWorkspace
 import hep.dataforge.workspace.tasks.task
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertTrue
-import kotlinx.coroutines.experimental.time.delay
+import kotlinx.coroutines.time.delay
 import org.junit.Test
 import java.time.Duration
 

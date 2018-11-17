@@ -1,8 +1,5 @@
 package hep.dataforge.fx
 
-import hep.dataforge.context.Global
-import hep.dataforge.goals.Coal
-import hep.dataforge.goals.Goal
 import javafx.application.Platform
 import javafx.beans.property.BooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
@@ -14,13 +11,12 @@ import javafx.scene.image.ImageView
 import javafx.scene.layout.Region
 import javafx.scene.paint.Color
 import javafx.stage.Stage
-import kotlinx.coroutines.experimental.DefaultDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
 import tornadofx.*
 import java.util.*
 import java.util.concurrent.Executor
-import java.util.function.BiConsumer
 import kotlin.collections.HashMap
-import kotlin.coroutines.experimental.CoroutineContext
 
 val dfIcon: Image = Image(Global::class.java.getResourceAsStream("/img/df.png"))
 val dfIconView = ImageView(dfIcon)
@@ -73,9 +69,9 @@ private fun removeMonitor(component: UIComponent, id: String) {
     }
 }
 
-fun <R> UIComponent.runGoal(id: String, dispatcher: CoroutineContext = DefaultDispatcher, block: suspend GoalMonitor.() -> R): Coal<R> {
+fun <R> UIComponent.runGoal(id: String, scope: CoroutineScope = GlobalScope, block: suspend GoalMonitor.() -> R): Coal<R> {
     val monitor = getMonitor(id);
-    return Coal(dispatcher, Collections.emptyList(), id) {
+    return Coal(scope, Collections.emptyList(), id) {
         monitor.progress = -1.0
         block(monitor).also {
             monitor.progress = 1.0
