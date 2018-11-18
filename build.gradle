@@ -64,8 +64,6 @@ subprojects {
             kotlinOptions {
                 jvmTarget = "1.8"
                 javaParameters = true
-                jvmTarget = "1.8"
-                javaParameters = true
                 freeCompilerArgs += [
                         '-Xjvm-default=enable',
                         "-progressive",
@@ -78,8 +76,6 @@ subprojects {
             kotlinOptions {
                 jvmTarget = "1.8"
                 javaParameters = true
-                jvmTarget = "1.8"
-                javaParameters = true
                 freeCompilerArgs += [
                         '-Xjvm-default=enable',
                         "-progressive",
@@ -88,8 +84,4 @@ subprojects {
             }
         }
     }
-}
-
-task wrapper(type: Wrapper) {
-    gradleVersion = '4.9'
 }

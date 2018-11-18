@@ -17,6 +17,7 @@
 package hep.dataforge.storage.files
 
 import hep.dataforge.Named
+import hep.dataforge.asName
 import hep.dataforge.connections.ConnectionHelper
 import hep.dataforge.context.Context
 import hep.dataforge.context.launch
@@ -33,7 +34,7 @@ import hep.dataforge.storage.StorageElement
 import hep.dataforge.storage.StorageElementType
 import hep.dataforge.storage.StorageManager
 import kotlinx.coroutines.joinAll
-import java.net.URI
+import kotlinx.coroutines.runBlocking
 import java.nio.file.*
 import kotlin.streams.asSequence
 import kotlin.streams.toList
@@ -69,13 +70,6 @@ class FileStorage(
         val type: FileStorageElementType
 ) : MutableStorage, FileStorageElement {
 
-//    /**
-//     * The list of available children types.
-//     * Take types from parent otherwise cache them from the context
-//     */
-//    val types: List<FileStorageElementType> = (parent as? FileStorage)?.types
-//            ?: context.provideAll("fileStorageType", FileStorageElementType::class.java).toList()
-
     private val _connectionHelper by lazy { ConnectionHelper(this) }
 
     override fun getConnectionHelper(): ConnectionHelper = _connectionHelper
@@ -83,11 +77,24 @@ class FileStorage(
     private var isInitialized = false
     private val _children = HashMap<Path, StorageElement>()
 
-    override suspend fun getChildren(): Collection<StorageElement>{
-        if(!isInitialized){
-            refresh()
+
+    override val children: Collection<StorageElement>
+        get() = synchronized(this) {
+            runBlocking {
+                if (!isInitialized) {
+                    refresh()
+                }
+            }
+            _children.values
         }
-        return _children.values
+
+    override fun resolveType(meta: Meta): StorageElementType? {
+        val type = meta.optString(StorageManager.STORAGE_META_TYPE_KEY).nullable
+        return if (type == null) {
+            directory
+        } else {
+            context.plugins[StorageManager::class]?.resolveType(meta)
+        }
     }
 
     /**
@@ -100,9 +107,11 @@ class FileStorage(
     //TODO actually watch for file change
 
     override suspend fun create(meta: Meta): StorageElement {
-        val path = path.resolve(meta.getString("path"))
+        val path = path.resolve(meta.getString("path", meta.getString("name")))
         return _children.getOrPut(path) {
-            MutableStorage.createNewElement(this, meta)
+            resolveType(meta)
+                    ?.create(this, meta)
+                    ?: error("Can't resolve storage element type.")
         }
     }
 
@@ -149,6 +158,8 @@ class FileStorage(
         fun getFileName(file: Path): String {
             return file.fileName.toString().substringBeforeLast(".")
         }
+
+        val directory = FileStorage.Directory()
     }
 
     open class Directory : FileStorageElementType {
@@ -156,13 +167,13 @@ class FileStorage(
 
         @ValueDefs(
                 ValueDef(key = "path", info = "The relative path to the shelf inside parent storage or absolute path"),
-                ValueDef(key = "name", info = "The name of the new storage. By default use last segment shelf name")
+                ValueDef(key = "name", required = true, info = "The name of the new storage. By default use last segment shelf name")
         )
         override suspend fun create(context: Context, meta: Meta, parent: StorageElement?): FileStorageElement {
-            val shelf = meta.getString("path")
-            val shelfPath = Paths.get(URI(shelf))
+            val shelfName = meta.getString("name")
+            val segments = meta.getString("path", shelfName).asName()
+            val shelfPath = Paths.get(segments.tokens.joinToString(separator = "/"))
             val path: Path = ((parent as? FileStorageElement)?.path ?: context.dataDir).resolve(shelfPath)
-            val name = meta.getString("name", path.fileName.toString())
             if (!Files.exists(path)) {
                 Files.createDirectories(path)
             }
@@ -171,7 +182,7 @@ class FileStorage(
             Files.newOutputStream(metaFile, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE).use {
                 TaglessEnvelopeType.INSTANCE.writer.write(it, createMetaEnvelope(meta))
             }
-            return FileStorage(context, name, meta, path, parent, this).also {
+            return FileStorage(context, shelfName, meta, path, parent, this).also {
                 if (parent == null) {
                     context.load<StorageManager>().register(it)
                 }
@@ -181,7 +192,7 @@ class FileStorage(
         override suspend fun read(context: Context, path: Path, parent: StorageElement?): FileStorageElement? {
             val meta = resolveMeta(path)
             val name = meta?.optString("name").nullable ?: path.fileName.toString()
-            val type = meta?.optString("type").nullable?.let { context.load<StorageManager>().optType(it) } as? FileStorageElementType
+            val type = meta?.optString("type").nullable?.let { context.load<StorageManager>().getType(it) } as? FileStorageElementType
             return if (type == null || type is Directory) {
                 // Read path as directory if type not found and path is directory
                 if (Files.isDirectory(path)) {
@@ -201,3 +212,4 @@ class FileStorage(
         }
     }
 }
+

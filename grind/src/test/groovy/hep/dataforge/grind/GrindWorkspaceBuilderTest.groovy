@@ -17,7 +17,7 @@ class GrindWorkspaceBuilderTest extends Specification {
         DataNode res = workspace.run("testTask")
         res.dataStream().forEach { println("${it.name}: ${it.get()}") }
         then:
-        res.get("a") == 4;
+        res.get("a").int  == 4;
     }
 
     def "Run Task with meta"() {
@@ -27,6 +27,6 @@ class GrindWorkspaceBuilderTest extends Specification {
         DataNode res = workspace.run("testTask{childNode(metaValue: 18); otherChildNode(val: false)}")
         res.dataStream().forEach { println("${it.name}: ${it.get()}") }
         then:
-        res.get("meta.childNode.metaValue") == 18
+        res.get("meta.childNode.metaValue").int == 18
     }
 }

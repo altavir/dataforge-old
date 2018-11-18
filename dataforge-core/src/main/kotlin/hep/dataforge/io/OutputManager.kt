@@ -126,7 +126,7 @@ class SplitOutputManager(val managers: Set<OutputManager> = HashSet(), meta: Met
     override fun attach(context: Context) {
         super.attach(context)
         managers.forEach {
-            context.pluginManager.loadDependencies(it)
+            context.plugins.loadDependencies(it)
             it.attach(context)
         }
     }

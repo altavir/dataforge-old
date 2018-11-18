@@ -24,26 +24,31 @@ import hep.dataforge.context.PluginFactory
 import hep.dataforge.meta.KMetaBuilder
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.buildMeta
+import hep.dataforge.nullable
 import hep.dataforge.providers.Provides
 import hep.dataforge.providers.ProvidesNames
 import kotlin.streams.toList
 
 
 @PluginDef(name = "storage", group = "hep.dataforge", info = "Dataforge root storage plugin")
-class StorageManager() : BasicPlugin(), MutableStorage {
+class StorageManager : BasicPlugin(), MutableStorage {
 
     override val parent: StorageElement? = null
     private val _connectionHelper = ConnectionHelper(this)
     private val _children = HashMap<String, StorageElement>()
 
-    override suspend fun getChildren() = _children.values
+    override val children get() = _children.values
 
     override fun getConnectionHelper(): ConnectionHelper = _connectionHelper
 
-    val types by lazy { context.serviceStream(StorageElementType::class.java).toList() }
+    private val types by lazy { context.serviceStream(StorageElementType::class.java).toList() }
+
+    override fun resolveType(meta: Meta): StorageElementType? {
+        return meta.optString(STORAGE_META_TYPE_KEY).nullable?.let { getType(it)}
+    }
 
     @Provides(STORAGE_TYPE_TARGET)
-    fun optType(name: String): StorageElementType? {
+    fun getType(name: String): StorageElementType? {
         return types.find { it.name == name }
     }
 
@@ -55,10 +60,10 @@ class StorageManager() : BasicPlugin(), MutableStorage {
     /**
      * Register existing orphan element
      */
-    fun register(element: StorageElement){
-        if(element.parent == null || element.parent == this) {
+    fun register(element: StorageElement) {
+        if (element.parent == null || element.parent == this) {
             _children.putIfAbsent(element.name, element)
-        } else{
+        } else {
             error("Can't register non-orphaned element")
         }
     }
@@ -67,10 +72,8 @@ class StorageManager() : BasicPlugin(), MutableStorage {
      * Create a root storage
      */
     override suspend fun create(meta: Meta): StorageElement {
-        val type = meta.getString("type", DEFAULT_STORAGE_TYPE)
-        val element = types.find { it.name == type }
-                ?.create(this, meta)
-                ?: error("Storage factory with type $type not found in ${context.name}")
+        val element = resolveType(meta)?.create(this, meta)
+                ?: error("Storage factory for $meta not found in ${context.name}")
         //TODO evaluate meta clash
         register(element)
         return element
@@ -97,7 +100,7 @@ class StorageManager() : BasicPlugin(), MutableStorage {
     }
 
     companion object {
-        const val DEFAULT_STORAGE_TYPE = ""
+        const val STORAGE_META_TYPE_KEY = "type"
         const val STORAGE_TYPE_TARGET = "storageType"
     }
 }

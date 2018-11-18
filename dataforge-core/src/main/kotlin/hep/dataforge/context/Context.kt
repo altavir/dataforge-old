@@ -80,7 +80,7 @@ open class Context(
      *
      * @return
      */
-    val pluginManager: PluginManager by lazy { PluginManager(this) }
+    val plugins: PluginManager by lazy { PluginManager(this) }
     var logger: Logger = LoggerFactory.getLogger(name)
     private val lock by lazy { ContextLock(this) }
 
@@ -104,7 +104,7 @@ open class Context(
      */
     var output: OutputManager
         get() {
-            val thisOutput = pluginManager[OutputManager::class, false]
+            val thisOutput = plugins[OutputManager::class, false]
             return when {
                 parent == null -> thisOutput ?: Global.consoleOutputManager // default console for Global
                 thisOutput == null -> parent.output// return parent output manager if not defined for this one
@@ -123,8 +123,8 @@ open class Context(
         set(newOutput) {
             //remove old output
             lock.operate {
-                pluginManager.get<OutputManager>(false)?.let { pluginManager.remove(it) }
-                pluginManager.load(newOutput)
+                plugins.get<OutputManager>(false)?.let { plugins.remove(it) }
+                plugins.load(newOutput)
             }
         }
 
@@ -159,7 +159,7 @@ open class Context(
         get() = lock.isLocked
 
     open val history: Chronicler
-        get() = pluginManager[Chronicler::class] ?: parent?.history ?: Global.history
+        get() = plugins[Chronicler::class] ?: parent?.history ?: Global.history
 
     /**
      * {@inheritDoc} namespace does not work
@@ -184,12 +184,12 @@ open class Context(
 
     @Provides(Plugin.PLUGIN_TARGET)
     fun getPlugin(pluginName: String): Plugin? {
-        return pluginManager.get(PluginTag.fromString(pluginName))
+        return plugins.get(PluginTag.fromString(pluginName))
     }
 
     @ProvidesNames(Plugin.PLUGIN_TARGET)
     fun listPlugins(): Collection<String> {
-        return pluginManager.map { it.name }
+        return plugins.map { it.name }
     }
 
     @ProvidesNames(ValueProvider.VALUE_TARGET)
@@ -203,28 +203,17 @@ open class Context(
     }
 
 
-    /**
-     * Get a plugin extending given class
-     *
-     * @param type
-     * @param <T>
-     * @return
-     */
-    operator fun <T:Any> get(type: Class<T>): T {
-        return opt(type) ?: throw RuntimeException("Feature could not be loaded by type: " + type.simpleName)
-    }
-
-    inline fun <reified T: Any> get(): T {
+    inline fun <reified T : Any> get(): T? {
         return get(T::class.java)
     }
 
     @JvmOverloads
     fun <T : Plugin> load(type: Class<T>, meta: Meta = Meta.empty()): T {
-        return pluginManager.load(type, meta)
+        return plugins.load(type, meta)
     }
 
     inline fun <reified T : Plugin> load(noinline metaBuilder: KMetaBuilder.() -> Unit = {}): T {
-        return pluginManager.load(metaBuilder)
+        return plugins.load(metaBuilder)
     }
 
 
@@ -235,11 +224,18 @@ open class Context(
      * @param <T>
      * @return
      */
-    fun <T: Any> opt(type: Class<T>): T? {
-        return pluginManager
+    operator fun <T : Any> get(type: Class<T>): T? {
+        return plugins
                 .stream(true)
                 .asSequence().filterIsInstance(type)
                 .firstOrNull()
+    }
+
+    /**
+     * Get existing plugin or load it with default meta
+     */
+    fun <T : Plugin> getOrLoad(type: Class<T>): T {
+        return get(type) ?: load(type)
     }
 
     private val serviceCache: MutableMap<Class<*>, ServiceLoader<*>> = HashMap()
@@ -273,7 +269,7 @@ open class Context(
     override fun toMeta(): Meta {
         return buildMeta("context") {
             update(properties)
-            pluginManager.stream(true).forEach { plugin ->
+            plugins.stream(true).forEach { plugin ->
                 if (plugin.javaClass.isAnnotationPresent(PluginDef::class.java)) {
                     if (!plugin.javaClass.getAnnotation(PluginDef::class.java).support) {
                         putNode(plugin.toMeta())
@@ -313,7 +309,7 @@ open class Context(
     @Throws(Exception::class)
     override fun close() {
         //detach all plugins
-        pluginManager.close()
+        plugins.close()
 
         if (started) {
             dispatcher.shutdown()
@@ -329,7 +325,7 @@ open class Context(
      */
     val rootDir: Path by lazy {
         properties[ROOT_DIRECTORY_CONTEXT_KEY]
-                ?.let {value -> Paths.get(value.string).also { Files.createDirectories(it) } }
+                ?.let { value -> Paths.get(value.string).also { Files.createDirectories(it) } }
                 ?: parent?.rootDir
                 ?: File(System.getProperty("user.home")).toPath()
     }
@@ -396,16 +392,16 @@ open class Context(
         return if (target == PLUGIN_TARGET || target == VALUE_TARGET) {
             super.provideAll(target, type)
         } else {
-            pluginManager.stream(true).flatMap { it.provideAll(target, type) }
+            plugins.stream(true).flatMap { it.provideAll(target, type) }
         }
     }
 
 
     open val executors: ExecutorPlugin
-        get() = pluginManager[ExecutorPlugin::class] ?: parent?.executors ?: Global.executors
+        get() = plugins[ExecutorPlugin::class] ?: parent?.executors ?: Global.executors
 
     override val coroutineContext: CoroutineContext
-        get() =  this.executors.coroutineContext
+        get() = this.executors.coroutineContext
 
     companion object {
 

@@ -69,7 +69,7 @@ class BasicWorkspace(
         }
 
         override fun build(): Workspace {
-            context.pluginManager.stream(true)
+            context.plugins.stream(true)
                     .flatMap { plugin -> plugin.provideAll(Task.TASK_TARGET, Task::class.java) }
                     .forEach { taskMap.putIfAbsent(it.name, it) }
             return BasicWorkspace(context, taskMap, targetMap, data.build())

@@ -95,7 +95,7 @@ class OutputContainer(val context: Context, val meta: Meta) : Fragment(title = "
      */
     private fun buildOutput(type: String, meta: Meta): FXOutput {
         return when {
-            type.startsWith(Plottable.PLOTTABLE_TYPE) -> if (context.opt(PlotFactory::class.java) != null) {
+            type.startsWith(Plottable.PLOTTABLE_TYPE) -> if (context.get(PlotFactory::class.java) != null) {
                 FXPlotOutput(context, meta)
             } else {
                 context.logger.error("Plot output not defined in the context")
@@ -159,7 +159,10 @@ class OutputContainer(val context: Context, val meta: Meta) : Fragment(title = "
 }
 
 @PluginDef(name = "output.fx", dependsOn = ["hep.dataforge.fx", "hep.dataforge.plots"], info = "JavaFX based output manager")
-class FXOutputManager(meta: Meta = Meta.empty(), viewConsumer: Context.(OutputContainer) -> Unit = { get<FXPlugin>().display(it) }) : OutputManager, BasicPlugin(meta) {
+class FXOutputManager(
+        meta: Meta = Meta.empty(),
+        viewConsumer: Context.(OutputContainer) -> Unit = { getOrLoad(FXPlugin::class.java).display(it) }
+) : OutputManager, BasicPlugin(meta) {
 
     override val tag = PluginTag(name = "output.fx", dependsOn = *arrayOf("hep.dataforge:fx"))
 

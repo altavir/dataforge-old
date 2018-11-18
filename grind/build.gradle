@@ -9,5 +9,5 @@ dependencies {
     compile project(":dataforge-core")
     compile 'org.codehaus.groovy:groovy-all:2.4+'
 
-    testImplementation project(":dataforge-gui")
+    testCompile project(":dataforge-gui")
 }

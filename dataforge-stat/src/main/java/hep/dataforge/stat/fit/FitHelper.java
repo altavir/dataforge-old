@@ -35,7 +35,7 @@ public class FitHelper {
     private FitManager manager;
 
     public FitHelper(Context context) {
-        this.manager = context.getPluginManager().load(FitManager.class);
+        this.manager = context.getPlugins().load(FitManager.class);
     }
 
     public FitHelper() {

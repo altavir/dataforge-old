@@ -22,6 +22,7 @@ import hep.dataforge.meta.Meta
 import hep.dataforge.meta.buildMeta
 import hep.dataforge.nullable
 import hep.dataforge.storage.IndexedTableLoader
+import hep.dataforge.storage.MutableStorage
 import hep.dataforge.storage.MutableTableLoader
 import hep.dataforge.storage.StorageElement
 import hep.dataforge.storage.files.TableLoaderType.Companion.TABLE_FORMAT_KEY
@@ -323,4 +324,13 @@ class TableLoaderType : FileStorageElementType {
             else -> throw RuntimeException("Unknown data type for table loader")
         }
     }
+}
+
+suspend fun MutableStorage.createTable(name: String, format: TableFormat): MutableTableLoader {
+    val meta = buildMeta {
+        "name" to name
+        TABLE_FORMAT_KEY to format.toMeta()
+        Envelope.ENVELOPE_DATA_TYPE_KEY to TableLoaderType.BINARY_DATA_TYPE
+    }
+    return create(meta) as MutableTableLoader
 }

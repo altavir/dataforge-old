@@ -13,7 +13,7 @@ class CoreExtensionTest extends Specification {
         }
         then:
         meta.child["c"] == 22.8
-        meta.getValue("child.d") == "hocus-pocus"
+        meta.getValue("child.d").string == "hocus-pocus"
     }
 
     def "Property write"() {

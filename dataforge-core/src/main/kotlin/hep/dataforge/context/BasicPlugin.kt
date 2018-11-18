@@ -51,7 +51,7 @@ abstract class BasicPlugin(meta: Meta = Meta.empty(), tag: PluginTag? = null) : 
         if (_context != null && Global != context) {
             Global.logger.warn("Loading plugin as global from non-global context")
         }
-        Global.pluginManager.load(this)
+        Global.plugins.load(this)
     }
 
     override fun attach(context: Context) {

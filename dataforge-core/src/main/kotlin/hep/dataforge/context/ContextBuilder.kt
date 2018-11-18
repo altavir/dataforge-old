@@ -94,7 +94,7 @@ class ContextBuilder(val name: String, val parent: Context = Global) {
     @JvmOverloads
     fun plugin(type: Class<out Plugin>, meta: Meta = Meta.empty()): ContextBuilder {
         val tag = PluginTag.resolve(type)
-        return plugin(parent.pluginManager.pluginLoader.get(tag, meta))
+        return plugin(parent.plugins.pluginLoader.get(tag, meta))
     }
 
     inline fun <reified T : Plugin> plugin(noinline metaBuilder: KMetaBuilder.() -> Unit = {}): ContextBuilder {
@@ -103,7 +103,7 @@ class ContextBuilder(val name: String, val parent: Context = Global) {
 
     fun plugin(tag: String, meta: Meta): ContextBuilder {
         val pluginTag = PluginTag.fromString(tag)
-        return plugin(parent.pluginManager.pluginLoader.get(pluginTag, meta))
+        return plugin(parent.plugins.pluginLoader.get(pluginTag, meta))
     }
 
 
@@ -188,10 +188,10 @@ class ContextBuilder(val name: String, val parent: Context = Global) {
 
         return Context(name, parent, classLoader, properties).apply {
             this@ContextBuilder.output?.let {
-                pluginManager.load(it)
+                plugins.load(it)
             }
             plugins.forEach {
-                pluginManager.load(it)
+                plugins.load(it)
             }
 
 //            //If custom paths are defined, use new plugin to direct to them

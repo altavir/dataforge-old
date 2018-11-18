@@ -54,7 +54,7 @@ class ExecSpec {
     }
 
     Action build() {
-        return new GrindExecAction();
+        return new GrindExecAction(actionName);
     }
 
     @TupleConstructor
@@ -242,9 +242,8 @@ class ExecSpec {
 //    @NodeDef(name = "parameter", info = "The definition for command parameter")
     private class GrindExecAction extends OneToOneAction<Object, Object> {
 
-        @Override
-        String getName() {
-            return actionName;
+        GrindExecAction(String name) {
+            super(name, Object, Object)
         }
 
         @Override

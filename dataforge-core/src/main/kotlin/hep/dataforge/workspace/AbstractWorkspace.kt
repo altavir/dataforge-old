@@ -52,11 +52,11 @@ abstract class AbstractWorkspace(
     }
 
     private val cache: CachePlugin by lazy {
-        context.get<CachePlugin>()
+        context.getOrLoad(CachePlugin::class.java)
     }
 
     private val cacheEnabled: Boolean
-        get() = context.getBoolean("cache.enabled", true)
+        get() = context[CachePlugin::class.java] != null && context.getBoolean("cache.enabled", true)
 
     override fun runTask(model: TaskModel): DataNode<*> {
         //Cache result if cache is available and caching is not blocked by task

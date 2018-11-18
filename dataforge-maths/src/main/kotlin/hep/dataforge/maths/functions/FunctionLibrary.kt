@@ -117,7 +117,7 @@ class FunctionLibrary : BasicPlugin() {
 
     companion object {
         fun buildFrom(context: Context): FunctionLibrary {
-            return context.pluginManager.load(FunctionLibrary::class.java)
+            return context.plugins.load(FunctionLibrary::class.java)
         }
     }
 

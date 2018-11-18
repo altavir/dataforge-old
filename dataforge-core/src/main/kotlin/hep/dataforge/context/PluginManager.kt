@@ -41,7 +41,7 @@ class PluginManager(override val context: Context) : ContextAware, AutoCloseable
      */
     var pluginLoader: PluginLoader = ClassPathPluginLoader(context)
 
-    private val parent: PluginManager? = context.parent?.pluginManager
+    private val parent: PluginManager? = context.parent?.plugins
 
 
     fun stream(recursive: Boolean): Stream<Plugin> {
@@ -170,6 +170,13 @@ class PluginManager(override val context: Context) : ContextAware, AutoCloseable
     @JvmOverloads
     fun load(name: String, meta: Meta = Meta.empty()): Plugin {
         return load(PluginTag.fromString(name), meta)
+    }
+
+    /**
+     * Get existing plugin or load it with default meta
+     */
+    fun <T : Plugin> getOrLoad(type: KClass<T>): T {
+        return get(type) ?: load(type)
     }
 
     @Throws(Exception::class)

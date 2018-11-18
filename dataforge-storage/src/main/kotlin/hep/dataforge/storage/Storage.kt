@@ -25,11 +25,8 @@ import hep.dataforge.connections.RoleDef
 import hep.dataforge.connections.RoleDefs
 import hep.dataforge.context.Context
 import hep.dataforge.context.ContextAware
-import hep.dataforge.context.launch
 import hep.dataforge.events.EventHandler
-import hep.dataforge.exceptions.NameNotFoundException
-import hep.dataforge.meta.Meta
-import hep.dataforge.meta.Metoid
+import hep.dataforge.meta.*
 import hep.dataforge.names.Name
 import hep.dataforge.providers.Provider
 import hep.dataforge.providers.Provides
@@ -59,9 +56,9 @@ interface StorageElement : Named, Metoid, Provider, ContextAware, AutoConnectibl
      */
     @JvmDefault
     val fullName: Name
-        get() = if(parent == null){
+        get() = if (parent == null) {
             Name.empty()
-        } else{
+        } else {
             parent?.fullName?.plus(name) ?: Name.ofSingle(name)
         }
 
@@ -78,14 +75,14 @@ interface Storage : StorageElement {
     /**
      * Top level children of this storage
      */
-    suspend fun getChildren(): Collection<StorageElement>
+    val children: Collection<StorageElement>
 
     /**
      * Names of direct children for provider
      */
     @get:ProvidesNames(STORAGE_TARGET)
     val childrenNames: Collection<String>
-        get() = runBlocking { getChildren().map { it.name }}
+        get() = runBlocking { children.map { it.name } }
 
     /**
      * Get storage element (name notation for recursive calls). Null if not present
@@ -102,9 +99,7 @@ interface Storage : StorageElement {
     @JvmDefault
     operator fun get(name: Name): StorageElement? {
         return if (name.length == 1) {
-            runBlocking {
-                getChildren().find { it.name == name.unescaped }
-            }
+            children.find { it.name == name.unescaped }
         } else {
             (get(name.first) as Storage?)?.get(name.cutFirst())
         }
@@ -118,9 +113,7 @@ interface Storage : StorageElement {
      */
     @JvmDefault
     override fun close() {
-        launch {
-            getChildren().forEach { it.close() }
-        }
+        children.forEach { it.close() }
     }
 }
 
@@ -133,18 +126,22 @@ interface MutableStorage : Storage {
      */
     suspend fun create(meta: Meta): StorageElement
 
-    companion object {
-        /**
-         * Create new element but do not register it with parent
-         */
-        suspend fun createNewElement(parent: Storage, meta: Meta): StorageElement{
-            val type = meta.getString("type", StorageManager.DEFAULT_STORAGE_TYPE)
-            return parent.context.load<StorageManager>().optType(type)
-                    ?.create(parent.context, meta, parent)
-                    ?: throw NameNotFoundException(type, "Storage element factory.")
+    /**
+     * Resolve type of new element based on meta or return null if element type could not be resolved
+     */
+    fun resolveType(meta: Meta): StorageElementType?
+}
 
-        }
-    }
+suspend fun MutableStorage.create(metaBuilder: KMetaBuilder.() -> Unit) = create(buildMeta(MetaBuilder.DEFAULT_META_NAME, metaBuilder))
+
+/**
+ * Create a child storage. In general it has the same type ase parent storage, but it is not guaranteed
+ */
+suspend fun MutableStorage.createShelf(shelfName: String, meta: Meta = Meta.empty()): MutableStorage {
+    return create{
+        "name" to shelfName
+        update(meta)
+    } as MutableStorage
 }
 
 /**

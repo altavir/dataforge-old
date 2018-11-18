@@ -2,8 +2,7 @@
 // define context
 context{
     name = "TEST"
-    plugin "cache"
-    plugin "plots-fx"
+    plugin "fx"
     properties{
         a = 4
         b = false

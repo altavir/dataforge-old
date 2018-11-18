@@ -44,7 +44,7 @@ class WorkspaceTest {
     @Test
     fun testCaching() {
         counter.set(0)
-        wsp.context[CachePlugin::class.java].invalidate()
+        wsp.context[CachePlugin::class.java]?.invalidate()
         val res1 = wsp.runTask("test2", Meta.empty())
         val res2 = wsp.runTask("test2", Meta.empty())
         res1.computeAll()
