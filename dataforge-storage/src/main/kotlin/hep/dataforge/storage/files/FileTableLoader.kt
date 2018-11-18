@@ -29,6 +29,8 @@ import hep.dataforge.storage.files.TableLoaderType.Companion.binaryTableWriter
 import hep.dataforge.tables.MetaTableFormat
 import hep.dataforge.tables.TableFormat
 import hep.dataforge.values.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.io.DataOutputStream
 import java.nio.ByteBuffer
@@ -70,9 +72,7 @@ open class FileTableLoader internal constructor(
         if (index == 0) {
             return 0
         } else if (index >= defaultIndex.size) {
-            runBlocking {
-                updateIndex()
-            }
+            updateIndex()
         }
         return defaultIndex[index.asValue()]
     }
@@ -165,15 +165,21 @@ class IndexedFileTableLoader(val loader: FileTableLoader, val indexField: String
 /**
  * Appendable version of FileTableLoader. Build
  */
-class AppendableFileTableLoader(val loader: FileTableLoader, val writer: (Values, TableFormat) -> ByteBuffer = binaryTableWriter) : IndexedTableLoader by loader, MutableTableLoader {
+class AppendableFileTableLoader(
+        val loader: FileTableLoader,
+        val writer: (Values, TableFormat) -> ByteBuffer = binaryTableWriter
+) : IndexedTableLoader by loader, MutableTableLoader {
+
     private val mutableEnvelope = MutableFileEnvelope.readExisting(loader.path)
 
     /**
      * Append single point
      */
     override suspend fun append(item: Values) {
-        mutableEnvelope.append(writer(item, format))
-        loader.updateIndex()
+        withContext(Dispatchers.IO) {
+            mutableEnvelope.append(writer(item, format))
+            loader.updateIndex()
+        }
     }
 
     suspend fun append(vararg values: Any) {

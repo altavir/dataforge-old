@@ -6,29 +6,30 @@
 package hep.dataforge.control.connections
 
 import hep.dataforge.connections.Connection
-import hep.dataforge.exceptions.StorageException
-import hep.dataforge.storage.api.TableLoader
+import hep.dataforge.context.Context
+import hep.dataforge.context.ContextAware
+import hep.dataforge.context.launch
+import hep.dataforge.storage.MutableTableLoader
 import hep.dataforge.tables.ValuesListener
 import hep.dataforge.values.Values
-import org.slf4j.LoggerFactory
 
 /**
  *
  * @author Alexander Nozik
  */
-class LoaderConnection(private val loader: TableLoader): Connection, ValuesListener {
+class LoaderConnection(private val loader: MutableTableLoader) : Connection, ValuesListener, ContextAware {
+
+    override val context: Context
+        get() = loader.context
 
     override fun accept(point: Values) {
-        try {
-            loader.push(point)
-        } catch (ex: StorageException) {
-            LoggerFactory.getLogger(javaClass).error("Error while pushing data", ex)
+        launch {
+            loader.append(point)
         }
-
     }
 
     override fun isOpen(): Boolean {
-        return loader.isOpen
+        return true
     }
 
     override fun open(`object`: Any) {

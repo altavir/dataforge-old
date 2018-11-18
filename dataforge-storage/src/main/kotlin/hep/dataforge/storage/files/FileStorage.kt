@@ -32,6 +32,7 @@ import hep.dataforge.storage.MutableStorage
 import hep.dataforge.storage.StorageElement
 import hep.dataforge.storage.StorageElementType
 import hep.dataforge.storage.StorageManager
+import kotlinx.coroutines.joinAll
 import java.net.URI
 import java.nio.file.*
 import kotlin.streams.asSequence
