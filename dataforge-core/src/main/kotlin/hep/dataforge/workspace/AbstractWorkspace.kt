@@ -52,7 +52,7 @@ abstract class AbstractWorkspace(
     }
 
     private val cache: CachePlugin by lazy {
-        context.load<CachePlugin>()
+        context.get<CachePlugin>()
     }
 
     private val cacheEnabled: Boolean

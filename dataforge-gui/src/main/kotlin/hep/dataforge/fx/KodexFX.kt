@@ -1,5 +1,8 @@
 package hep.dataforge.fx
 
+import hep.dataforge.context.Global
+import hep.dataforge.goals.Coal
+import hep.dataforge.goals.Goal
 import javafx.application.Platform
 import javafx.beans.property.BooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
@@ -16,6 +19,7 @@ import kotlinx.coroutines.GlobalScope
 import tornadofx.*
 import java.util.*
 import java.util.concurrent.Executor
+import java.util.function.BiConsumer
 import kotlin.collections.HashMap
 
 val dfIcon: Image = Image(Global::class.java.getResourceAsStream("/img/df.png"))

@@ -38,7 +38,7 @@ class FXWebOutputTest {
 
         val node = document.getElementsByTagName("body").item(0)
 
-        val appender = node.append.onFinalize { from, partial ->
+        val appender = node.append.onFinalize { from, _ ->
             println(from.ownerDocument.serialize(true))
         }
 

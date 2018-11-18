@@ -31,6 +31,6 @@ include ':dataforge-storage:storage-server' // Storage web servlet
 
 include ':dataforge-storage2' // storage2 module
 
-include ':dataforge-messages'
+//include ':dataforge-messages'
 
 include ':site'//the site

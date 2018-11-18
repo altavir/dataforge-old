@@ -16,15 +16,15 @@ class TablesKtTest {
     }
 
     @Test
-    fun groupTest(){
+    fun groupTest() {
         val res = table.groupBy { floor(it["a"].double / 0.1) }
         assertEquals(10, res.size)
     }
 
     @Test
     fun testReduction() {
-        val reduced = table.sumByStep("a",0.1)
+        val reduced = table.sumByStep("a", 0.1)
         assertEquals(10, reduced.size())
-        assertEquals(45,reduced.first()["b"].int)
+        assertEquals(55, reduced.first()["b"].int)
     }
 }

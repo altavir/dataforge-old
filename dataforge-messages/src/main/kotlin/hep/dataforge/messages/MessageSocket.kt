@@ -18,7 +18,11 @@ package hep.dataforge.messages
 
 import hep.dataforge.context.Context
 import hep.dataforge.context.ContextAware
+import hep.dataforge.context.launch
 import hep.dataforge.io.envelopes.*
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.channels.Channel
 import java.net.Socket
 
 /**
@@ -45,9 +49,9 @@ class MessageSocket(override val context: Context, private val receiver: Receive
 
 
     fun open() {
-        val job = Job()
+        val job = SupervisorJob()
         parentJob = job
-        launch(context.scope, parent = job) {
+        launch(job) {
             val stream = socket.getOutputStream()
             val writer = DefaultEnvelopeWriter(DefaultEnvelopeType.INSTANCE, binaryMetaType)
 
@@ -57,7 +61,7 @@ class MessageSocket(override val context: Context, private val receiver: Receive
             }
         }
 
-        launch(context.scope, parent = job) {
+        launch(job) {
             val stream = socket.getInputStream()
             val reader = DefaultEnvelopeReader.INSTANCE
 
@@ -66,7 +70,7 @@ class MessageSocket(override val context: Context, private val receiver: Receive
             }
         }
 
-        launch(context.scope, parent = job) {
+        launch(job) {
             while (true) {
                 receiver.send(incoming.receive())
             }
@@ -82,7 +86,7 @@ class MessageSocket(override val context: Context, private val receiver: Receive
      * send message via socket
      */
     override fun send(message: Envelope) {
-        launch(context.scope) {
+        launch {
             incoming.send(message)
         }
     }

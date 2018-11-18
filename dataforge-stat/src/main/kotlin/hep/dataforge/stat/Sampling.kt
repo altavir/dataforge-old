@@ -18,6 +18,7 @@ package hep.dataforge.stat
 
 import hep.dataforge.maths.chain.Chain
 import hep.dataforge.maths.chain.SimpleChain
+import kotlinx.coroutines.channels.dropWhile
 import org.apache.commons.math3.distribution.MultivariateRealDistribution
 import org.apache.commons.math3.distribution.RealDistribution
 import org.apache.commons.math3.random.RandomGenerator

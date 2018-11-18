@@ -177,11 +177,11 @@ class RowReducer(val default: (Iterable<Value>) -> Value) {
         reducers[key] = reducer
     }
 
-    fun sumByDouble(key: String) = rule(key) { it.sumByDouble { it.double }.asValue() }
-    fun sumByInt(key: String) = rule(key) { it.sumBy { it.int }.asValue() }
+    fun sumByDouble(key: String) = rule(key) { rows -> rows.sumByDouble { it.double }.asValue() }
+    fun sumByInt(key: String) = rule(key) { rows -> rows.sumBy { it.int }.asValue() }
 
-    fun averageByDouble(key: String) = rule(key) { it.map { it.double }.average().asValue() }
-    fun averageByInt(key: String) = rule(key) { it.map { it.int }.average().asValue() }
+    fun averageByDouble(key: String) = rule(key) { rows -> rows.map { it.double }.average().asValue() }
+    fun averageByInt(key: String) = rule(key) { rows -> rows.map { it.int }.average().asValue() }
 
     fun reduce(key: String, values: Iterable<Value>): Value {
         return reducers.getOrDefault(key, default).invoke(values)
@@ -206,7 +206,7 @@ class RowReducer(val default: (Iterable<Value>) -> Value) {
 fun Table.sumByStep(key: String, step: Double, customizer: (RowReducer) -> Unit = {}): Table {
     assert(step > 0) { "Step must be positive" }
 
-    val reducer = RowReducer { it.sumByDouble { it.double }.asValue() }.apply {
+    val reducer = RowReducer { rows -> rows.sumByDouble { it.double }.asValue() }.apply {
         averageByDouble(key)
     }.apply(customizer)
 

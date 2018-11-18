@@ -45,8 +45,10 @@ class WorkspaceTest {
     fun testCaching() {
         counter.set(0)
         wsp.context[CachePlugin::class.java].invalidate()
-        val res1 = wsp.runTask("test2", Meta.empty()).apply { computeAll() }
-        val res2 = wsp.runTask("test2", Meta.empty()).apply { computeAll() }
+        val res1 = wsp.runTask("test2", Meta.empty())
+        val res2 = wsp.runTask("test2", Meta.empty())
+        res1.computeAll()
+        res2.computeAll()
         assertEquals(6, counter.get().toLong())
         val res3 = wsp.runTask("test2", MetaBuilder().putValue("a", 1))
                 .getCheckedData("data_2", Number::class.java).get().toLong()

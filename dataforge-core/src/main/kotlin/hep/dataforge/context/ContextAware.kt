@@ -19,6 +19,8 @@ import hep.dataforge.Named
 import kotlinx.coroutines.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 /**
  * The interface for something that encapsulated in context
@@ -43,7 +45,13 @@ interface ContextAware {
         }
 }
 
-fun ContextAware.launch(block: suspend CoroutineScope.() -> Unit): Job = context.launch(block = block)
+fun ContextAware.launch(
+        context: CoroutineContext = EmptyCoroutineContext,
+        start: CoroutineStart = CoroutineStart.DEFAULT,
+        block: suspend CoroutineScope.() -> Unit): Job = this.context.launch(context, start, block)
 
-fun <R> ContextAware.async(block: suspend CoroutineScope.() -> R): Deferred<R> = context.async(block = block)
+fun <R> ContextAware.async(
+        context: CoroutineContext = EmptyCoroutineContext,
+        start: CoroutineStart = CoroutineStart.DEFAULT,
+        block: suspend CoroutineScope.() -> R): Deferred<R> = this.context.async(context, start, block)
 

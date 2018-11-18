@@ -16,6 +16,14 @@
 
 package hep.dataforge.maths.chain
 
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.channels.map
+import kotlinx.coroutines.channels.produce
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+
 /**
  * A not-necessary-Markov chain of some type
  * @param S - the state of the chain

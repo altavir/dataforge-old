@@ -57,7 +57,7 @@ remotes {
         role 'webServers'
         host = 'npm.mipt.ru'
         user = findProperty('npm.user')
-        password =findProperty('npm.pass')
+        password = findProperty('npm.pass')
     }
 }
 

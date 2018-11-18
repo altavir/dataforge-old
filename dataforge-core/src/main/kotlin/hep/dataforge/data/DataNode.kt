@@ -163,7 +163,7 @@ interface DataNode<T : Any> : Iterable<NamedData<out T>>, Named, Metoid, Provide
      * Force start data goals for all data and wait for completion
      */
     fun computeAll(){
-        nodeGoal().run()
+        nodeGoal().get()
     }
 
     /**
@@ -181,7 +181,7 @@ interface DataNode<T : Any> : Iterable<NamedData<out T>>, Named, Metoid, Provide
      * @param consumer
      */
     fun handle(consumer: Consumer<DataNode<in T>>) {
-        nodeGoal().onComplete { res, err -> consumer.accept(this@DataNode) }
+        nodeGoal().onComplete { _, _ -> consumer.accept(this@DataNode) }
     }
 
     /**
