@@ -14,16 +14,25 @@
  *  limitations under the License.
  */
 
-package hep.dataforge.storage
+package hep.dataforge.storage.tables
 
 import hep.dataforge.Type
+import hep.dataforge.context.async
+import hep.dataforge.io.envelopes.Envelope
 import hep.dataforge.meta.Meta
+import hep.dataforge.meta.buildMeta
+import hep.dataforge.storage.AppendableLoader
+import hep.dataforge.storage.IndexedLoader
+import hep.dataforge.storage.Loader
+import hep.dataforge.storage.MutableStorage
+import hep.dataforge.storage.files.TableLoaderType
 import hep.dataforge.tables.ListTable
 import hep.dataforge.tables.Table
 import hep.dataforge.tables.TableFormat
 import hep.dataforge.tables.ValuesSource
 import hep.dataforge.values.Value
 import hep.dataforge.values.Values
+import kotlinx.coroutines.Deferred
 
 @Type("hep.dataforge.storage.loader.table")
 interface TableLoader : Loader<Values>, ValuesSource {
@@ -41,12 +50,13 @@ interface TableLoader : Loader<Values>, ValuesSource {
      * Generate a mutable loader based on this one. Throws an exception if it is not possible
      */
     fun mutable(): MutableTableLoader
+}
 
-    @JvmDefault
-    suspend fun asTable(): Table {
-        // Replace with custom table which will be updated with the loader
-        return ListTable(format, this.toList())
-    }
+/**
+ * TODO Replace with custom table which will be updated with the loader
+ */
+fun TableLoader.asTable(): Deferred<Table> {
+    return async { ListTable(format, toList()) }
 }
 
 interface IndexedTableLoader : TableLoader, IndexedLoader<Value, Values> {
@@ -65,10 +75,21 @@ suspend fun IndexedTableLoader.select(from: Value, to: Value): Table {
     return ListTable(format, keys.subSet(from, true, to, true).map { get(it)!! })
 }
 
-suspend fun IndexedTableLoader.select(query: Meta): Table {
+fun IndexedTableLoader.select(query: Meta): Deferred<Table> {
     TODO("To be implemented")
 }
 
 
 interface MutableTableLoader : TableLoader, AppendableLoader<Values>
 
+/**
+ * Create a new table loader with given name and format
+ */
+fun MutableStorage.createTable(name: String, format: TableFormat): MutableTableLoader {
+    val meta = buildMeta {
+        "name" to name
+        TableLoaderType.TABLE_FORMAT_KEY to format.toMeta()
+        Envelope.ENVELOPE_DATA_TYPE_KEY to TableLoaderType.BINARY_DATA_TYPE
+    }
+    return create(meta) as MutableTableLoader
+}

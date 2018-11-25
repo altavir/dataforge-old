@@ -13,6 +13,7 @@ target/*
 .nb-gradle*
 .idea/*
 *.iml
+*/gen/*
 
 ## Grain:
 site/target/

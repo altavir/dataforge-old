@@ -124,7 +124,7 @@ interface MutableStorage : Storage {
     /**
      * Create a new element of the storage. If element with this name already exists, checks meta and either does nothing or throws exception.
      */
-    suspend fun create(meta: Meta): StorageElement
+    fun create(meta: Meta): StorageElement
 
     /**
      * Resolve type of new element based on meta or return null if element type could not be resolved
@@ -132,7 +132,7 @@ interface MutableStorage : Storage {
     fun resolveType(meta: Meta): StorageElementType?
 }
 
-suspend fun MutableStorage.create(metaBuilder: KMetaBuilder.() -> Unit) = create(buildMeta(MetaBuilder.DEFAULT_META_NAME, metaBuilder))
+fun MutableStorage.create(metaBuilder: KMetaBuilder.() -> Unit) = create(buildMeta(MetaBuilder.DEFAULT_META_NAME, metaBuilder))
 
 /**
  * Create a child storage. In general it has the same type ase parent storage, but it is not guaranteed
@@ -199,10 +199,10 @@ interface StorageElementType : Named {
     /**
      * Produce an element. The method uses optional parent, but element it produces could be different from the one, produced by parent.
      */
-    suspend fun create(context: Context, meta: Meta, parent: StorageElement? = null): StorageElement
+    fun create(context: Context, meta: Meta, parent: StorageElement? = null): StorageElement
 
     @JvmDefault
-    suspend fun create(parent: StorageElement, meta: Meta): StorageElement {
+    fun create(parent: StorageElement, meta: Meta): StorageElement {
         return create(parent.context, meta, parent)
     }
 }

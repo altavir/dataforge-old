@@ -21,12 +21,11 @@ import hep.dataforge.io.envelopes.*
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.buildMeta
 import hep.dataforge.nullable
-import hep.dataforge.storage.IndexedTableLoader
-import hep.dataforge.storage.MutableStorage
-import hep.dataforge.storage.MutableTableLoader
 import hep.dataforge.storage.StorageElement
 import hep.dataforge.storage.files.TableLoaderType.Companion.TABLE_FORMAT_KEY
 import hep.dataforge.storage.files.TableLoaderType.Companion.binaryTableWriter
+import hep.dataforge.storage.tables.IndexedTableLoader
+import hep.dataforge.storage.tables.MutableTableLoader
 import hep.dataforge.tables.MetaTableFormat
 import hep.dataforge.tables.TableFormat
 import hep.dataforge.values.*
@@ -248,7 +247,7 @@ class TableLoaderType : FileStorageElementType {
 
     override val name: String = TABLE_ENVELOPE_TYPE
 
-    override suspend fun create(context: Context, meta: Meta, parent: StorageElement?): FileStorageElement {
+    override fun create(context: Context, meta: Meta, parent: StorageElement?): FileStorageElement {
         if (!meta.hasMeta(TABLE_FORMAT_KEY)) {
             throw IllegalArgumentException("Values format not found")
         }
@@ -324,13 +323,4 @@ class TableLoaderType : FileStorageElementType {
             else -> throw RuntimeException("Unknown data type for table loader")
         }
     }
-}
-
-suspend fun MutableStorage.createTable(name: String, format: TableFormat): MutableTableLoader {
-    val meta = buildMeta {
-        "name" to name
-        TABLE_FORMAT_KEY to format.toMeta()
-        Envelope.ENVELOPE_DATA_TYPE_KEY to TableLoaderType.BINARY_DATA_TYPE
-    }
-    return create(meta) as MutableTableLoader
 }

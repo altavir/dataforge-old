@@ -37,7 +37,7 @@ import kotlinx.coroutines.runBlocking
  * @author Alexander Nozik
  */
 @AnonymousNotAlowed
-class StorageConnection(storageFactory: () -> Storage) : Connection, ContextAware {
+class StorageConnection(storageFactory: () -> MutableStorage) : Connection, ContextAware {
     val storage by lazy(storageFactory)
     override val context by lazy { storage.context }
     private var isOpen = false
@@ -78,7 +78,7 @@ class StorageConnection(storageFactory: () -> Storage) : Connection, ContextAwar
             val storageManager = context.plugins.load(StorageManager::class.java)
             return StorageConnection {
                 runBlocking {
-                    storageManager.create(meta) as Storage
+                    storageManager.create(meta) as MutableStorage
                 }
             }
         }

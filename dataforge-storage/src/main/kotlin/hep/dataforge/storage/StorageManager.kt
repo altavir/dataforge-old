@@ -71,7 +71,7 @@ class StorageManager : BasicPlugin(), MutableStorage {
     /**
      * Create a root storage
      */
-    override suspend fun create(meta: Meta): StorageElement {
+    override fun create(meta: Meta): StorageElement {
         val element = resolveType(meta)?.create(this, meta)
                 ?: error("Storage factory for $meta not found in ${context.name}")
         //TODO evaluate meta clash

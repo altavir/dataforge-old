@@ -53,7 +53,7 @@ interface FileStorageElementType : StorageElementType, Named {
     /**
      * Create a new child for given parent. If child already exists, compare the meta. If same - return it, otherwise, throw exception
      */
-    override suspend fun create(context: Context, meta: Meta, parent: StorageElement?): FileStorageElement
+    override fun create(context: Context, meta: Meta, parent: StorageElement?): FileStorageElement
 
     /**
      * Read given path as [FileStorageElement] with given parent. Returns null if path does not belong to storage
@@ -106,7 +106,7 @@ class FileStorage(
 
     //TODO actually watch for file change
 
-    override suspend fun create(meta: Meta): StorageElement {
+    override fun create(meta: Meta): StorageElement {
         val path = path.resolve(meta.getString("path", meta.getString("name")))
         return _children.getOrPut(path) {
             resolveType(meta)
@@ -169,7 +169,7 @@ class FileStorage(
                 ValueDef(key = "path", info = "The relative path to the shelf inside parent storage or absolute path"),
                 ValueDef(key = "name", required = true, info = "The name of the new storage. By default use last segment shelf name")
         )
-        override suspend fun create(context: Context, meta: Meta, parent: StorageElement?): FileStorageElement {
+        override fun create(context: Context, meta: Meta, parent: StorageElement?): FileStorageElement {
             val shelfName = meta.getString("name")
             val segments = meta.getString("path", shelfName).asName()
             val shelfPath = Paths.get(segments.tokens.joinToString(separator = "/"))
