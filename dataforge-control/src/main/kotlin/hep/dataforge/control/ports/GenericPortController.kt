@@ -41,7 +41,7 @@ open class GenericPortController(
 ) : PortController, AutoCloseable, ContextAware {
 
 
-    constructor(context: Context, port: Port, delimeter: String) : this(context, port, { it.endsWith(delimeter) })
+    constructor(context: Context, port: Port, delimiter: String) : this(context, port, { it.endsWith(delimiter) })
 
     private val waiters = ReferenceRegistry<FuturePhrase>()
     private val listeners = ReferenceRegistry<PhraseListener>()
@@ -82,7 +82,7 @@ open class GenericPortController(
     private fun acceptPhrase(message: String) {
         waiters.forEach { waiter -> waiter.acceptPhrase(message) }
         listeners.forEach { listener -> listener.acceptPhrase(message) }
-     }
+    }
 
     override fun error(errorMessage: String, error: Throwable) {
         exceptionListeners.forEach { it ->
@@ -130,8 +130,7 @@ open class GenericPortController(
      */
     @JvmOverloads
     fun waitFor(timeout: Duration, predicate: (String) -> Boolean = { true }): String {
-        return next(predicate)
-                .get(timeout.toMillis(), TimeUnit.MILLISECONDS)
+        return next(predicate).get(timeout.toMillis(), TimeUnit.MILLISECONDS)
     }
 
     /**
@@ -259,8 +258,7 @@ open class GenericPortController(
      * @return
      */
     fun sendAndWait(message: String, timeout: Duration, condition: (String) -> Boolean = { true }): String {
-        return sendAndGet(message, condition)
-                .get(timeout.toMillis(), TimeUnit.MILLISECONDS)
+        return sendAndGet(message, condition).get(timeout.toMillis(), TimeUnit.MILLISECONDS)
     }
 
     /**

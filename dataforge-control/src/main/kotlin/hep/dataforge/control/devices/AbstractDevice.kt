@@ -52,7 +52,6 @@ abstract class AbstractDevice(override val context: Context = Global, meta: Meta
 
     final override val states = StateHolder()
 
-
     val initializedState: ValueState = valueState(INITIALIZED_STATE) { old, value ->
         if (old != value) {
             if (value.boolean) {
@@ -155,18 +154,6 @@ abstract class AbstractDevice(override val context: Context = Global, meta: Meta
         }
     }
 
-    protected fun notifyError(message: String, error: Throwable? = null) {
-        logger.error(message, error)
-        forEachConnection(DeviceListener::class.java) {
-            it.evaluateDeviceException(this, message, error)
-        }
-    }
-
-    protected fun dispatchEvent(event: Event) {
-        forEachConnection(EventHandler::class.java) { it -> it.pushEvent(event) }
-    }
-
-
     override val type: String
         get() = meta.getString("type", "unknown")
 
@@ -186,3 +173,14 @@ val Device.initialized: Boolean
                     .filterIsInstance(ValueState::class.java).firstOrNull()?.value?.boolean ?: false
         }
     }
+
+fun Device.notifyError(message: String, error: Throwable? = null) {
+    logger.error(message, error)
+    forEachConnection(DeviceListener::class.java) {
+        it.evaluateDeviceException(this, message, error)
+    }
+}
+
+fun Device.dispatchEvent(event: Event) {
+    forEachConnection(EventHandler::class.java) { it -> it.pushEvent(event) }
+}
