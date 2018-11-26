@@ -31,7 +31,7 @@ import java.util.stream.Stream
  */
 interface DeviceHub : Provider {
 
-    val deviceNames: Stream<Name>
+    val deviceNames: List<Name>
 
     fun optDevice(name: Name): Optional<Device>
 
@@ -42,14 +42,14 @@ interface DeviceHub : Provider {
 
     @ProvidesNames(DEVICE_TARGET)
     fun listDevices(): Stream<String> {
-        return deviceNames.map{ it.toString() }
+        return deviceNames.stream().map{ it.toString() }
     }
 
     fun getDevices(recursive: Boolean): Stream<Device> {
         return if (recursive) {
-            deviceNames.map { it -> optDevice(it).get() }
+            deviceNames.stream().map { it -> optDevice(it).get() }
         } else {
-            deviceNames.filter { it -> it.length == 1 }.map { it -> optDevice(it).get() }
+            deviceNames.stream().filter { it -> it.length == 1 }.map { it -> optDevice(it).get() }
         }
     }
 
@@ -60,7 +60,7 @@ interface DeviceHub : Provider {
      * @param roles
      */
     fun connectAll(connection: Connection, vararg roles: String) {
-        deviceNames.filter { it -> it.length == 1 }
+        deviceNames.stream().filter { it -> it.length == 1 }
                 .map<Optional<Device>>{ this.optDevice(it) }
                 .map<Device>{ it.get() }
                 .forEach { it ->
@@ -73,7 +73,7 @@ interface DeviceHub : Provider {
     }
 
     fun connectAll(context: Context, meta: Meta) {
-        deviceNames.filter { it -> it.length == 1 }
+        deviceNames.stream().filter { it -> it.length == 1 }
                 .map<Optional<Device>>{ this.optDevice(it) }
                 .map<Device>{ it.get() }
                 .forEach { it ->
