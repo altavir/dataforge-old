@@ -144,7 +144,7 @@ class TcpPort(meta: Meta) : Port(meta) {
                 val stream = socket.getOutputStream()
                 stream.write(message.toByteArray())
                 stream.flush()
-                LoggerFactory.getLogger(javaClass).debug("SEND: " + message)
+                LoggerFactory.getLogger(javaClass).debug("SEND: $message")
             } catch (ex: IOException) {
                 throw RuntimeException(ex)
             }

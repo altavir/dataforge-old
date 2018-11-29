@@ -23,6 +23,7 @@ import hep.dataforge.control.devices.dispatchEvent
 import hep.dataforge.control.devices.notifyError
 import hep.dataforge.events.EventBuilder
 import hep.dataforge.meta.Meta
+import hep.dataforge.nullable
 import hep.dataforge.states.StateHolder
 import hep.dataforge.states.Stateful
 import hep.dataforge.states.metaState
@@ -48,13 +49,15 @@ class PortHelper(
     val connection: GenericPortController
         get() = _connection ?: throw RuntimeException("Not connected")
 
-    val connected = valueState(CONNECTED_STATE, getter = { connection.port.isOpen }) { old, value ->
+    val connectedState = valueState(CONNECTED_STATE, getter = { connection.port.isOpen }) { old, value ->
         if (old != value) {
             logger.info("State 'connect' changed to $value")
             connect(value.boolean)
         }
         update(value)
     }
+
+    var connected by connectedState.booleanDelegate
 
     var debug by valueState(DEBUG_STATE) { old, value ->
         if (old != value) {
@@ -102,18 +105,22 @@ class PortHelper(
             try {
                 if (_connection == null) {
                     logger.debug("Setting up connection using device meta")
-                    setupConnection(device.meta.getMetaOrEmpty(PORT_STATE))
+                    val portMeta: Meta = device.meta.optMeta(PORT_STATE).nullable
+                            ?: device.meta.optValue(PORT_STATE).map {
+                                PortFactory.nameToMeta(it.string)
+                            }.orElse(Meta.empty())
+                    setupConnection(portMeta)
                 }
                 connection.open()
-                this.connected.update(true)
+                this.connectedState.update(true)
             } catch (ex: Exception) {
                 device.notifyError("Failed to open connection", ex)
-                this.connected.update(false)
+                this.connectedState.update(false)
             }
         } else {
             _connection?.close()
             _connection = null
-            this.connected.update(false)
+            this.connectedState.update(false)
         }
     }
 
@@ -125,7 +132,7 @@ class PortHelper(
     }
 
     fun shutdown() {
-        connected.set(false)
+        connectedState.set(false)
     }
 
     fun sendAndWait(request: String, timeout: Duration = defaultTimeout): String {
@@ -137,6 +144,7 @@ class PortHelper(
     }
 
     fun send(message: String) {
+        connected = true
         connection.send(message)
         device.dispatchEvent(
                 EventBuilder

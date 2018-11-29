@@ -48,7 +48,7 @@ object PortFactory : MetaFactory<Port> {
         val protocol = meta.getString("type", "tcp")
         val port = when (protocol) {
             "com" -> ComPort(meta)
-            "tcp" -> TcpPort(meta);
+            "tcp" -> TcpPort(meta)
             "virtual" -> buildVirtualPort(meta)
             else -> throw ControlException("Unknown protocol")
         }
@@ -71,7 +71,7 @@ object PortFactory : MetaFactory<Port> {
         return build(nameToMeta(portName))
     }
 
-    private fun nameToMeta(portName: String): Meta {
+    fun nameToMeta(portName: String): Meta {
         val builder = MetaBuilder("port")
                 .setValue("name", portName)
 

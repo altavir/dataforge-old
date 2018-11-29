@@ -25,7 +25,6 @@ import hep.dataforge.exceptions.ControlException
 import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name
 import java.util.*
-import java.util.stream.Stream
 
 /**
  * A plugin for creating and using different devices
@@ -44,12 +43,12 @@ class DeviceManager : BasicPlugin(), DeviceHub {
      */
     val devices: Collection<Device> = _devices.values
 
-    override val deviceNames: Stream<Name>
-        get() = _devices.entries.stream().flatMap { entry ->
+    override val deviceNames: List<Name>
+        get() = _devices.entries.flatMap { entry ->
             if (entry.value is DeviceHub) {
                 (entry.value as DeviceHub).deviceNames.map { it -> entry.key.plus(it) }
             } else {
-                Stream.of<Name>(entry.key)
+                listOf(entry.key)
             }
         }
 

@@ -41,13 +41,13 @@ import kotlin.reflect.KProperty
 sealed class State<T : Any>(
         final override val name: String,
         def: T? = null,
-        owner: Stateful? = null,
+        val owner: Stateful? = null,
         private val scope: CoroutineScope = GlobalScope,
         private val getter: (suspend () -> T)? = null,
         private val setter: (suspend State<T>.(T?, T) -> Unit)? = null) : Named, MetaID {
     private var valid: Boolean = false
 
-    val logger: Logger = owner?.logger ?: LoggerFactory.getLogger("state::$name")
+    val logger: Logger get() = owner?.logger ?: LoggerFactory.getLogger("state::$name")
 
     private val ref = AtomicReference<T>()
     val channel = BroadcastChannel<T>(BUFFER_SIZE)
@@ -351,7 +351,7 @@ class MetaState(
         owner: Stateful? = null,
         getter: (suspend () -> Meta)? = null,
         setter: (suspend State<Meta>.(Meta?, Meta) -> Unit)? = null
-) : State<Meta>(name, def, owner, getter = getter,  setter = setter) {
+) : State<Meta>(name, def, owner, getter = getter, setter = setter) {
 
     constructor(
             def: NodeDef,
