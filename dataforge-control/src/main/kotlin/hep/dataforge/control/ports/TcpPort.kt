@@ -17,7 +17,6 @@ package hep.dataforge.control.ports
 
 import hep.dataforge.exceptions.PortException
 import hep.dataforge.meta.Meta
-import hep.dataforge.meta.buildMeta
 import org.slf4j.LoggerFactory
 import java.io.BufferedInputStream
 import java.io.IOException
@@ -26,21 +25,13 @@ import java.net.Socket
 /**
  * @author Alexander Nozik
  */
-class TcpPort(meta: Meta) : Port(meta) {
-
-    constructor(ip: String, port: Int) : this(
-            buildMeta("handler",
-                    "type" to "tcp",
-                    "ip" to ip,
-                    "port" to port
-            )
-    )
+class TcpPort(val ip: String, val port: Int, meta: Meta?) : Port(buildPortMeta(ip, port, meta)) {
 
     private var _socket: Socket? = null
     private val socket: Socket
         get() {
             if (_socket == null || _socket!!.isClosed) {
-                _socket = Socket(getString("ip"), getInt("port"))
+                _socket = Socket(ip, port)
             }
             return _socket!!
         }
@@ -54,7 +45,7 @@ class TcpPort(meta: Meta) : Port(meta) {
         get() = listenerThread != null
 
     override val name: String
-        get() = String.format("tcp::%s:%s", getString("ip"), getString("port"))
+        get() = String.format("tcp::%s:%d", ip, port)
 
     @Throws(PortException::class)
     override fun open() {
@@ -66,16 +57,8 @@ class TcpPort(meta: Meta) : Port(meta) {
         } catch (ex: IOException) {
             throw PortException(ex)
         }
-
     }
 
-    //    @Override
-    //    public void holdBy(PortController controller) throws PortException {
-    //        super.holdBy(controller); //To change body of generated methods, choose Tools | Templates.
-    //
-    //        open();
-    //
-    //    }
     @Synchronized
     @Throws(Exception::class)
     override fun close() {
@@ -108,9 +91,8 @@ class TcpPort(meta: Meta) : Port(meta) {
                     if (reader == null) {
                         reader = BufferedInputStream(socket.getInputStream())
                     }
-                    //TODO switch to nio
                     receive(reader.read().toByte())
-                } catch (ex: IOException) {
+                } catch (ex: Exception) {
                     if (!stopFlag) {
                         LoggerFactory.getLogger(javaClass).error("TCP connection broken on {}. Reconnecting.", toString())
                         try {
@@ -148,6 +130,16 @@ class TcpPort(meta: Meta) : Port(meta) {
             } catch (ex: IOException) {
                 throw RuntimeException(ex)
             }
+        }
+    }
+
+    companion object {
+        private fun buildPortMeta(ip: String, port: Int, meta: Meta?): Meta {
+            return (meta ?: Meta.empty()).builder.apply {
+                setValue("type", "tcp")
+                setValue("ip", ip)
+                setValue("port", port)
+            }.build()
         }
     }
 

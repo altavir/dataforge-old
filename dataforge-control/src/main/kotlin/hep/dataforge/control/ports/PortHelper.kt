@@ -20,7 +20,6 @@ import hep.dataforge.context.Context
 import hep.dataforge.context.ContextAware
 import hep.dataforge.control.devices.Device
 import hep.dataforge.control.devices.dispatchEvent
-import hep.dataforge.control.devices.notifyError
 import hep.dataforge.events.EventBuilder
 import hep.dataforge.meta.Meta
 import hep.dataforge.nullable
@@ -45,14 +44,25 @@ class PortHelper(
     override val context: Context
         get() = device.context
 
-    private var _connection: GenericPortController? = null
-    val connection: GenericPortController
-        get() = _connection ?: throw RuntimeException("Not connected")
+
+    private val Device.portMeta: Meta
+        get() = meta.optMeta(PORT_STATE).nullable
+                ?: device.meta.optValue(PORT_STATE).map {
+                    PortFactory.nameToMeta(it.string)
+                }.orElse(Meta.empty())
+
+    var connection: GenericPortController = builder(context, device.portMeta)
+        private set
 
     val connectedState = valueState(CONNECTED_STATE, getter = { connection.port.isOpen }) { old, value ->
         if (old != value) {
             logger.info("State 'connect' changed to $value")
-            connect(value.boolean)
+            if (value.boolean) {
+                connection.open()
+            } else {
+                connection.close()
+            }
+            //connect(value.boolean)
         }
         update(value)
     }
@@ -69,7 +79,12 @@ class PortHelper(
 
     var port by metaState(PORT_STATE, getter = { connection.port.meta }) { old, value ->
         if (old != value) {
-            setupConnection(value)
+            setDebugMode(false)
+            connectedState.update(false)
+            connection.close()
+            connection = builder(context, value)
+            connection.open()
+            setDebugMode(debug)
         }
         update(value)
     }.delegate
@@ -79,8 +94,9 @@ class PortHelper(
     val name get() = device.name
 
     init {
+        states.update(PORT_STATE, connection.port.meta)
         device.meta.useValue(DEBUG_STATE) {
-            states.update(DEBUG_STATE, it.boolean)
+            debug = it.boolean
         }
     }
 
@@ -100,36 +116,6 @@ class PortHelper(
         states.update(DEBUG_STATE, debugMode)
     }
 
-    private fun connect(connected: Boolean) {
-        if (connected) {
-            try {
-                if (_connection == null) {
-                    logger.debug("Setting up connection using device meta")
-                    val portMeta: Meta = device.meta.optMeta(PORT_STATE).nullable
-                            ?: device.meta.optValue(PORT_STATE).map {
-                                PortFactory.nameToMeta(it.string)
-                            }.orElse(Meta.empty())
-                    setupConnection(portMeta)
-                }
-                connection.open()
-                this.connectedState.update(true)
-            } catch (ex: Exception) {
-                device.notifyError("Failed to open connection", ex)
-                this.connectedState.update(false)
-            }
-        } else {
-            _connection?.close()
-            _connection = null
-            this.connectedState.update(false)
-        }
-    }
-
-    private fun setupConnection(portMeta: Meta) {
-        _connection?.close()
-        this._connection = builder(device.context, portMeta)
-        setDebugMode(debug)
-        states.update(PORT_STATE, portMeta)
-    }
 
     fun shutdown() {
         connectedState.set(false)
@@ -144,7 +130,6 @@ class PortHelper(
     }
 
     fun send(message: String) {
-        connected = true
         connection.send(message)
         device.dispatchEvent(
                 EventBuilder
