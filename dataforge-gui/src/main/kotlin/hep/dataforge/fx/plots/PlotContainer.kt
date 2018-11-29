@@ -9,7 +9,6 @@ import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name
 import hep.dataforge.plots.*
 import hep.dataforge.plots.data.DataPlot
-import hep.dataforge.utils.FXObject
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.geometry.Orientation
@@ -28,16 +27,7 @@ import tornadofx.*
 import java.util.*
 import kotlin.collections.HashMap
 
-
-internal val defaultDisplay: (PlotFrame) -> Node = {
-    if (it is FXObject) {
-        it.fxNode
-    } else {
-        throw IllegalArgumentException("Can't display a plot frame since it is not an FX object")
-    }
-}
-
-class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = defaultDisplay) : Fragment(icon = dfIconView), PlotListener {
+class PlotContainer(val frame: FXPlotFrame) : Fragment(icon = dfIconView), PlotListener {
 
     private val configWindows = HashMap<hep.dataforge.meta.Configurable, Stage>()
     private val dataWindows = HashMap<Plot, Stage>()
@@ -63,7 +53,7 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
                     borderpane {
                         minHeight = 300.0
                         minWidth = 300.0
-                        center = display(frame)
+                        center = frame.fxNode
                     }
                     button {
                         graphicTextGap = 0.0

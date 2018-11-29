@@ -23,7 +23,7 @@ import hep.dataforge.io.output.SelfRendered
 import hep.dataforge.io.output.TextOutput
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
-import javafx.scene.paint.Color
+import java.awt.Color
 
 /**
  *

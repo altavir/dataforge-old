@@ -18,7 +18,7 @@ package hep.dataforge.stat.fit;
 import hep.dataforge.names.NameList;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueFactory;
-import javafx.util.Pair;
+import kotlin.Pair;
 
 import java.io.PrintWriter;
 

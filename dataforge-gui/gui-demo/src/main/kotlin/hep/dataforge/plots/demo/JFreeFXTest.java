@@ -49,7 +49,7 @@ public class JFreeFXTest extends Application {
         BorderPane root = new BorderPane();
 
         JFreeChartFrame frame = new JFreeChartFrame();
-        root.setCenter(frame.getFXNode());
+        root.setCenter(frame.getFxNode());
 
         XYFunctionPlot funcPlot = XYFunctionPlot.Companion.plot("func", 0.1, 4, 200, (x1) -> x1 * x1);
 

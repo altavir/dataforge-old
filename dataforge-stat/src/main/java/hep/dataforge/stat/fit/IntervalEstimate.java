@@ -17,7 +17,7 @@ package hep.dataforge.stat.fit;
 
 import hep.dataforge.names.NameSetContainer;
 import hep.dataforge.values.Value;
-import javafx.util.Pair;
+import kotlin.Pair;
 
 import java.io.PrintWriter;
 import java.io.Serializable;
@@ -47,11 +47,11 @@ public interface IntervalEstimate extends Serializable, NameSetContainer {
     Pair<Value, Value> getInterval(String parName);
 
     default Value gerLowerBound(String parName) {
-        return getInterval(parName).getKey();
+        return getInterval(parName).getFirst();
     }
 
     default Value gerUpperBound(String parName) {
-        return getInterval(parName).getValue();
+        return getInterval(parName).getSecond();
     }
 
     /**

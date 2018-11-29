@@ -25,10 +25,7 @@ import hep.dataforge.meta.Configurable
 import hep.dataforge.meta.Configuration
 import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name
-import hep.dataforge.plots.PlotFactory
-import hep.dataforge.plots.PlotFrame
-import hep.dataforge.plots.PlotListener
-import hep.dataforge.plots.Plottable
+import hep.dataforge.plots.*
 import hep.dataforge.plots.output.PlotOutput
 import hep.dataforge.tables.Table
 import hep.dataforge.useValue
@@ -71,7 +68,7 @@ class FXPlotOutput(context: Context, meta: Meta = Meta.empty()) : FXOutput(conte
 
     override val frame: PlotFrame  by lazy { context.getOrLoad(PlotFactory::class.java).build(meta.getMetaOrEmpty("frame")) }
 
-    val container: PlotContainer by lazy { PlotContainer(frame) }
+    val container: PlotContainer by lazy { PlotContainer(frame as FXPlotFrame) }
 
     override val view: Fragment by lazy {
         object : Fragment() {

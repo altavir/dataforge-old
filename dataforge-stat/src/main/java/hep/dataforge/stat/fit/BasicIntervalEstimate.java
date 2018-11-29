@@ -4,7 +4,7 @@ import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.names.NameList;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueFactory;
-import javafx.util.Pair;
+import kotlin.Pair;
 
 import java.io.PrintWriter;
 import java.io.Serializable;
@@ -50,9 +50,9 @@ public class BasicIntervalEstimate implements IntervalEstimate {
 
     @Override
     public Pair<Value, Value> getInterval(String parName) {
-        return ranges.stream().filter(range -> range.cl == this.cl && range.parName == parName)
-                .map(range -> new Pair(range.lower, range.upper))
-                .findFirst().orElseThrow(() -> new NotDefinedException());
+        return ranges.stream().filter(range -> range.cl == this.cl && range.parName.equals(parName))
+                .map(range -> new Pair<>(range.lower, range.upper))
+                .findFirst().orElseThrow(NotDefinedException::new);
     }
 
     @Override

@@ -19,7 +19,8 @@ package hep.dataforge.stat.fit;
 import hep.dataforge.io.ColumnedDataReader;
 import hep.dataforge.tables.Column;
 import hep.dataforge.tables.Table;
-import javafx.util.Pair;
+import hep.dataforge.values.Value;
+import kotlin.Pair;
 import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 
 /**
@@ -42,8 +43,8 @@ public class UpperLimitGenerator {
         Column x = readFile().getColumn("val");
         Column y = readFile().getColumn(columnName);
 
-        double[] xArray = x.stream().mapToDouble(v -> v.getDouble()).toArray();
-        double[] yArray = y.stream().mapToDouble(v -> v.getDouble()).toArray();
+        double[] xArray = x.stream().mapToDouble(Value::getDouble).toArray();
+        double[] yArray = y.stream().mapToDouble(Value::getDouble).toArray();
 
         SplineInterpolator interpolator = new SplineInterpolator();
         //PENDING add function caching here?

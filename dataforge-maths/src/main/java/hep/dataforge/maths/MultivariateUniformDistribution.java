@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +17,7 @@ package hep.dataforge.maths;
 
 import hep.dataforge.maths.domains.Domain;
 import hep.dataforge.maths.domains.HyperSquareDomain;
-import javafx.util.Pair;
+import kotlin.Pair;
 import org.apache.commons.math3.distribution.AbstractMultivariateRealDistribution;
 import org.apache.commons.math3.random.RandomGenerator;
 
@@ -33,6 +33,7 @@ public class MultivariateUniformDistribution extends AbstractMultivariateRealDis
 
     /**
      * Create a uniform distribution with hyper-square domain
+     *
      * @param rg
      * @param loVals
      * @param upVals
@@ -42,12 +43,12 @@ public class MultivariateUniformDistribution extends AbstractMultivariateRealDis
         return new MultivariateUniformDistribution(rg, new HyperSquareDomain(loVals, upVals));
     }
 
-    public static MultivariateUniformDistribution square(RandomGenerator rg, List<Pair<Double,Double>> borders) {
+    public static MultivariateUniformDistribution square(RandomGenerator rg, List<Pair<Double, Double>> borders) {
         Double[] loVals = new Double[borders.size()];
         Double[] upVals = new Double[borders.size()];
         for (int i = 0; i < borders.size(); i++) {
-            loVals[i] = borders.get(i).getKey();
-            upVals[i] = borders.get(i).getValue();
+            loVals[i] = borders.get(i).getFirst();
+            upVals[i] = borders.get(i).getSecond();
         }
         return new MultivariateUniformDistribution(rg, new HyperSquareDomain(loVals, upVals));
     }

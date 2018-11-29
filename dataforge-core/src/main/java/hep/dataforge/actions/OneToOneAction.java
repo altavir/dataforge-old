@@ -24,7 +24,7 @@ import hep.dataforge.io.history.Chronicle;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
-import javafx.util.Pair;
+import kotlin.Pair;
 import org.slf4j.Logger;
 
 /**
@@ -75,8 +75,8 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
         Pair<String, Meta> resultParamters = outputParameters(context, data, actionMeta);
 
         Laminate meta = inputMeta(context, data.getMeta(), actionMeta);
-        String resultName = resultParamters.getKey();
-        Meta outputMeta = resultParamters.getValue();
+        String resultName = resultParamters.getFirst();
+        Meta outputMeta = resultParamters.getSecond();
 
         PipeGoal<? extends T, R> goal = new PipeGoal<>(getExecutorService(context, meta), data.getGoal(),
                 input -> {

@@ -39,8 +39,8 @@ import hep.dataforge.meta.Metoid
 import hep.dataforge.tables.Table
 import hep.dataforge.useValue
 import hep.dataforge.values.ValueType
-import javafx.scene.paint.Color
 import org.slf4j.LoggerFactory
+import java.awt.Color
 import java.io.OutputStream
 import java.io.PrintWriter
 import java.time.Instant
@@ -230,7 +230,7 @@ class ANSIStreamOutput(context: Context, stream: OutputStream) : StreamOutput(co
                 Color.GREEN -> IOUtils.wrapANSI(text, IOUtils.ANSI_GREEN)
                 Color.YELLOW -> IOUtils.wrapANSI(text, IOUtils.ANSI_YELLOW)
                 Color.BLUE -> IOUtils.wrapANSI(text, IOUtils.ANSI_BLUE)
-                Color.PURPLE -> IOUtils.wrapANSI(text, IOUtils.ANSI_PURPLE)
+                //Color. -> IOUtils.wrapANSI(text, IOUtils.ANSI_PURPLE)
                 Color.CYAN -> IOUtils.wrapANSI(text, IOUtils.ANSI_CYAN)
                 Color.WHITE -> IOUtils.wrapANSI(text, IOUtils.ANSI_WHITE)
                 else -> {

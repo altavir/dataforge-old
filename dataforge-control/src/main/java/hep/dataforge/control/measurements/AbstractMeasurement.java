@@ -7,7 +7,7 @@ package hep.dataforge.control.measurements;
 
 import hep.dataforge.exceptions.MeasurementException;
 import hep.dataforge.utils.DateTimeUtils;
-import javafx.util.Pair;
+import kotlin.Pair;
 import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
@@ -137,12 +137,12 @@ public abstract class AbstractMeasurement<T> implements Measurement<T> {
 
     @Override
     public Instant getTime() throws MeasurementException {
-        return get().getValue();
+        return get().getSecond();
     }
 
     @Override
     public T getResult() throws MeasurementException {
-        return get().getKey();
+        return get().getFirst();
     }
 
     protected enum MeasurementState {

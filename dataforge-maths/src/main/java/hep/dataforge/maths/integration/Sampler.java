@@ -16,7 +16,7 @@
 package hep.dataforge.maths.integration;
 
 import hep.dataforge.maths.MultivariateUniformDistribution;
-import javafx.util.Pair;
+import kotlin.Pair;
 import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;

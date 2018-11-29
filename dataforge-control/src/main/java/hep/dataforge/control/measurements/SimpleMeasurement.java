@@ -7,7 +7,7 @@ package hep.dataforge.control.measurements;
 
 import hep.dataforge.exceptions.MeasurementException;
 import hep.dataforge.utils.DateTimeUtils;
-import javafx.util.Pair;
+import kotlin.Pair;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
@@ -102,7 +102,7 @@ public abstract class SimpleMeasurement<T> extends AbstractMeasurement<T> {
 
 
                 if (res != null) {
-                    result(res.getKey(), res.getValue());
+                    result(res.getFirst(), res.getSecond());
                 } else {
                     throw new MeasurementException("Empty result");
                 }

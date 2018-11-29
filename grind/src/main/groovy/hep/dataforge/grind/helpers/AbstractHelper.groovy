@@ -6,11 +6,11 @@ import hep.dataforge.io.output.Output
 import hep.dataforge.io.output.SelfRendered
 import hep.dataforge.io.output.TextOutput
 import hep.dataforge.meta.Meta
-import javafx.scene.paint.Color
 import org.jetbrains.annotations.NotNull
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+import java.awt.*
 import java.lang.reflect.Method
 
 @CompileStatic

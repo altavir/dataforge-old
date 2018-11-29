@@ -22,7 +22,6 @@ import hep.dataforge.names.Name
 import hep.dataforge.nullable
 import hep.dataforge.orElse
 import hep.dataforge.plots.*
-import hep.dataforge.utils.FXObject
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueFactory
 import javafx.application.Platform
@@ -59,7 +58,7 @@ import kotlin.math.abs
 /**
  * @author Alexander Nozik
  */
-class JFreeChartFrame : XYPlotFrame(), FXObject, Serializable {
+class JFreeChartFrame : XYPlotFrame(), FXPlotFrame, Serializable {
 
     private val xyPlot: XYPlot = XYPlot(null, NumberAxis(), NumberAxis(), XYLineAndShapeRenderer())
     val chart: JFreeChart = JFreeChart(xyPlot)
@@ -91,11 +90,12 @@ class JFreeChartFrame : XYPlotFrame(), FXObject, Serializable {
         }
     }
 
-    override fun getFXNode(): Node {
-        val viewer = ChartViewer(chart,true)
-        addExportPlotAction(viewer.contextMenu, this)
-        return viewer
-    }
+    override val fxNode: Node
+        get() {
+            val viewer = ChartViewer(chart, true)
+            addExportPlotAction(viewer.contextMenu, this)
+            return viewer
+        }
 
 
     private fun addExportPlotAction(menu: ContextMenu, frame: JFreeChartFrame) {
@@ -110,7 +110,7 @@ class JFreeChartFrame : XYPlotFrame(), FXObject, Serializable {
                 }
 
 
-        val dfpExport = PlotUtils.getDFPlotExportMenuItem(menu.ownerWindow, frame)
+        val dfpExport = FXPlotUtils.getDFPlotExportMenuItem(menu.ownerWindow, frame)
 
         parent.items.add(dfpExport)
     }
@@ -291,7 +291,7 @@ class JFreeChartFrame : XYPlotFrame(), FXObject, Serializable {
             render.setSeriesStroke(0, BasicStroke(thickness.toFloat()))
         }
 
-        val color = PlotUtils.getAWTColor(config, colorCache[name])
+        val color = FXPlotUtils.getAWTColor(config, colorCache[name])
         if (color != null) {
             render.setSeriesPaint(0, color)
         }
@@ -352,7 +352,7 @@ class JFreeChartFrame : XYPlotFrame(), FXObject, Serializable {
     }
 
     override fun getActualColor(name: Name): Optional<Value> {
-        return Optional.ofNullable(colorCache[name]).map { color -> ValueFactory.of(PlotUtils.awtColorToString(color)) }
+        return Optional.ofNullable(colorCache[name]).map { color -> ValueFactory.of(FXPlotUtils.awtColorToString(color)) }
     }
 
     @Throws(ObjectStreamException::class)

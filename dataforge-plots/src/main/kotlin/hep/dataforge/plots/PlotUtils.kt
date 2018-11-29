@@ -15,49 +15,17 @@
  */
 package hep.dataforge.plots
 
-import hep.dataforge.io.envelopes.DefaultEnvelopeType
-import hep.dataforge.io.envelopes.DefaultEnvelopeWriter
-import hep.dataforge.io.envelopes.xmlMetaType
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.plots.data.DataPlot
 import hep.dataforge.tables.Adapters
 import hep.dataforge.tables.ListTable
 import hep.dataforge.tables.Table
-import javafx.scene.control.MenuItem
-import javafx.stage.FileChooser
-import javafx.stage.Window
-import java.awt.Color
-import java.io.FileOutputStream
-import java.io.IOException
 
 /**
  * @author darksnake
  */
 object PlotUtils {
-
-    fun getAWTColor(meta: Meta, def: Color?): Color? {
-        return when {
-            meta.hasValue("color") -> {
-                val fxColor = javafx.scene.paint.Color.valueOf(meta.getString("color"))
-                Color(fxColor.red.toFloat(), fxColor.green.toFloat(), fxColor.blue.toFloat())
-            }
-            else -> def
-        }
-    }
-
-    fun awtColorToString(color: Color): String {
-        val fxColor = javafx.scene.paint.Color.rgb(
-                color.red,
-                color.green,
-                color.blue,
-                color.transparency.toDouble()
-        )
-        return String.format("#%02X%02X%02X",
-                (fxColor.red * 255).toInt(),
-                (fxColor.green * 255).toInt(),
-                (fxColor.blue * 255).toInt())
-    }
 
     fun getThickness(reader: Meta): Double {
         return reader.getDouble("thickness", -1.0)
@@ -91,33 +59,6 @@ object PlotUtils {
 
     fun setTitle(frame: PlotFrame, title: String) {
         frame.configureValue("title", title)
-    }
-
-    /**
-     * TODO move from plots module to implementations
-     *
-     * @param window
-     * @param frame
-     * @return
-     */
-    fun getDFPlotExportMenuItem(window: Window?, frame: PlotFrame): MenuItem {
-        val dfpExport = MenuItem("DF...")
-        dfpExport.setOnAction { _ ->
-            val chooser = FileChooser()
-            chooser.extensionFilters.setAll(FileChooser.ExtensionFilter("DataForge envelope", "*.df"))
-            chooser.title = "Select file to save plot into"
-            val file = chooser.showSaveDialog(window)
-            if (file != null) {
-                try {
-                    DefaultEnvelopeWriter(DefaultEnvelopeType.INSTANCE, xmlMetaType)
-                            .write(FileOutputStream(file), PlotFrame.Wrapper().wrap(frame))
-                } catch (ex: IOException) {
-                    throw RuntimeException("Failed to save plot to file", ex)
-                }
-
-            }
-        }
-        return dfpExport
     }
 
     fun extractData(plot: DataPlot, query: Meta): Table {

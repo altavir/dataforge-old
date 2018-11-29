@@ -30,7 +30,7 @@ import hep.dataforge.utils.GenericBuilder;
 import hep.dataforge.utils.Optionals;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.Values;
-import javafx.util.Pair;
+import kotlin.Pair;
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
 import org.apache.commons.math3.linear.RealMatrix;
