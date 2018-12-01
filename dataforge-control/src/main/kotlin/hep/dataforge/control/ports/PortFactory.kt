@@ -28,7 +28,6 @@ import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.set
 import hep.dataforge.utils.MetaFactory
-import java.lang.IllegalArgumentException
 import java.util.*
 
 /**
@@ -48,18 +47,24 @@ object PortFactory : MetaFactory<Port> {
     override fun build(meta: Meta): Port {
         val protocol = meta.getString("type", "tcp")
         val port = when (protocol) {
-            "com" -> ComPort(meta)
+            "com" -> {
+                if (meta.hasValue("address")) {
+                    ComPort(meta.getString("address"), meta)
+                } else {
+                    throw IllegalArgumentException("Not enough information to create a port")
+                }
+            }
             "tcp" -> {
                 if (meta.hasValue("ip") && meta.hasValue("port")) {
                     TcpPort(meta.getString("ip"), meta.getInt("port"), meta)
-                } else{
+                } else {
                     throw IllegalArgumentException("Not enough information to create a port")
                 }
             }
             "virtual" -> buildVirtualPort(meta)
             else -> throw ControlException("Unknown protocol")
         }
-        return portMap.getOrPut(port.meta) { port }
+        return portMap.getOrPut(port.toMeta()) { port }
     }
 
     private fun buildVirtualPort(meta: Meta): Port {
@@ -82,13 +87,13 @@ object PortFactory : MetaFactory<Port> {
         val builder = MetaBuilder("port")
                 .setValue("name", portName)
 
-        val type = portName.substringBefore("::","com")
+        val type = portName.substringBefore("::", "com")
         val address = portName.substringAfter("::")
 
         builder["type"] = type
-        builder["address"] =  address
+        builder["address"] = address
 
-        if(type == "tcp"){
+        if (type == "tcp") {
             builder["ip"] = address.substringBefore(":")
             builder["port"] = address.substringAfter(":").toInt()
         }

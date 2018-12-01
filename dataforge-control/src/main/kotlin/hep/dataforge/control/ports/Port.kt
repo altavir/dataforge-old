@@ -18,12 +18,11 @@ package hep.dataforge.control.ports
 import hep.dataforge.Named
 import hep.dataforge.exceptions.PortException
 import hep.dataforge.exceptions.PortLockException
-import hep.dataforge.meta.Meta
-import hep.dataforge.meta.MetaHolder
 import hep.dataforge.meta.MetaID
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.Duration
+import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.locks.ReentrantLock
 
@@ -37,7 +36,10 @@ interface PortController {
 
     fun accept(byte: Byte)
 
-    fun accept(bytes: ByteArray)
+    fun accept(bytes: ByteArray){
+        //TODO improve performance using byte buffers
+        bytes.forEach { accept(it) }
+    }
 
     fun error(errorMessage: String, error: Throwable) {
         //do nothing
@@ -50,33 +52,25 @@ interface PortController {
  *
  * @author Alexander Nozik
  */
-abstract class Port(meta: Meta) : MetaHolder(meta), AutoCloseable, MetaID, Named {
+abstract class Port : AutoCloseable, MetaID, Named {
 
     private val portLock = ReentrantLock(true)
 
     private var controller: PortController? = null
 
-    protected val executor = Executors.newSingleThreadExecutor { r ->
+    protected val executor: ExecutorService = Executors.newSingleThreadExecutor { r ->
         val res = Thread(r)
         res.name = "port::$name"
         res.priority = Thread.MAX_PRIORITY
         res
     }
 
-    protected val logger: Logger by lazy { LoggerFactory.getLogger(meta.getString("logger", "port.$name")) }
+    protected val logger: Logger by lazy { LoggerFactory.getLogger("port[$name]") }
 
     abstract val isOpen: Boolean
 
     private val isLocked: Boolean
         get() = this.portLock.isLocked
-//
-//    fun setPhraseCondition(condition: (String) -> Boolean) {
-//        this.phraseCondition = condition
-//    }
-//
-//    fun setDelimiter(delimiter: String) {
-//        phraseCondition = { str: String -> str.endsWith(delimiter) }
-//    }
 
     @Throws(PortException::class)
     abstract fun open()
@@ -118,8 +112,7 @@ abstract class Port(meta: Meta) : MetaHolder(meta), AutoCloseable, MetaID, Named
      * @throws hep.dataforge.exceptions.PortException
      */
     @Throws(PortException::class)
-    fun holdBy(controller: PortController?) {
-        assert(controller != null)
+    fun holdBy(controller: PortController) {
         if (!isOpen) {
             open()
         }
@@ -158,7 +151,7 @@ abstract class Port(meta: Meta) : MetaHolder(meta), AutoCloseable, MetaID, Named
      * @throws hep.dataforge.exceptions.PortException
      */
     @Throws(PortException::class)
-    protected abstract fun send(message: String)
+    protected abstract fun send(message: ByteArray)
 
     /**
      * Send the message if the controller is correct
@@ -168,8 +161,8 @@ abstract class Port(meta: Meta) : MetaHolder(meta), AutoCloseable, MetaID, Named
      * @throws PortException
      */
     @Throws(PortException::class)
-    fun send(controller: PortController?, message: String) {
-        if (this.controller == null || controller === this.controller) {
+    fun send(controller: PortController, message: ByteArray) {
+        if (controller === this.controller) {
             send(message)
         } else {
             throw PortException("Port locked by another controller")
@@ -185,9 +178,8 @@ abstract class Port(meta: Meta) : MetaHolder(meta), AutoCloseable, MetaID, Named
      */
     @Synchronized
     @Throws(PortLockException::class)
-    fun releaseBy(controller: PortController?) {
+    fun releaseBy(controller: PortController) {
         if (isLocked) {
-            assert(controller != null)
             if (controller == this.controller) {
                 this.controller = null
                 execute {
@@ -208,20 +200,7 @@ abstract class Port(meta: Meta) : MetaHolder(meta), AutoCloseable, MetaID, Named
         executor.shutdown()
     }
 
-    class PortTimeoutException(private val timeout: Duration) : PortException() {
+    class PortTimeoutException(timeout: Duration) : PortException() {
         override val message: String = String.format("The timeout time of '%s' is exceeded", timeout)
-    }
-
-    override fun toMeta(): Meta {
-        return meta
-    }
-
-    companion object {
-        /**
-         * The definition of default phrase condition
-         *
-         * @return
-         */
-        private val DEFAULT_PHRASE_CONDITION = { str: String -> str.endsWith("\n") }
     }
 }

@@ -15,132 +15,105 @@
  */
 package hep.dataforge.control.ports
 
+import hep.dataforge.context.Global
 import hep.dataforge.exceptions.PortException
 import hep.dataforge.meta.Meta
-import org.slf4j.LoggerFactory
-import java.io.BufferedInputStream
-import java.io.IOException
-import java.net.Socket
+import hep.dataforge.meta.buildMeta
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import java.net.InetSocketAddress
+import java.nio.ByteBuffer
+import java.nio.channels.SocketChannel
 
 /**
  * @author Alexander Nozik
  */
-class TcpPort(val ip: String, val port: Int, meta: Meta?) : Port(buildPortMeta(ip, port, meta)) {
+class TcpPort(val ip: String, val port: Int, val config: Meta = Meta.empty()) : Port() {
 
-    private var _socket: Socket? = null
-    private val socket: Socket
-        get() {
-            if (_socket == null || _socket!!.isClosed) {
-                _socket = Socket(ip, port)
-            }
-            return _socket!!
-        }
-
-    private var listenerThread: Thread? = null
-
-    @Volatile
-    private var stopFlag = false
+    private var channel: SocketChannel = SocketChannel.open()
 
     override val isOpen: Boolean
-        get() = listenerThread != null
+        get() = channel.isConnected
 
-    override val name: String
-        get() = String.format("tcp::%s:%d", ip, port)
+    override val name = String.format("tcp::%s:%d", ip, port)
+
+    private val dispatcher = this.executor.asCoroutineDispatcher()
+
+    private var listenerJob: Job? = null
+
+    private fun openChannel(): SocketChannel{
+        return SocketChannel.open(InetSocketAddress(ip, port)).apply {
+            this.configureBlocking(false)
+        }
+    }
 
     @Throws(PortException::class)
     override fun open() {
-        try {
-            if (listenerThread == null) {
-                stopFlag = false
-                listenerThread = startListenerThread()
+        execute {
+            if (!channel.isConnected && !channel.isConnectionPending) {
+                channel = openChannel()
+                channel.finishConnect()
+                startListener()
             }
-        } catch (ex: IOException) {
-            throw PortException(ex)
         }
     }
 
     @Synchronized
     @Throws(Exception::class)
     override fun close() {
-        if (_socket != null) {
-            try {
-                stopFlag = true
-                listenerThread?.join(1500)
-            } catch (ex: InterruptedException) {
-                throw PortException(ex)
-            } finally {
-                listenerThread = null
-                try {
-                    socket.close()
-                    _socket = null
-                } catch (e: IOException) {
-                    LoggerFactory.getLogger(javaClass).error("Failed to close socket", e)
-                }
-
+        execute {
+            if(isOpen) {
+                listenerJob?.cancel()
+                channel.shutdownInput()
+                channel.shutdownOutput()
+                channel.close()
+                super.close()
             }
         }
-        super.close()
     }
 
-    @Throws(IOException::class)
-    private fun startListenerThread(): Thread {
-        val task = {
-            var reader: BufferedInputStream? = null
-            while (!stopFlag) {
+    private fun startListener() {
+        listenerJob = Global.launch(dispatcher) {
+            val buffer = ByteBuffer.allocate(1024)
+            while (true) {
                 try {
-                    if (reader == null) {
-                        reader = BufferedInputStream(socket.getInputStream())
-                    }
-                    receive(reader.read().toByte())
-                } catch (ex: Exception) {
-                    if (!stopFlag) {
-                        LoggerFactory.getLogger(javaClass).error("TCP connection broken on {}. Reconnecting.", toString())
-                        try {
-                            _socket?.let {
-                                it.close()
-                                _socket = null
-                            }
-                            reader = BufferedInputStream(socket.getInputStream())
-                        } catch (ex1: Exception) {
-                            throw RuntimeException("Failed to reconnect tcp port")
+                    //read all content
+                    do {
+                        val num = channel.read(buffer)
+                        buffer.flip()
+                        if (num > 0) {
+                            receive(buffer.array())
                         }
-
-                    } else {
-                        LoggerFactory.getLogger(javaClass).info("Port listener stopped")
-                    }
+                        buffer.rewind()
+                    } while (num > 0)
+                    delay(50)
+                } catch (ex: Exception) {
+                    logger.error("Channel read error", ex)
+                    logger.info("Reconnecting")
+                    channel = openChannel()
                 }
-
             }
-
         }
-        val thread = Thread(task, "port::" + toString() + "[listener]")
-        thread.start()
-
-        return thread
     }
 
     @Throws(PortException::class)
-    public override fun send(message: String) {
+    public override fun send(message: ByteArray) {
         execute {
             try {
-                val stream = socket.getOutputStream()
-                stream.write(message.toByteArray())
-                stream.flush()
-                LoggerFactory.getLogger(javaClass).debug("SEND: $message")
-            } catch (ex: IOException) {
+                channel.write(ByteBuffer.wrap(message))
+                logger.debug("SEND: $message")
+            } catch (ex: Exception) {
                 throw RuntimeException(ex)
             }
         }
     }
 
-    companion object {
-        private fun buildPortMeta(ip: String, port: Int, meta: Meta?): Meta {
-            return (meta ?: Meta.empty()).builder.apply {
-                setValue("type", "tcp")
-                setValue("ip", ip)
-                setValue("port", port)
-            }.build()
-        }
+    override fun toMeta(): Meta = buildMeta {
+        "type" to "tcp"
+        "name" to this@TcpPort.name
+        "ip" to ip
+        "port" to port
     }
-
 }

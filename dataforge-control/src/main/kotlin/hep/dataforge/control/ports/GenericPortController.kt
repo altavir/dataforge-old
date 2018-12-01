@@ -25,6 +25,7 @@ import hep.dataforge.utils.ReferenceRegistry
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.ByteArrayOutputStream
+import java.nio.charset.Charset
 import java.time.Duration
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
@@ -72,11 +73,6 @@ open class GenericPortController(
                 buffer.reset()
             }
         }
-    }
-
-    override fun accept(bytes: ByteArray) {
-        //TODO improve performance using byte buffers
-        bytes.forEach { accept(it) }
     }
 
     private fun acceptPhrase(message: String) {
@@ -227,7 +223,7 @@ open class GenericPortController(
      *
      * @param message
      */
-    fun send(message: String) {
+    fun send(message: ByteArray) {
         try {
             open()
             port.send(this, message)
@@ -235,6 +231,10 @@ open class GenericPortController(
             throw RuntimeException("Failed to send message to port $port")
         }
 
+    }
+
+    fun send(message: String, charset: Charset = Charsets.US_ASCII) {
+        send(message.toByteArray(charset))
     }
 
     /**

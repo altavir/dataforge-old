@@ -27,11 +27,11 @@ import java.util.function.Supplier
 /**
  * @author Alexander Nozik
  */
-abstract class VirtualPort protected constructor(meta: Meta) : Port(meta), Configurable {
+abstract class VirtualPort protected constructor(meta: Meta) : Port(), Configurable {
 
     private val futures = CopyOnWriteArraySet<TaggedFuture>()
     override var isOpen = false
-    override var meta = Configuration(meta)
+    var meta = Configuration(meta)
     protected open val delimeter = meta.getString("delimenter", "\n")
 
     private val scope = GlobalScope + executor.asCoroutineDispatcher()
@@ -56,8 +56,8 @@ abstract class VirtualPort protected constructor(meta: Meta) : Port(meta), Confi
     }
 
     @Throws(PortException::class)
-    public override fun send(message: String) {
-        evaluateRequest(message)
+    public override fun send(message: ByteArray) {
+        evaluateRequest(String(message, Charsets.US_ASCII))
     }
 
     /**

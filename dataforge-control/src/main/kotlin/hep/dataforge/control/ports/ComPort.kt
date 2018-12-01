@@ -22,23 +22,30 @@ import jssc.SerialPort
 import jssc.SerialPort.*
 import jssc.SerialPortEventListener
 import jssc.SerialPortException
-import org.slf4j.LoggerFactory
 import java.io.IOException
 
 /**
  * @author Alexander Nozik
  */
-class ComPort(meta: Meta) : Port(meta) {
+class ComPort(val address: String, val config: Meta) : Port() {
+
+    override val name: String = if (address.startsWith("com::")) {
+        address
+    } else {
+        "com::$address"
+    }
 
     //    private static final int CHAR_SIZE = 1;
     //    private static final int MAX_SIZE = 50;
-    private var port: SerialPort? = null
+    private val port: SerialPort by lazy {
+        SerialPort(name)
+    }
 
     private val serialPortListener = SerialPortEventListener { event ->
         if (event.isRXCHAR) {
             val chars = event.eventValue
             try {
-                val bytes = port!!.readBytes(chars)
+                val bytes = port.readBytes(chars)
                 receive(bytes)
             } catch (ex: IOException) {
                 throw RuntimeException(ex)
@@ -49,10 +56,8 @@ class ComPort(meta: Meta) : Port(meta) {
     }
 
     override val isOpen: Boolean
-        get() = port?.isOpened ?: false
+        get() = port.isOpened
 
-    override val name: String
-        get() = String.format("com::%s", getString("name"))
 
     override fun toString(): String {
         return name
@@ -61,14 +66,13 @@ class ComPort(meta: Meta) : Port(meta) {
     @Throws(PortException::class)
     override fun open() {
         try {
-            if (port == null) {
-                port = SerialPort(getString("name")).apply {
+            if (!port.isOpened) {
+                port.apply {
                     openPort()
-                    val an = meta
-                    val baudRate = an.getInt("baudRate", BAUDRATE_9600)
-                    val dataBits = an.getInt("dataBits", DATABITS_8)
-                    val stopBits = an.getInt("stopBits", STOPBITS_1)
-                    val parity = an.getInt("parity", PARITY_NONE)
+                    val baudRate = config.getInt("baudRate", BAUDRATE_9600)
+                    val dataBits = config.getInt("dataBits", DATABITS_8)
+                    val stopBits = config.getInt("stopBits", STOPBITS_1)
+                    val parity = config.getInt("parity", PARITY_NONE)
                     setParams(baudRate, dataBits, stopBits, parity)
                     addEventListener(serialPortListener)
                 }
@@ -82,7 +86,7 @@ class ComPort(meta: Meta) : Port(meta) {
     @Throws(PortException::class)
     fun clearPort() {
         try {
-            port?.purgePort(PURGE_RXCLEAR or PURGE_TXCLEAR)
+            port.purgePort(PURGE_RXCLEAR or PURGE_TXCLEAR)
         } catch (ex: SerialPortException) {
             throw PortException(ex)
         }
@@ -91,29 +95,35 @@ class ComPort(meta: Meta) : Port(meta) {
 
     @Throws(Exception::class)
     override fun close() {
-        port?.let {
+        port.let {
             it.removeEventListener()
             if (it.isOpened) {
                 it.closePort()
             }
         }
-        port = null
         super.close()
     }
 
     @Throws(PortException::class)
-    public override fun send(message: String) {
+    public override fun send(message: ByteArray) {
         if (!isOpen) {
             open()
         }
         execute {
             try {
-                LoggerFactory.getLogger(javaClass).debug("SEND: $message")
-                port!!.writeString(message)
+                logger.debug("SEND: $message")
+                port.writeBytes(message)
             } catch (ex: SerialPortException) {
                 throw RuntimeException(ex)
             }
         }
+    }
+
+    override fun toMeta(): Meta = buildMeta {
+        "type" to "com"
+        "name" to this@ComPort.name
+        "address" to address
+        update(config)
     }
 
     companion object {
@@ -137,7 +147,7 @@ class ComPort(meta: Meta) : Port(meta) {
          */
         @JvmOverloads
         fun create(portName: String, baudRate: Int = BAUDRATE_9600, dataBits: Int = DATABITS_8, stopBits: Int = STOPBITS_1, parity: Int = PARITY_NONE): ComPort {
-            return ComPort(buildMeta {
+            return ComPort(portName, buildMeta {
                 setValue("type", "com")
                 putValue("name", portName)
                 putValue("baudRate", baudRate)

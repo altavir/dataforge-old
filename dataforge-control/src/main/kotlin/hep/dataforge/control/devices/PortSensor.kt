@@ -75,7 +75,7 @@ abstract class PortSensor(context: Context, meta: Meta) : Sensor(context, meta) 
         update(value)
     }.booleanDelegate
 
-    var port by metaState(PORT_STATE, getter = { connection.port.meta }) { old, value ->
+    var port by metaState(PORT_STATE, getter = { connection.port.toMeta() }) { old, value ->
         if (old != value) {
             setupConnection(value)
         }

@@ -20,17 +20,17 @@ import hep.dataforge.context.Context
 import hep.dataforge.context.ContextAware
 import hep.dataforge.control.devices.Device
 import hep.dataforge.control.devices.dispatchEvent
+import hep.dataforge.description.ValueDef
 import hep.dataforge.events.EventBuilder
 import hep.dataforge.meta.Meta
 import hep.dataforge.nullable
-import hep.dataforge.states.StateHolder
-import hep.dataforge.states.Stateful
-import hep.dataforge.states.metaState
-import hep.dataforge.states.valueState
+import hep.dataforge.states.*
 import hep.dataforge.useValue
+import hep.dataforge.values.ValueType
 import org.slf4j.Logger
 import java.time.Duration
 
+@StateDef(value = ValueDef(key = "connected",type = [ValueType.BOOLEAN], def = "false"), writable = true)
 class PortHelper(
         val device: Device,
         val builder: ((Context, Meta) -> GenericPortController) = { context, meta -> GenericPortController(context, PortFactory.build(meta)) }
@@ -77,7 +77,7 @@ class PortHelper(
         update(value)
     }.booleanDelegate
 
-    var port by metaState(PORT_STATE, getter = { connection.port.meta }) { old, value ->
+    var port by metaState(PORT_STATE, getter = { connection.port.toMeta() }) { old, value ->
         if (old != value) {
             setDebugMode(false)
             connectedState.update(false)
@@ -94,7 +94,7 @@ class PortHelper(
     val name get() = device.name
 
     init {
-        states.update(PORT_STATE, connection.port.meta)
+        states.update(PORT_STATE, connection.port.toMeta())
         device.meta.useValue(DEBUG_STATE) {
             debug = it.boolean
         }
@@ -115,7 +115,6 @@ class PortHelper(
         }
         states.update(DEBUG_STATE, debugMode)
     }
-
 
     fun shutdown() {
         connectedState.set(false)
