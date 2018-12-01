@@ -22,6 +22,7 @@ import jssc.SerialPort
 import jssc.SerialPort.*
 import jssc.SerialPortEventListener
 import jssc.SerialPortException
+import kotlinx.coroutines.launch
 import java.io.IOException
 
 /**
@@ -109,7 +110,7 @@ class ComPort(val address: String, val config: Meta) : Port() {
         if (!isOpen) {
             open()
         }
-        execute {
+        launch {
             try {
                 logger.debug("SEND: $message")
                 port.writeBytes(message)

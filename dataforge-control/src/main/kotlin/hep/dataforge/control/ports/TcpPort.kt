@@ -15,12 +15,10 @@
  */
 package hep.dataforge.control.ports
 
-import hep.dataforge.context.Global
 import hep.dataforge.exceptions.PortException
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.buildMeta
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.net.InetSocketAddress
@@ -39,8 +37,6 @@ class TcpPort(val ip: String, val port: Int, val config: Meta = Meta.empty()) : 
 
     override val name = String.format("tcp::%s:%d", ip, port)
 
-    private val dispatcher = this.executor.asCoroutineDispatcher()
-
     private var listenerJob: Job? = null
 
     private fun openChannel(): SocketChannel{
@@ -51,10 +47,9 @@ class TcpPort(val ip: String, val port: Int, val config: Meta = Meta.empty()) : 
 
     @Throws(PortException::class)
     override fun open() {
-        execute {
+        launch {
             if (!channel.isConnected && !channel.isConnectionPending) {
                 channel = openChannel()
-                channel.finishConnect()
                 startListener()
             }
         }
@@ -63,7 +58,7 @@ class TcpPort(val ip: String, val port: Int, val config: Meta = Meta.empty()) : 
     @Synchronized
     @Throws(Exception::class)
     override fun close() {
-        execute {
+        launch {
             if(isOpen) {
                 listenerJob?.cancel()
                 channel.shutdownInput()
@@ -75,16 +70,15 @@ class TcpPort(val ip: String, val port: Int, val config: Meta = Meta.empty()) : 
     }
 
     private fun startListener() {
-        listenerJob = Global.launch(dispatcher) {
+        listenerJob = launch {
             val buffer = ByteBuffer.allocate(1024)
             while (true) {
                 try {
                     //read all content
                     do {
                         val num = channel.read(buffer)
-                        buffer.flip()
                         if (num > 0) {
-                            receive(buffer.array())
+                            receive(buffer.toArray(num))
                         }
                         buffer.rewind()
                     } while (num > 0)
@@ -100,10 +94,10 @@ class TcpPort(val ip: String, val port: Int, val config: Meta = Meta.empty()) : 
 
     @Throws(PortException::class)
     public override fun send(message: ByteArray) {
-        execute {
+        launch {
             try {
                 channel.write(ByteBuffer.wrap(message))
-                logger.debug("SEND: $message")
+                logger.debug("SEND: ${String(message)}")
             } catch (ex: Exception) {
                 throw RuntimeException(ex)
             }
@@ -116,4 +110,12 @@ class TcpPort(val ip: String, val port: Int, val config: Meta = Meta.empty()) : 
         "ip" to ip
         "port" to port
     }
+}
+
+fun ByteBuffer.toArray(limit: Int = limit()): ByteArray{
+    rewind()
+    val response = ByteArray(limit)
+    get(response)
+    rewind()
+    return response
 }

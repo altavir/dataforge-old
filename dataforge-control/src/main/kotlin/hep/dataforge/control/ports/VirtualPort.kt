@@ -19,7 +19,8 @@ import hep.dataforge.exceptions.PortException
 import hep.dataforge.meta.Configurable
 import hep.dataforge.meta.Configuration
 import hep.dataforge.meta.Meta
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import java.time.Duration
 import java.util.concurrent.CopyOnWriteArraySet
 import java.util.function.Supplier
@@ -33,8 +34,6 @@ abstract class VirtualPort protected constructor(meta: Meta) : Port(), Configura
     override var isOpen = false
     var meta = Configuration(meta)
     protected open val delimeter = meta.getString("delimenter", "\n")
-
-    private val scope = GlobalScope + executor.asCoroutineDispatcher()
 
     @Throws(PortException::class)
     override fun open() {
@@ -87,7 +86,7 @@ abstract class VirtualPort protected constructor(meta: Meta) : Port(), Configura
     @Synchronized
     protected fun planResponse(response: String, delay: Duration, vararg tags: String) {
         clearCompleted()
-        val future = scope.launch {
+        val future = launch {
             kotlinx.coroutines.time.delay(delay)
             receive((response + delimeter).toByteArray())
         }
@@ -97,7 +96,7 @@ abstract class VirtualPort protected constructor(meta: Meta) : Port(), Configura
     @Synchronized
     protected fun planRegularResponse(responseBuilder: Supplier<String>, delay: Duration, period: Duration, vararg tags: String) {
         clearCompleted()
-        val future = scope.launch {
+        val future = launch {
             kotlinx.coroutines.time.delay(delay)
             while (true) {
                 receive((responseBuilder.get() + delimeter).toByteArray())

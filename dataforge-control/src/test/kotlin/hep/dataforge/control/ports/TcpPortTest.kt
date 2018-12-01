@@ -54,8 +54,7 @@ class TcpPortTest {
         val buffer = ByteBuffer.allocate(1024)
         channel.read(buffer)
         buffer.flip()
-        val response = ByteArray(buffer.limit())
-        buffer.get(response)
+        val response = buffer.toArray()
         assertEquals(request.size, response.size)
         assertEquals(String(request), String(response))
     }
@@ -65,10 +64,10 @@ class TcpPortTest {
         val port = TcpPort("localhost", 9999)
         port.holdBy(object : PortController {
             override fun accept(byte: Byte) {
-                print(byte)
+                println(byte)
             }
-
         })
         port.send("ddd".toByteArray())
+        Thread.sleep(500)
     }
 }

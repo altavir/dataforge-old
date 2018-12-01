@@ -19,10 +19,12 @@ import hep.dataforge.Named
 import hep.dataforge.exceptions.PortException
 import hep.dataforge.exceptions.PortLockException
 import hep.dataforge.meta.MetaID
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.launch
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.Duration
-import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.locks.ReentrantLock
 
@@ -52,18 +54,18 @@ interface PortController {
  *
  * @author Alexander Nozik
  */
-abstract class Port : AutoCloseable, MetaID, Named {
+abstract class Port : AutoCloseable, MetaID, Named, CoroutineScope {
 
     private val portLock = ReentrantLock(true)
 
     private var controller: PortController? = null
 
-    protected val executor: ExecutorService = Executors.newSingleThreadExecutor { r ->
+    override val coroutineContext = Executors.newSingleThreadExecutor { r ->
         val res = Thread(r)
         res.name = "port::$name"
         res.priority = Thread.MAX_PRIORITY
         res
-    }
+    }.asCoroutineDispatcher()
 
     protected val logger: Logger by lazy { LoggerFactory.getLogger("port[$name]") }
 
@@ -76,21 +78,13 @@ abstract class Port : AutoCloseable, MetaID, Named {
     abstract fun open()
 
     /**
-     * Run something on port thread
-     * @param r
-     */
-    protected fun execute(r: () -> Unit) {
-        executor.submit(r)
-    }
-
-    /**
      * Emergency hold break.
      */
     @Synchronized
     fun breakHold() {
         if (isLocked) {
             logger.warn("Breaking hold on port $name")
-            execute { portLock.unlock() }
+            launch { portLock.unlock() }
         }
     }
 
@@ -117,7 +111,7 @@ abstract class Port : AutoCloseable, MetaID, Named {
             open()
         }
 
-        execute {
+        launch {
             try {
                 portLock.lockInterruptibly()
             } catch (ex: InterruptedException) {
@@ -182,7 +176,7 @@ abstract class Port : AutoCloseable, MetaID, Named {
         if (isLocked) {
             if (controller == this.controller) {
                 this.controller = null
-                execute {
+                launch {
                     portLock.unlock()
                     logger.debug("Unlocked by {}", controller)
                 }
@@ -197,7 +191,7 @@ abstract class Port : AutoCloseable, MetaID, Named {
 
     @Throws(Exception::class)
     override fun close() {
-        executor.shutdown()
+        coroutineContext.close()
     }
 
     class PortTimeoutException(timeout: Duration) : PortException() {
