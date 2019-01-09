@@ -26,20 +26,30 @@ import hep.dataforge.providers.Provides
 import hep.dataforge.values.ValueType
 import java.util.*
 
-@ValueDef(key = "printHistory", type = [ValueType.BOOLEAN], def = "false", info = "If true, print all incoming records in default context output")
-@PluginDef(name = "chronicler", group = "hep.dataforge", support = true, info = "The general support for history logging")
+@ValueDef(
+    key = "printHistory",
+    type = [ValueType.BOOLEAN],
+    def = "false",
+    info = "If true, print all incoming records in default context output"
+)
+@PluginDef(
+    name = "chronicler",
+    group = "hep.dataforge",
+    support = true,
+    info = "The general support for history logging"
+)
 class Chronicler(meta: Meta) : BasicPlugin(meta), History {
 
     private val recordPusher: (Record) -> Unit = { Global.console.render(it) }
 
     private val root: Chronicle by lazy {
         Chronicle(
-                context.name,
-                if (context == Global) {
-                    null
-                } else {
-                    Global.history
-                }
+            context.name,
+            if (context == Global) {
+                null
+            } else {
+                Global.history
+            }
         ).also {
             if (meta.getBoolean("printHistory", false)) {
                 it.addListener(recordPusher)
@@ -64,13 +74,17 @@ class Chronicler(meta: Meta) : BasicPlugin(meta), History {
      * @return
      */
     fun getChronicle(reportName: String): Chronicle {
-        return historyCache.computeIfAbsent(reportName) { str ->
-            val name = Name.of(str)
+        return historyCache[reportName] ?: run {
+            val name = Name.of(reportName)
             val parent: History? = when {
                 name.length > 1 -> getChronicle(name.cutLast().toString())
                 else -> root
             }
-            Chronicle(name.last.toString(), parent)
+            Chronicle(name.last.toString(), parent).also {
+                synchronized(this){
+                    historyCache[reportName] = it
+                }
+            }
         }
     }
 }

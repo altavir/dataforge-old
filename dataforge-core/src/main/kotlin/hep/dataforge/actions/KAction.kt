@@ -245,7 +245,7 @@ class KSplit<T : Any, R : Any>(
 
                 val laminate = Laminate(it.meta, actionMeta)
 
-                val split = SplitBuilder<T, R>(context, it.name, it.meta).apply(action)
+                val split = SplitBuilder<T, R>(context, it.name, actionMeta).apply(action)
 
 
                 val dispatcher = context + getExecutorService(context, laminate).asCoroutineDispatcher()
@@ -257,7 +257,7 @@ class KSplit<T : Any, R : Any>(
                 split.fragments.forEach { name, rule ->
                     val env = FragmentEnv<T, R>(
                             context,
-                            it.name,
+                            name,
                             laminate.builder,
                             context.history.getChronicle(Name.joinString(it.name, name))
                     )

@@ -1,6 +1,6 @@
 package hep.dataforge.maths.integration
 
-import javafx.util.Pair
+import kotlin.Pair
 import org.apache.commons.math3.analysis.MultivariateFunction
 import org.apache.commons.math3.linear.Array2DRowRealMatrix
 import org.apache.commons.math3.linear.ArrayRealVector

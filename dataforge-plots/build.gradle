@@ -1,10 +1,10 @@
-plugins {
-    id 'org.openjfx.javafxplugin' version '0.0.5'
-}
-
-javafx {
-    modules = [ 'javafx.controls' ]
-}
+//plugins {
+//    id 'org.openjfx.javafxplugin' version '0.0.5'
+//}
+//
+//javafx {
+//    modules = [ 'javafx.controls' ]
+//}
 
 description = 'dataforge-plots'
 

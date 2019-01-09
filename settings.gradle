@@ -13,7 +13,7 @@ include ':grind' // GRoovy INteractive Dataforge
 include ':grind:groovymath' // groovy mathematical extension
 include ':grind:grind-terminal'
 
-include 'kodex-server' // ktor based http server
+//include 'kodex-server' // ktor based http server
 //include ':kodex:dataforge-server' // server base
 
 include ':dataforge-gui' // javafx based gui
