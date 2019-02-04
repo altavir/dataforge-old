@@ -101,15 +101,18 @@ class PluginManager(override val context: Context) : ContextAware, AutoCloseable
         if (context.isLocked) {
             throw ContextLockException()
         }
-        if (get(plugin::class, false) != null) {
-            throw  RuntimeException("Plugin of type ${plugin::class} already exists in ${context.name}")
-        } else {
+        val existing = get(plugin::class, false)
+        if ( existing == null) {
             loadDependencies(plugin)
 
             logger.info("Loading plugin {} into {}", plugin.name, context.name)
             plugin.attach(context)
             plugins.add(plugin)
             return plugin
+        } else if(existing.meta == plugin.meta){
+            return existing
+        } else{
+            throw  RuntimeException("Plugin of type ${plugin::class} already exists in ${context.name}")
         }
     }
 

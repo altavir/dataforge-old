@@ -43,9 +43,15 @@ class ContextBuilder(val name: String, val parent: Context = Global) {
 
     private val classPath = ArrayList<URL>()
 
-    private val plugins = ArrayList<Plugin>()
+    private val plugins = HashSet<Plugin>()
 
     var output: OutputManager? = null
+        set(value) {
+            plugins.removeIf{it is OutputManager}
+            if (value != null) {
+                plugins.add(value)
+            }
+        }
 
     var rootDir: String
         get() = properties[ROOT_DIRECTORY_CONTEXT_KEY]?.toString() ?: parent.rootDir.toString()
@@ -61,7 +67,7 @@ class ContextBuilder(val name: String, val parent: Context = Global) {
 
     var dataDir: String
         get() = properties[DATA_DIRECTORY_CONTEXT_KEY]?.toString()
-                ?: parent.getString(DATA_DIRECTORY_CONTEXT_KEY, parent.rootDir.toString())
+            ?: parent.getString(DATA_DIRECTORY_CONTEXT_KEY, parent.rootDir.toString())
         set(value) {
             properties[DATA_DIRECTORY_CONTEXT_KEY] = value.asValue()
         }
@@ -94,7 +100,7 @@ class ContextBuilder(val name: String, val parent: Context = Global) {
     @JvmOverloads
     fun plugin(type: Class<out Plugin>, meta: Meta = Meta.empty()): ContextBuilder {
         val tag = PluginTag.resolve(type)
-        return plugin(parent.plugins.pluginLoader.get(tag, meta))
+        return plugin(parent.plugins.pluginLoader[tag, meta])
     }
 
     inline fun <reified T : Plugin> plugin(noinline metaBuilder: KMetaBuilder.() -> Unit = {}): ContextBuilder {
@@ -103,7 +109,7 @@ class ContextBuilder(val name: String, val parent: Context = Global) {
 
     fun plugin(tag: String, meta: Meta): ContextBuilder {
         val pluginTag = PluginTag.fromString(tag)
-        return plugin(parent.plugins.pluginLoader.get(pluginTag, meta))
+        return plugin(parent.plugins.pluginLoader[pluginTag, meta])
     }
 
 
@@ -114,7 +120,7 @@ class ContextBuilder(val name: String, val parent: Context = Global) {
             meta.hasValue("name") -> plugin(meta.getString("name"), plMeta)
             meta.hasValue("class") -> {
                 val type: Class<out Plugin> = Class.forName(meta.getString("class")) as? Class<out Plugin>
-                        ?: throw RuntimeException("Failed to initialize plugin from meta")
+                    ?: throw RuntimeException("Failed to initialize plugin from meta")
                 plugin(type, plMeta)
             }
             else -> throw IllegalArgumentException("Malformed plugin definition")
@@ -147,7 +153,7 @@ class ContextBuilder(val name: String, val parent: Context = Global) {
         return when {
             Files.isDirectory(path) -> try {
                 Files.find(path, -1, BiPredicate { subPath, _ -> subPath.toString().endsWith(".jar") })
-                        .map<URI> { it.toUri() }.forEach { this.classPath(it) }
+                    .map<URI> { it.toUri() }.forEach { this.classPath(it) }
                 this
             } catch (e: IOException) {
                 throw RuntimeException("Failed to load library", e)
@@ -187,10 +193,10 @@ class ContextBuilder(val name: String, val parent: Context = Global) {
         }
 
         return Context(name, parent, classLoader, properties).apply {
-            this@ContextBuilder.output?.let {
-                plugins.load(it)
-            }
-            plugins.forEach {
+            //            this@ContextBuilder.output?.let {
+//                plugins.load(it)
+//            }
+            this@ContextBuilder.plugins.forEach {
                 plugins.load(it)
             }
 

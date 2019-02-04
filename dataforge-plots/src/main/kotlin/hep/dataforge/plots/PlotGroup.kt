@@ -124,9 +124,9 @@ class PlotGroup(override  val name: String, descriptor: NodeDescriptor = NodeDes
     fun stream(recursive: Boolean = true): Stream<Pair<Name, Plottable>> {
         return plots.stream().flatMap {
             if (recursive && it is PlotGroup) {
-                it.stream().map { pair -> Pair(Name.of(it.name) + pair.first, pair.second) }
+                it.stream().map { pair -> Pair(Name.ofSingle(it.name) + pair.first, pair.second) }
             } else {
-                Stream.of(Pair(Name.of(it.name), it))
+                Stream.of(Pair(Name.ofSingle(it.name), it))
             }
         }
     }
