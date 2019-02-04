@@ -1,8 +1,0 @@
-description = 'dataforge-storage'
-
-dependencies {
-    compile project(':dataforge-core')
-    compile project(':dataforge-core:dataforge-json')
-    compile 'commons-io:commons-io:2.5'
-    compile group: 'org.slf4j', name: 'jcl-over-slf4j', version: '1.7.25'
-}
