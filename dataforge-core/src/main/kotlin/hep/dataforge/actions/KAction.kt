@@ -142,7 +142,10 @@ class JoinGroupBuilder<T : Any, R : Any>(val context: Context, val meta: Meta) {
      */
     fun result(resultName: String, f: suspend ActionEnv.(Map<String, T>) -> R) {
         groupRules += { context, node ->
-            listOf(JoinGroup<T, R>(context, resultName, node).apply { result(f) })
+            listOf(JoinGroup<T, R>(context, resultName, node).apply {
+                //TODO Meta mutator could be inserted here
+                result(f)
+            })
         }
     }
 

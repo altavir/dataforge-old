@@ -65,12 +65,7 @@ class CustomDataFilter(meta: Meta) : SimpleMetaMorph(meta), DataFilter {
     }
 
     private fun includeData(namePattern: String, type: Class<*>?) {
-        val limitingType: Class<*>
-        if (type == null) {
-            limitingType = Any::class.java
-        } else {
-            limitingType = type
-        }
+        val limitingType: Class<*> = type ?: Any::class.java
         val predicate = BiPredicate<String, Data<*>> { name, data -> name.matches(namePattern.toRegex()) && limitingType.isAssignableFrom(data.type) }
         includeData(predicate)
     }
@@ -86,13 +81,7 @@ class CustomDataFilter(meta: Meta) : SimpleMetaMorph(meta), DataFilter {
     }
 
     private fun includeNode(namePattern: String, type: Class<*>?) {
-
-        val limitingType: Class<*>
-        if (type == null) {
-            limitingType = Any::class.java
-        } else {
-            limitingType = type
-        }
+        val limitingType: Class<*> = type ?: Any::class.java
         val predicate = BiPredicate<String, DataNode<*>> { name, data -> name.matches(namePattern.toRegex()) && limitingType.isAssignableFrom(data.type) }
         includeNode(predicate)
     }
@@ -116,12 +105,10 @@ class CustomDataFilter(meta: Meta) : SimpleMetaMorph(meta), DataFilter {
     }
 
     private fun getPattern(node: Meta): String {
-        return if (node.hasValue("mask")) {
-            applyMask(node.getString("mask"))
-        } else if (node.hasValue("pattern")) {
-            node.getString("pattern")
-        } else {
-            ".*"
+        return when {
+            node.hasValue("mask") -> applyMask(node.getString("mask"))
+            node.hasValue("pattern") -> node.getString("pattern")
+            else -> ".*"
         }
     }
 
