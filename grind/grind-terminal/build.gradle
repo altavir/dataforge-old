@@ -8,6 +8,12 @@ buildscript {
 apply plugin: 'groovy'
 apply plugin: "application"
 apply plugin: 'com.github.johnrengelman.shadow'
+//apply plugin: 'org.openjfx.javafxplugin'
+//
+//javafx{
+//    modules = [ 'javafx.controls']
+//}
+
 
 if (!hasProperty('mainClass')) {
     ext.mainClass = 'hep.dataforge.grind.terminal.RunGrindShell'

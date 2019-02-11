@@ -42,7 +42,7 @@ abstract class FXOutput(override val context: Context) : Output {
  * A specialized output for tables. Pushing new table replaces the old one
  */
 class FXTableOutput(context: Context) : FXOutput(context) {
-    val tableDisplay: TableDisplay = TableDisplay()
+    val tableDisplay: TableDisplay by lazy { TableDisplay() }
 
     override val view: Fragment = object : Fragment() {
         override val root = borderpane {
@@ -66,7 +66,9 @@ class FXTableOutput(context: Context) : FXOutput(context) {
 
 class FXPlotOutput(context: Context, meta: Meta = Meta.empty()) : FXOutput(context), PlotOutput, Configurable {
 
-    override val frame: PlotFrame  by lazy { context.getOrLoad(PlotFactory::class.java).build(meta.getMetaOrEmpty("frame")) }
+    override val frame: PlotFrame  by lazy {
+        context.getOrLoad(PlotFactory::class.java).build(meta.getMetaOrEmpty("frame"))
+    }
 
     val container: PlotContainer by lazy { PlotContainer(frame as FXPlotFrame) }
 
@@ -99,10 +101,10 @@ class FXPlotOutput(context: Context, meta: Meta = Meta.empty()) : FXOutput(conte
                     frame.addAll(obj.plots)
                     frame.plots.configure(obj.plots.config)
 
-                    obj.plots.addListener(object: PlotListener{
+                    obj.plots.addListener(object : PlotListener {
 
                         override fun dataChanged(caller: Plottable, path: Name, before: Plottable?, after: Plottable?) {
-                            if(before!= after) {
+                            if (before != after) {
                                 frame.plots[path] = after
                             }
                         }

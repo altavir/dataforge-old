@@ -8,12 +8,11 @@ buildscript {
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:0.9.17"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
-
-
 }
 
 plugins {
     //id "org.jetbrains.kotlin.jvm" version "1.2.31" apply false
+    //id 'org.openjfx.javafxplugin' version '0.0.7' apply false
     id "me.champeau.gradle.jmh" version "0.4.7" apply false
     id "idea"
     id "maven-publish"

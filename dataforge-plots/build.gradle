@@ -1,6 +1,4 @@
-//plugins {
-//    id 'org.openjfx.javafxplugin' version '0.0.5'
-//}
+//apply plugin: 'org.openjfx.javafxplugin'
 //
 //javafx {
 //    modules = [ 'javafx.controls' ]
