@@ -83,17 +83,17 @@ class FXPlotOutput(context: Context, meta: Meta = Meta.empty()) : FXOutput(conte
     override fun getConfig(): Configuration = frame.config
 
     override fun render(obj: Any, meta: Meta) {
-        if (!meta.isEmpty) {
-            if (!frame.config.isEmpty) {
-                logger.warn("Overriding non-empty frame configuration")
-            }
-            frame.configure(meta)
-            // Use descriptor hidden field to update root plot container description
-            meta.useValue("@descriptor") {
-                frame.plots.descriptor = Descriptors.forReference("plot", it.string)
-            }
-        }
         runLater {
+            if (!meta.isEmpty) {
+                if (!frame.config.isEmpty) {
+                    logger.warn("Overriding non-empty frame configuration")
+                }
+                frame.configure(meta)
+                // Use descriptor hidden field to update root plot container description
+                meta.useValue("@descriptor") {
+                    frame.plots.descriptor = Descriptors.forReference("plot", it.string)
+                }
+            }
             when (obj) {
                 is PlotFrame -> {
                     frame.configure(obj.config)

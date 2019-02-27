@@ -158,7 +158,6 @@ class JFreeChartFrame : XYPlotFrame(), FXPlotFrame, Serializable {
         }
     }
 
-    @Synchronized
     override fun updateAxis(axisName: String, axisMeta: Meta, plotMeta: Meta) {
             val axis = getAxis(axisMeta)
 

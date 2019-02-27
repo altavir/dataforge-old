@@ -102,7 +102,7 @@ fun OutputManager.render(obj: Any, stage: String? = null, name: String? = null, 
             setValue(OUTPUT_STAGE_KEY, stage)
         }
         if (type != null || !meta.hasValue(OUTPUT_TYPE_KEY)) {
-            setValue(OUTPUT_TYPE_KEY, type ?: Types.get(obj))
+            setValue(OUTPUT_TYPE_KEY, type ?: Types[obj])
         }
     }
     get(outputMeta).render(obj, outputMeta)

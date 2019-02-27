@@ -57,7 +57,8 @@ private fun <T, R> ObservableMap<T, R>.ui(): ObservableMap<T, R> {
     return res
 }
 
-class OutputContainer(val context: Context, val meta: Meta) : Fragment(title = "[${context.name}] DataForge output container", icon = dfIconView) {
+class OutputContainer(val context: Context, val meta: Meta) :
+    Fragment(title = "[${context.name}] DataForge output container", icon = dfIconView) {
 
     private val stages: ObservableMap<String, OutputStageContainer> = FXCollections.observableHashMap()
 
@@ -158,10 +159,14 @@ class OutputContainer(val context: Context, val meta: Meta) : Fragment(title = "
     }
 }
 
-@PluginDef(name = "output.fx", dependsOn = ["hep.dataforge.fx", "hep.dataforge.plots"], info = "JavaFX based output manager")
+@PluginDef(
+    name = "output.fx",
+    dependsOn = ["hep.dataforge.fx", "hep.dataforge.plots"],
+    info = "JavaFX based output manager"
+)
 class FXOutputManager(
-        meta: Meta = Meta.empty(),
-        viewConsumer: Context.(OutputContainer) -> Unit = { getOrLoad(FXPlugin::class.java).display(it) }
+    meta: Meta = Meta.empty(),
+    viewConsumer: Context.(OutputContainer) -> Unit = { getOrLoad(FXPlugin::class.java).display(it) }
 ) : OutputManager, BasicPlugin(meta) {
 
     override val tag = PluginTag(name = "output.fx", dependsOn = *arrayOf("hep.dataforge:fx"))
@@ -176,11 +181,10 @@ class FXOutputManager(
         OutputContainer(context, meta).also { viewConsumer.invoke(context, it) }
     }
 
-    val root: UIComponent
-        get() = container
+    val root get() = container
 
     override fun get(meta: Meta): Output {
-        return container.get(meta)
+        return root.get(meta)
     }
 
     companion object {
@@ -191,6 +195,7 @@ class FXOutputManager(
         /**
          * Display in existing BorderPane
          */
-        fun display(pane: BorderPane, meta: Meta = Meta.empty()): FXOutputManager = FXOutputManager(meta) { pane.center = it.root }
+        fun display(pane: BorderPane, meta: Meta = Meta.empty()): FXOutputManager =
+            FXOutputManager(meta) { pane.center = it.root }
     }
 }
