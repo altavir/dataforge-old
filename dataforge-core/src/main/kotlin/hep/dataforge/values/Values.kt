@@ -91,3 +91,7 @@ interface Values : NameSetContainer, ValueProvider, MetaMorph, Iterable<NamedVal
         return builder.build()
     }
 }
+
+fun Values.builder() = ValueMap.Builder(this)
+
+fun Values.edit(block: ValueMap.Builder.()->Unit) = builder().apply(block).build()

@@ -137,6 +137,14 @@ class ValueMap : Values, MetaMorph {
             return this
         }
 
+        infix fun String.to(value: Any?) {
+            if (value == null) {
+                valueMap.remove(this)
+            } else {
+                putValue(this, value)
+            }
+        }
+
         /**
          * Put the value at the beginning of the map
          *
@@ -185,13 +193,13 @@ class ValueMap : Values, MetaMorph {
         }
 
         @JvmStatic
-        fun of(values: Iterable<NamedValue>): ValueMap{
-            return ValueMap(values.associateBy(keySelector = {it.name}, valueTransform = {it.anonymous}))
+        fun of(values: Iterable<NamedValue>): ValueMap {
+            return ValueMap(values.associateBy(keySelector = { it.name }, valueTransform = { it.anonymous }))
         }
 
         @JvmStatic
-        fun of(vararg values: NamedValue): ValueMap{
-            return ValueMap(values.associateBy(keySelector = {it.name}, valueTransform = {it.anonymous}))
+        fun of(vararg values: NamedValue): ValueMap {
+            return ValueMap(values.associateBy(keySelector = { it.name }, valueTransform = { it.anonymous }))
         }
 
         @JvmStatic
