@@ -10,8 +10,8 @@ apply plugin: "application"
 apply plugin: 'com.github.johnrengelman.shadow'
 //apply plugin: 'org.openjfx.javafxplugin'
 //
-//javafx{
-//    modules = [ 'javafx.controls']
+//javafx {
+//    modules = [ 'javafx.controls' ]
 //}
 
 

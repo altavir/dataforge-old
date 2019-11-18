@@ -21,6 +21,7 @@ import tornadofx.*
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.OutputStream
+import kotlin.math.max
 
 /**
  * OutputPane for formatted data
@@ -28,8 +29,6 @@ import java.io.OutputStream
  * @author Alexander Nozik
  */
 class FXTextOutput(context: Context) : FXOutput(context), TextOutput {
-
-
 
     private val textArea = InlineCssTextArea()
 
@@ -46,7 +45,7 @@ class FXTextOutput(context: Context) : FXOutput(context), TextOutput {
     private var currentTab = 0
 
     private val tabSize: Int
-        get() = Math.max(getTabStop(currentTab) - textArea.caretColumn, 2)
+        get() = max(getTabStop(currentTab) - textArea.caretColumn, 2)
 
     val isEmpty: Boolean
         get() = textArea.text.isEmpty()

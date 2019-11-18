@@ -32,6 +32,7 @@ import hep.dataforge.description.ValueDefs
 import hep.dataforge.events.EventBuilder
 import hep.dataforge.exceptions.ControlException
 import hep.dataforge.meta.Meta
+import hep.dataforge.nullable
 import hep.dataforge.states.*
 import hep.dataforge.useValue
 import hep.dataforge.values.ValueType.BOOLEAN
@@ -45,13 +46,33 @@ import java.time.Duration
  * @author darksnake
  */
 @StateDefs(
-        StateDef(value = ValueDef(key = CONNECTED_STATE, type = [BOOLEAN], def = "false", info = "The connection state for this device"), writable = true),
-        //StateDef(value = ValueDef(name = PORT_STATE, info = "The name of the port to which this device is connected")),
-        StateDef(value = ValueDef(key = DEBUG_STATE, type = [BOOLEAN], def = "false", info = "If true, then all received phrases would be shown in the log"), writable = true)
+    StateDef(
+        value = ValueDef(
+            key = CONNECTED_STATE,
+            type = [BOOLEAN],
+            def = "false",
+            info = "The connection state for this device"
+        ), writable = true
+    ),
+    //StateDef(value = ValueDef(name = PORT_STATE, info = "The name of the port to which this device is connected")),
+    StateDef(
+        value = ValueDef(
+            key = DEBUG_STATE,
+            type = [BOOLEAN],
+            def = "false",
+            info = "If true, then all received phrases would be shown in the log"
+        ), writable = true
+    )
 )
-@MetaStateDef(value = NodeDef(key = "port", descriptor = "method::hep.dataforge.control.ports.PortFactory.build", info = "Information about port"), writable = true)
+@MetaStateDef(
+    value = NodeDef(
+        key = "port",
+        descriptor = "method::hep.dataforge.control.ports.PortFactory.build",
+        info = "Information about port"
+    ), writable = true
+)
 @ValueDefs(
-        ValueDef(key = "timeout", type = arrayOf(NUMBER), def = "400", info = "A timeout for port response in milliseconds")
+    ValueDef(key = "timeout", type = arrayOf(NUMBER), def = "400", info = "A timeout for port response in milliseconds")
 )
 abstract class PortSensor(context: Context, meta: Meta) : Sensor(context, meta) {
 
@@ -98,7 +119,14 @@ abstract class PortSensor(context: Context, meta: Meta) : Sensor(context, meta) 
         if (debugMode) {
             connection.apply {
                 onAnyPhrase("$name[debug]") { phrase -> logger.debug("Device {} received phrase: \n{}", name, phrase) }
-                onError("$name[debug]") { message, error -> logger.error("Device {} exception: \n{}", name, message, error) }
+                onError("$name[debug]") { message, error ->
+                    logger.error(
+                        "Device {} exception: \n{}",
+                        name,
+                        message,
+                        error
+                    )
+                }
             }
         } else {
             connection.apply {
@@ -114,7 +142,10 @@ abstract class PortSensor(context: Context, meta: Meta) : Sensor(context, meta) 
             try {
                 if (_connection == null) {
                     logger.debug("Setting up connection using device meta")
-                    setupConnection(meta.getMetaOrEmpty(PORT_STATE))
+                    val initialPort = meta.optMeta(PORT_STATE).nullable
+                        ?: meta.optString(PORT_STATE).nullable?.let { PortFactory.nameToMeta(it) }
+                        ?: Meta.empty()
+                    setupConnection(initialPort)
                 }
                 connection.open()
                 this.connected.update(true)
@@ -151,17 +182,21 @@ abstract class PortSensor(context: Context, meta: Meta) : Sensor(context, meta) 
         return connection.sendAndWait(request, timeout) { true }
     }
 
-    protected fun sendAndWait(request: String, timeout: Duration = defaultTimeout, predicate: (String) -> Boolean): String {
+    protected fun sendAndWait(
+        request: String,
+        timeout: Duration = defaultTimeout,
+        predicate: (String) -> Boolean
+    ): String {
         return connection.sendAndWait(request, timeout, predicate)
     }
 
     protected fun send(message: String) {
         connection.send(message)
         dispatchEvent(
-                EventBuilder
-                        .make(name)
-                        .setMetaValue("request", message)
-                        .build()
+            EventBuilder
+                .make(name)
+                .setMetaValue("request", message)
+                .build()
         )
     }
 

@@ -1,7 +1,9 @@
-//apply plugin: 'org.openjfx.javafxplugin'
+//allprojects {
+//    apply plugin: 'org.openjfx.javafxplugin'
 //
-//javafx {
-//    modules = [ 'javafx.controls' ]
+//    javafx {
+//        modules = ['javafx.controls']
+//    }
 //}
 
 description = 'dataforge-plots'

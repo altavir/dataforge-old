@@ -77,7 +77,7 @@ class LogFragment : Fragment("DataForge output log") {
 
     fun appendText(text: String) {
         if (formatter == null) {
-            outputPane.append(text)
+            outputPane.renderText(text)
         } else {
             formatter!!.accept(outputPane, text)
         }
