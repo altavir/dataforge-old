@@ -18,6 +18,7 @@ import java.util.function.Consumer;
  *
  * @author Alexander Nozik
  */
+@Deprecated
 public abstract class AbstractMeasurement<T> implements Measurement<T> {
 
     //    protected final ReferenceRegistry<MeasurementListener<T>> listeners = new ReferenceRegistry<>();

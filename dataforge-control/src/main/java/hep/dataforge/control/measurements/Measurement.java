@@ -16,6 +16,7 @@ import java.time.Instant;
  *
  * @author Alexander Nozik
  */
+@Deprecated
 public interface Measurement<T> {
 
     Device getDevice();

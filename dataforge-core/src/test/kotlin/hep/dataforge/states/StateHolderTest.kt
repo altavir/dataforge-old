@@ -34,7 +34,7 @@ class StateHolderTest {
         states.init(ValueState("state1"))
         states.init(ValueState("state2"))
 
-        val subscription = states.subscribe()
+        val subscription = states.changes()
         Global.launch {
 
             while (true) {

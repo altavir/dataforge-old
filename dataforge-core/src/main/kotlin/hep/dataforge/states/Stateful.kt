@@ -27,10 +27,8 @@ import hep.dataforge.providers.ProvidesNames
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueProvider
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.channels.produce
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.selects.select
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -66,10 +64,10 @@ interface Stateful : Provider {
  * Create a new meta state using class MetaState annotation if it is present and register it
  */
 fun Stateful.metaState(
-        name: String,
-        owner: Stateful? = null,
-        getter: (suspend () -> Meta)? = null,
-        setter: (suspend State<Meta>.(Meta?, Meta) -> Unit)? = null
+    name: String,
+    owner: Stateful? = null,
+    getter: (suspend () -> Meta)? = null,
+    setter: (suspend State<Meta>.(Meta?, Meta) -> Unit)? = null
 ): MetaState {
     val def: MetaStateDef? = this::class.listAnnotations<MetaStateDef>(true).find { it.value.key == name }
     return if (def == null) {
@@ -80,17 +78,17 @@ fun Stateful.metaState(
 }
 
 fun Stateful.metaState(
-        name: String,
-        getter: (suspend () -> Meta)? = null,
-        setter: (suspend (Meta) -> Unit)
+    name: String,
+    getter: (suspend () -> Meta)? = null,
+    setter: (suspend (Meta) -> Unit)
 ): MetaState {
     return metaState(name, getter = getter, setter = { old, value -> if (old != value) setter.invoke(value) })
 }
 
 fun Stateful.valueState(
-        name: String,
-        getter: (suspend () -> Any)? = null,
-        setter: (suspend State<Value>.(Value?, Value) -> Unit)? = null
+    name: String,
+    getter: (suspend () -> Any)? = null,
+    setter: (suspend State<Value>.(Value?, Value) -> Unit)? = null
 ): ValueState {
     val def: StateDef? = this::class.listAnnotations<StateDef>(true).find { it.value.key == name }
     return if (def == null) {
@@ -104,24 +102,25 @@ fun Stateful.valueState(
  * Simplified version of value state generator, applies setter only if value is changed
  */
 fun Stateful.valueState(
-        name: String,
-        getter: (suspend () -> Any)? = null,
-        setter: (suspend State<Value>.(Value) -> Unit)
+    name: String,
+    getter: (suspend () -> Any)? = null,
+    setter: (suspend State<Value>.(Value) -> Unit)
 ): ValueState {
     return valueState(name, getter = getter, setter = { old, value -> if (old != value) setter.invoke(this, value) })
 }
 
 fun <T : MetaMorph> Stateful.morphState(
-        name: String,
-        type: KClass<T>,
-        def: T? = null,
-        getter: (suspend () -> T)? = null,
-        setter: (suspend State<T>.(T?, T) -> Unit)? = null
+    name: String,
+    type: KClass<T>,
+    def: T? = null,
+    getter: (suspend () -> T)? = null,
+    setter: (suspend State<T>.(T?, T) -> Unit)? = null
 ): MorphState<T> {
     return MorphState(name, type, def, this, getter, setter)
 }
 
-class StateHolder(val logger: Logger = LoggerFactory.getLogger(StateHolder::class.java)) : Provider, Iterable<State<*>>, ValueProvider, AutoCloseable {
+class StateHolder(val logger: Logger = LoggerFactory.getLogger(StateHolder::class.java)) : Provider, Iterable<State<*>>,
+    ValueProvider, AutoCloseable {
     private val stateMap: MutableMap<String, State<*>> = HashMap()
 
     operator fun get(stateName: String): State<*>? {
@@ -195,15 +194,15 @@ class StateHolder(val logger: Logger = LoggerFactory.getLogger(StateHolder::clas
      * Subscribe on updates of specific states. By default subscribes on all updates.
      * Subscription is formed when the method is called, so states initialized after that are ignored.
      */
-    fun subscribe(pattern: Regex = ".*".toRegex(), scope: CoroutineScope = GlobalScope): ReceiveChannel<Pair<String, Any>> {
+    fun changes(pattern: Regex = ".*".toRegex()): Flow<Pair<String, Any>> {
         val subscriptions = stateMap.filter { it.key.matches(pattern) }.mapValues { it.value.subscribe() }
-        return scope.produce {
+        return flow {
             try {
                 while (true) {
                     select<Unit> {
                         subscriptions.forEach { key, value ->
                             value.onReceive {
-                                send(Pair(key, it))
+                                emit(Pair(key, it))
                             }
                         }
                     }

@@ -32,6 +32,7 @@ import hep.dataforge.names.AnonymousNotAlowed
 import hep.dataforge.states.*
 import hep.dataforge.values.ValueType
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.time.Duration
 import java.util.concurrent.*
@@ -47,8 +48,15 @@ import java.util.concurrent.*
  * @author Alexander Nozik
  */
 @AnonymousNotAlowed
-@StateDef(value = ValueDef(key = INITIALIZED_STATE, type = [ValueType.BOOLEAN], def = "false", info = "Initialization state of the device"), writable = true)
-abstract class AbstractDevice(override val context: Context = Global, meta: Meta) : MetaHolder(meta), Device {
+@StateDef(
+    value = ValueDef(
+        key = INITIALIZED_STATE,
+        type = [ValueType.BOOLEAN],
+        def = "false",
+        info = "Initialization state of the device"
+    ), writable = true
+)
+abstract class AbstractDevice(override final val context: Context = Global, meta: Meta) : MetaHolder(meta), Device {
 
     final override val states = StateHolder()
 
@@ -67,12 +75,7 @@ abstract class AbstractDevice(override val context: Context = Global, meta: Meta
      */
     val initialized by initializedState.booleanDelegate
 
-    private val stateListenerJob: Job = Global.launch {
-        val subscription = states.subscribe()
-        while (true) {
-            subscription.receive().also { onStateChange(it.first, it.second) }
-        }
-    }
+    private var stateListenerJob: Job? = null
 
     private val _connectionHelper: ConnectionHelper by lazy { ConnectionHelper(this) }
 
@@ -107,6 +110,12 @@ abstract class AbstractDevice(override val context: Context = Global, meta: Meta
     override fun init() {
         logger.info("Initializing device '{}'...", name)
         states.update(INITIALIZED_STATE, true)
+        stateListenerJob = context.launch {
+            val flow = states.changes()
+            flow.collect {
+                onStateChange(it.first, it.second)
+            }
+        }
     }
 
     @Throws(ControlException::class)
@@ -120,7 +129,7 @@ abstract class AbstractDevice(override val context: Context = Global, meta: Meta
             }
         }
         states.update(INITIALIZED_STATE, false)
-        stateListenerJob.cancel()
+        stateListenerJob?.cancel()
         executor.shutdown()
     }
 
@@ -140,7 +149,11 @@ abstract class AbstractDevice(override val context: Context = Global, meta: Meta
         return executor.schedule(runnable, delay.toMillis(), TimeUnit.MILLISECONDS)
     }
 
-    protected fun repeatOnDeviceThread(interval: Duration, delay: Duration = Duration.ZERO, runnable: () -> Unit): ScheduledFuture<*> {
+    protected fun repeatOnDeviceThread(
+        interval: Duration,
+        delay: Duration = Duration.ZERO,
+        runnable: () -> Unit
+    ): ScheduledFuture<*> {
         return executor.scheduleWithFixedDelay(runnable, delay.toMillis(), interval.toMillis(), TimeUnit.MILLISECONDS)
     }
 
@@ -169,8 +182,8 @@ val Device.initialized: Boolean
             this.initialized
         } else {
             this.states
-                    .filter { it.name == INITIALIZED_STATE }
-                    .filterIsInstance(ValueState::class.java).firstOrNull()?.value?.boolean ?: false
+                .filter { it.name == INITIALIZED_STATE }
+                .filterIsInstance(ValueState::class.java).firstOrNull()?.value?.boolean ?: false
         }
     }
 

@@ -11,6 +11,7 @@ import java.time.Duration;
  *
  * @author Alexander Nozik
  */
+@Deprecated
 public abstract class RegularMeasurement<T> extends SimpleMeasurement<T> {
 
     private boolean stopFlag = false;

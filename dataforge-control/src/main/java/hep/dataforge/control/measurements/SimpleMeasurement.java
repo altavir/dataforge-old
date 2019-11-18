@@ -20,6 +20,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Alexander Nozik
  */
+@Deprecated
 public abstract class SimpleMeasurement<T> extends AbstractMeasurement<T> {
 
     private FutureTask<Pair<T, Instant>> task;

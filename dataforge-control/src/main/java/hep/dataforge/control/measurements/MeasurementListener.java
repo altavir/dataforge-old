@@ -24,6 +24,7 @@ import java.time.Instant;
  *
  * @author Alexander Nozik
  */
+@Deprecated
 public interface MeasurementListener {
 
     /**

@@ -15,12 +15,14 @@
  */
 package hep.dataforge.control.devices
 
+import hep.dataforge.connections.Connection
+
 /**
  * A listener that listens to device state change initialization and shut down
  *
  * @author Alexander Nozik
  */
-interface DeviceListener {
+interface DeviceListener: Connection {
 
     /**
      * Notify that state of device is changed.
